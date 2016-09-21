@@ -1,9 +1,13 @@
 package main
 
 import(
+  "github.com/TykTechnologies/tykcommon"
+
+  "encoding/json"
   "fmt"
   "flag"
   "errors"
+  "io/ioutil"
   "os"
 )
 
@@ -14,6 +18,7 @@ var module, submodule, command string
 func init() {
 }
 
+// main is the entrypoint.
 func main() {
   fmt.Println("tyk-cli:", flag.CommandLine, os.Args)
   fmt.Println("os.Args (length) = ", len(os.Args))
@@ -48,13 +53,42 @@ func main() {
   }
 }
 
+// bundle will handle the bundle command calls.
 func bundle(command string) (err error) {
   fmt.Println("calling bundle w/ command: ", command)
   switch command {
   case "build":
-    fmt.Println("Build bundle.")
+    var manifestPath = "./manifest.json"
+    if _, err := os.Stat(manifestPath); err == nil {
+      var manifestData []byte
+      manifestData, err = ioutil.ReadFile(manifestPath)
+
+      var manifest tykcommon.BundleManifest
+      err = json.Unmarshal(manifestData, &manifest)
+
+      if err != nil {
+        break
+      }
+
+      err = bundleValidateManifest(&manifest)
+
+      if err != nil {
+        break
+      }
+
+    } else {
+      err = errors.New("Manifest file doesn't exist.")
+    }
   default:
     err = errors.New("Invalid command.")
   }
+  return err
+}
+
+// bundleValidateManifest will validate the manifest file before building a bundle.
+func bundleValidateManifest(manifest *tykcommon.BundleManifest) (err error) {
+  fmt.Println("validate manifest?", manifest)
+  // TODO: check if files specified in file_list exist
+  // TODO: 
   return err
 }

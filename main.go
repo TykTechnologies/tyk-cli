@@ -55,7 +55,6 @@ func main() {
 
 // bundle will handle the bundle command calls.
 func bundle(command string) (err error) {
-  fmt.Println("calling bundle w/ command: ", command)
   switch command {
   case "build":
     var manifestPath = "./manifest.json"
@@ -76,6 +75,9 @@ func bundle(command string) (err error) {
         break
       }
 
+      // The manifest is valid, we should do the checksum and sign step at this point.
+      bundleBuild(&manifest)
+
     } else {
       err = errors.New("Manifest file doesn't exist.")
     }
@@ -87,8 +89,11 @@ func bundle(command string) (err error) {
 
 // bundleValidateManifest will validate the manifest file before building a bundle.
 func bundleValidateManifest(manifest *tykcommon.BundleManifest) (err error) {
-  fmt.Println("validate manifest?", manifest)
-  // TODO: check if files specified in file_list exist
-  // TODO: 
+  // TODO: check if files specified in file_list exist.
+  // TODO: validate the custom middleware block.
   return err
+}
+
+func bundleBuild(manifest *tykcommon.BundleManifest) (err error) {
+
 }

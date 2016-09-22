@@ -8,6 +8,8 @@ import(
   "flag"
   "errors"
   "io/ioutil"
+  "crypto/md5"
+  "strings"
   "os"
 )
 
@@ -92,16 +94,48 @@ func bundle(command string) (err error) {
 
 // bundleValidateManifest will validate the manifest file before building a bundle.
 func bundleValidateManifest(manifest *tykcommon.BundleManifest) (err error) {
+  // Validate manifest file list:
   for _, file := range manifest.FileList {
     if _, statErr := os.Stat(file); statErr != nil {
       err = errors.New("Referencing a nonexistent file: " + file)
       break
     }
   }
-  // TODO: validate the custom middleware block.
+
+  // The custom middleware block must specify at least one hook:
+  var definedHooks int
+  definedHooks = len(manifest.CustomMiddleware.Pre) + len(manifest.CustomMiddleware.Post) + len(manifest.CustomMiddleware.PostKeyAuth)
+
+  if manifest.CustomMiddleware.AuthCheck.Name != "" {
+    definedHooks++
+  }
+
+  if definedHooks == 0 {
+    err = errors.New("No hooks defined!")
+    return err
+  }
+
+  // The custom middleware block must specify a driver:
+  if manifest.CustomMiddleware.Driver == "" {
+    err = errors.New("No driver specified!")
+    return err
+  }
+
   return err
 }
 
 func bundleBuild(manifest *tykcommon.BundleManifest) (err error) {
+  var bundleChecksums []string
+  for _, file := range manifest.FileList {
+    var data []byte
+    data, err = ioutil.ReadFile(file)
+    if err != nil {
+      return err
+    }
+    hash := fmt.Sprintf("%x", md5.Sum(data))
+    bundleChecksums = append(bundleChecksums, hash)
+  }
+  mergedChecksums := strings.Join(bundleChecksums, "")
+  manifest.Checksum = fmt.Sprintf("%x", md5.Sum([]byte(mergedChecksums)))
   return err
 }

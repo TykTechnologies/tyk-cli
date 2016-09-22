@@ -66,12 +66,15 @@ func bundle(command string) (err error) {
       err = json.Unmarshal(manifestData, &manifest)
 
       if err != nil {
+        fmt.Println("Couldn't parse manifest file!")
         break
       }
 
       err = bundleValidateManifest(&manifest)
 
       if err != nil {
+        fmt.Println("Bundle validation error:")
+        fmt.Println(err)
         break
       }
 
@@ -89,11 +92,15 @@ func bundle(command string) (err error) {
 
 // bundleValidateManifest will validate the manifest file before building a bundle.
 func bundleValidateManifest(manifest *tykcommon.BundleManifest) (err error) {
-  // TODO: check if files specified in file_list exist.
+  for _, file := range manifest.FileList {
+    if _, statErr := os.Stat(file); statErr != nil {
+      err = errors.New("Referencing a nonexistent file: " + file)
+    }
+  }
   // TODO: validate the custom middleware block.
   return err
 }
 
 func bundleBuild(manifest *tykcommon.BundleManifest) (err error) {
-
+  return err
 }

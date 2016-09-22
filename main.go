@@ -95,6 +95,7 @@ func bundleValidateManifest(manifest *tykcommon.BundleManifest) (err error) {
   for _, file := range manifest.FileList {
     if _, statErr := os.Stat(file); statErr != nil {
       err = errors.New("Referencing a nonexistent file: " + file)
+      break
     }
   }
   // TODO: validate the custom middleware block.

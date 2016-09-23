@@ -8,33 +8,46 @@ import(
   "flag"
   "errors"
   "io/ioutil"
+  "bytes"
+  "archive/zip"
   "crypto/md5"
   "strings"
   "os"
+  "io"
 )
 
 // tyk-cli <module> <submodule> <command> [--options] args...
 
 var module, submodule, command string
 
+var bundleOutput string
+
+const(
+  defaultBundleOutput = "bundle.zip"
+)
+
 func init() {
+  if len(os.Args) == 1 {
+    fmt.Println("No module specified!")
+    os.Exit(1)
+  }
+  if len(os.Args) == 2 {
+    fmt.Println("No command specified!")
+    os.Exit(1)
+  }
+
+  module = os.Args[1]
+  command = os.Args[2]
+
+  os.Args = os.Args[2:]
+
+  flag.StringVar(&bundleOutput, "output", "", "Bundle output")
+  flag.Parse()
 }
 
 // main is the entrypoint.
 func main() {
   fmt.Println("tyk-cli:", flag.CommandLine, os.Args)
-  fmt.Println("os.Args (length) = ", len(os.Args))
-  if len(os.Args) == 1 {
-    fmt.Println("No module specified.")
-    os.Exit(1)
-  } else if len(os.Args) == 2 {
-    fmt.Println("No command specified.")
-    os.Exit(1)
-  }
-
-
-  module = os.Args[1]
-  command = os.Args[2]
 
   fmt.Println("module =", module)
   fmt.Println("command =", command)
@@ -124,7 +137,13 @@ func bundleValidateManifest(manifest *tykcommon.BundleManifest) (err error) {
   return err
 }
 
+// bundleBuild will build and generate a bundle file.
 func bundleBuild(manifest *tykcommon.BundleManifest) (err error) {
+  if bundleOutput == "" {
+    fmt.Println("No output specified, using bundle.zip")
+    bundleOutput = defaultBundleOutput
+  }
+
   var bundleChecksums []string
   for _, file := range manifest.FileList {
     var data []byte
@@ -135,7 +154,40 @@ func bundleBuild(manifest *tykcommon.BundleManifest) (err error) {
     hash := fmt.Sprintf("%x", md5.Sum(data))
     bundleChecksums = append(bundleChecksums, hash)
   }
+
   mergedChecksums := strings.Join(bundleChecksums, "")
   manifest.Checksum = fmt.Sprintf("%x", md5.Sum([]byte(mergedChecksums)))
+
+  var newManifestData []byte
+  newManifestData, err = json.Marshal(&manifest)
+
+  // Write the bundle file:
+  buf := new(bytes.Buffer)
+  bundleWriter := zip.NewWriter(buf)
+
+  for _, file := range manifest.FileList {
+    var outputFile io.Writer
+    outputFile, err = bundleWriter.Create(file)
+    if err != nil {
+      return err
+    }
+    var data []byte
+    data, err = ioutil.ReadFile(file)
+
+    _, err = outputFile.Write(data)
+
+    if err != nil {
+      return err
+    }
+  }
+
+  // Write manifest file:
+  var newManifest io.Writer
+  newManifest, err = bundleWriter.Create("manifest.json")
+  _, err = newManifest.Write(newManifestData)
+
+  err = bundleWriter.Close()
+  err = ioutil.WriteFile(bundleOutput, buf.Bytes(), 0755)
+
   return err
 }

@@ -2,7 +2,9 @@ package main
 
 import(
   "github.com/TykTechnologies/tykcommon"
+  "github.com/TykTechnologies/goverify"
 
+  "encoding/base64"
   "encoding/json"
   "fmt"
   "flag"
@@ -20,7 +22,7 @@ import(
 
 var module, submodule, command string
 
-var bundleOutput string
+var bundleOutput, privKey string
 
 const(
   defaultBundleOutput = "bundle.zip"
@@ -42,6 +44,8 @@ func init() {
   os.Args = os.Args[2:]
 
   flag.StringVar(&bundleOutput, "output", "", "Bundle output")
+  flag.StringVar(&privKey, "key", "", "Key for bundle signature")
+
   flag.Parse()
 }
 
@@ -139,24 +143,62 @@ func bundleValidateManifest(manifest *tykcommon.BundleManifest) (err error) {
 
 // bundleBuild will build and generate a bundle file.
 func bundleBuild(manifest *tykcommon.BundleManifest) (err error) {
+  var useSignature bool
+
   if bundleOutput == "" {
     fmt.Println("No output specified, using bundle.zip")
     bundleOutput = defaultBundleOutput
   }
 
+  if privKey == "" {
+    // Warning?
+    fmt.Println("The bundle won't be signed.")
+  } else {
+    fmt.Println("The bundle will be signed.")
+    useSignature = true
+  }
+
+  var signer goverify.Signer
+
+  if useSignature {
+    signer, err = goverify.LoadPrivateKeyFromFile(privKey)
+    if err != nil {
+      return err
+    }
+  }
+
+  // Checksum and signature:
+
   var bundleChecksums []string
+  var bundleSignatures []string
+
   for _, file := range manifest.FileList {
     var data []byte
     data, err = ioutil.ReadFile(file)
     if err != nil {
+      fmt.Println("*** Error: ", err)
       return err
     }
     hash := fmt.Sprintf("%x", md5.Sum(data))
     bundleChecksums = append(bundleChecksums, hash)
+
+    if useSignature {
+      var signed []byte
+      signed, err = signer.Sign(data)
+
+      sig := base64.StdEncoding.EncodeToString(signed)
+      bundleSignatures = append(bundleSignatures, sig)
+      fmt.Printf("Signature: %v %s\n", sig, file)
+    }
   }
 
   mergedChecksums := strings.Join(bundleChecksums, "")
+  mergedSignatures := strings.Join(bundleSignatures, "")
+
+  // Update the manifest file:
+
   manifest.Checksum = fmt.Sprintf("%x", md5.Sum([]byte(mergedChecksums)))
+  manifest.Signature = mergedSignatures
 
   var newManifestData []byte
   newManifestData, err = json.Marshal(&manifest)

@@ -13,3 +13,5 @@ Assuming you're on a directory that contains your required bundle files and a **
 ```
 tyk-cli bundle build -output bundle-latest.zip
 ```
+
+The bundle will contain a `manifest.json` with the computed checksum and signature.

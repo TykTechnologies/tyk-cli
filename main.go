@@ -1,21 +1,21 @@
 package main
 
-import(
-  "github.com/TykTechnologies/tykcommon"
-  "github.com/TykTechnologies/goverify"
+import (
+	"github.com/TykTechnologies/goverify"
+	"github.com/TykTechnologies/tykcommon"
 
-  "encoding/base64"
-  "encoding/json"
-  "fmt"
-  "flag"
-  "errors"
-  "io/ioutil"
-  "bytes"
-  "archive/zip"
-  "crypto/md5"
-  "strings"
-  "os"
-  "io"
+	"archive/zip"
+	"bytes"
+	"crypto/md5"
+	"encoding/base64"
+	"encoding/json"
+	"errors"
+	"flag"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"os"
+	"strings"
 )
 
 // tyk-cli <module> <submodule> <command> [--options] args...
@@ -24,213 +24,213 @@ var module, submodule, command string
 
 var bundleOutput, privKey string
 
-const(
-  defaultBundleOutput = "bundle.zip"
+const (
+	defaultBundleOutput = "bundle.zip"
 )
 
 func init() {
-  if len(os.Args) == 1 {
-    fmt.Println("No module specified!")
-    os.Exit(1)
-  }
-  if len(os.Args) == 2 {
-    fmt.Println("No command specified!")
-    os.Exit(1)
-  }
+	if len(os.Args) == 1 {
+		fmt.Println("No module specified!")
+		os.Exit(1)
+	}
+	if len(os.Args) == 2 {
+		fmt.Println("No command specified!")
+		os.Exit(1)
+	}
 
-  module = os.Args[1]
-  command = os.Args[2]
+	module = os.Args[1]
+	command = os.Args[2]
 
-  os.Args = os.Args[2:]
+	os.Args = os.Args[2:]
 
-  flag.StringVar(&bundleOutput, "output", "", "Bundle output")
-  flag.StringVar(&privKey, "key", "", "Key for bundle signature")
+	flag.StringVar(&bundleOutput, "output", "", "Bundle output")
+	flag.StringVar(&privKey, "key", "", "Key for bundle signature")
 
-  flag.Parse()
+	flag.Parse()
 }
 
 // main is the entrypoint.
 func main() {
-  fmt.Println("tyk-cli:", flag.CommandLine, os.Args)
+	fmt.Println("tyk-cli:", flag.CommandLine, os.Args)
 
-  fmt.Println("module =", module)
-  fmt.Println("command =", command)
+	fmt.Println("module =", module)
+	fmt.Println("command =", command)
 
-  var err error
+	var err error
 
-  switch module {
-  case "bundle":
-    fmt.Println("Using bundle module.")
-    err = bundle(command)
-  default:
-    err = errors.New("Invalid module")
-  }
+	switch module {
+	case "bundle":
+		fmt.Println("Using bundle module.")
+		err = bundle(command)
+	default:
+		err = errors.New("Invalid module")
+	}
 
-  if err != nil {
-    fmt.Println("Error:", err)
-    os.Exit(1)
-  }
+	if err != nil {
+		fmt.Println("Error:", err)
+		os.Exit(1)
+	}
 }
 
 // bundle will handle the bundle command calls.
 func bundle(command string) (err error) {
-  switch command {
-  case "build":
-    var manifestPath = "./manifest.json"
-    if _, err := os.Stat(manifestPath); err == nil {
-      var manifestData []byte
-      manifestData, err = ioutil.ReadFile(manifestPath)
+	switch command {
+	case "build":
+		var manifestPath = "./manifest.json"
+		if _, err := os.Stat(manifestPath); err == nil {
+			var manifestData []byte
+			manifestData, err = ioutil.ReadFile(manifestPath)
 
-      var manifest tykcommon.BundleManifest
-      err = json.Unmarshal(manifestData, &manifest)
+			var manifest tykcommon.BundleManifest
+			err = json.Unmarshal(manifestData, &manifest)
 
-      if err != nil {
-        fmt.Println("Couldn't parse manifest file!")
-        break
-      }
+			if err != nil {
+				fmt.Println("Couldn't parse manifest file!")
+				break
+			}
 
-      err = bundleValidateManifest(&manifest)
+			err = bundleValidateManifest(&manifest)
 
-      if err != nil {
-        fmt.Println("Bundle validation error:")
-        fmt.Println(err)
-        break
-      }
+			if err != nil {
+				fmt.Println("Bundle validation error:")
+				fmt.Println(err)
+				break
+			}
 
-      // The manifest is valid, we should do the checksum and sign step at this point.
-      bundleBuild(&manifest)
+			// The manifest is valid, we should do the checksum and sign step at this point.
+			bundleBuild(&manifest)
 
-    } else {
-      err = errors.New("Manifest file doesn't exist.")
-    }
-  default:
-    err = errors.New("Invalid command.")
-  }
-  return err
+		} else {
+			err = errors.New("Manifest file doesn't exist.")
+		}
+	default:
+		err = errors.New("Invalid command.")
+	}
+	return err
 }
 
 // bundleValidateManifest will validate the manifest file before building a bundle.
 func bundleValidateManifest(manifest *tykcommon.BundleManifest) (err error) {
-  // Validate manifest file list:
-  for _, file := range manifest.FileList {
-    if _, statErr := os.Stat(file); statErr != nil {
-      err = errors.New("Referencing a nonexistent file: " + file)
-      break
-    }
-  }
+	// Validate manifest file list:
+	for _, file := range manifest.FileList {
+		if _, statErr := os.Stat(file); statErr != nil {
+			err = errors.New("Referencing a nonexistent file: " + file)
+			break
+		}
+	}
 
-  // The custom middleware block must specify at least one hook:
-  var definedHooks int
-  definedHooks = len(manifest.CustomMiddleware.Pre) + len(manifest.CustomMiddleware.Post) + len(manifest.CustomMiddleware.PostKeyAuth)
+	// The custom middleware block must specify at least one hook:
+	var definedHooks int
+	definedHooks = len(manifest.CustomMiddleware.Pre) + len(manifest.CustomMiddleware.Post) + len(manifest.CustomMiddleware.PostKeyAuth)
 
-  // We should count the auth check middleware (single), if it's present:
-  if manifest.CustomMiddleware.AuthCheck.Name != "" {
-    definedHooks++
-  }
+	// We should count the auth check middleware (single), if it's present:
+	if manifest.CustomMiddleware.AuthCheck.Name != "" {
+		definedHooks++
+	}
 
-  if definedHooks == 0 {
-    err = errors.New("No hooks defined!")
-    return err
-  }
+	if definedHooks == 0 {
+		err = errors.New("No hooks defined!")
+		return err
+	}
 
-  // The custom middleware block must specify a driver:
-  if manifest.CustomMiddleware.Driver == "" {
-    err = errors.New("No driver specified!")
-    return err
-  }
+	// The custom middleware block must specify a driver:
+	if manifest.CustomMiddleware.Driver == "" {
+		err = errors.New("No driver specified!")
+		return err
+	}
 
-  return err
+	return err
 }
 
 // bundleBuild will build and generate a bundle file.
 func bundleBuild(manifest *tykcommon.BundleManifest) (err error) {
-  var useSignature bool
+	var useSignature bool
 
-  if bundleOutput == "" {
-    fmt.Println("No output specified, using bundle.zip")
-    bundleOutput = defaultBundleOutput
-  }
+	if bundleOutput == "" {
+		fmt.Println("No output specified, using bundle.zip")
+		bundleOutput = defaultBundleOutput
+	}
 
-  if privKey == "" {
-    // Warning?
-    fmt.Println("The bundle won't be signed.")
-  } else {
-    fmt.Println("The bundle will be signed.")
-    useSignature = true
-  }
+	if privKey == "" {
+		// Warning?
+		fmt.Println("The bundle won't be signed.")
+	} else {
+		fmt.Println("The bundle will be signed.")
+		useSignature = true
+	}
 
-  var signer goverify.Signer
+	var signer goverify.Signer
 
-  if useSignature {
-    signer, err = goverify.LoadPrivateKeyFromFile(privKey)
-    if err != nil {
-      return err
-    }
-  }
+	if useSignature {
+		signer, err = goverify.LoadPrivateKeyFromFile(privKey)
+		if err != nil {
+			return err
+		}
+	}
 
-  // Checksum and signature:
+	// Checksum and signature:
 
-  var bundleChecksums []string
-  var bundleSignatures []string
+	var bundleChecksums []string
+	var bundleSignatures []string
 
-  for _, file := range manifest.FileList {
-    var data []byte
-    data, err = ioutil.ReadFile(file)
-    if err != nil {
-      fmt.Println("*** Error: ", err)
-      return err
-    }
-    hash := fmt.Sprintf("%x", md5.Sum(data))
-    bundleChecksums = append(bundleChecksums, hash)
+	for _, file := range manifest.FileList {
+		var data []byte
+		data, err = ioutil.ReadFile(file)
+		if err != nil {
+			fmt.Println("*** Error: ", err)
+			return err
+		}
+		hash := fmt.Sprintf("%x", md5.Sum(data))
+		bundleChecksums = append(bundleChecksums, hash)
 
-    if useSignature {
-      var signed []byte
-      signed, err = signer.Sign(data)
+		if useSignature {
+			var signed []byte
+			signed, err = signer.Sign(data)
 
-      sig := base64.StdEncoding.EncodeToString(signed)
-      bundleSignatures = append(bundleSignatures, sig)
-      fmt.Printf("Signature: %v %s\n", sig, file)
-    }
-  }
+			sig := base64.StdEncoding.EncodeToString(signed)
+			bundleSignatures = append(bundleSignatures, sig)
+			fmt.Printf("Signature: %v %s\n", sig, file)
+		}
+	}
 
-  mergedChecksums := strings.Join(bundleChecksums, "")
-  mergedSignatures := strings.Join(bundleSignatures, "")
+	mergedChecksums := strings.Join(bundleChecksums, "")
+	mergedSignatures := strings.Join(bundleSignatures, "")
 
-  // Update the manifest file:
+	// Update the manifest file:
 
-  manifest.Checksum = fmt.Sprintf("%x", md5.Sum([]byte(mergedChecksums)))
-  manifest.Signature = mergedSignatures
+	manifest.Checksum = fmt.Sprintf("%x", md5.Sum([]byte(mergedChecksums)))
+	manifest.Signature = mergedSignatures
 
-  var newManifestData []byte
-  newManifestData, err = json.Marshal(&manifest)
+	var newManifestData []byte
+	newManifestData, err = json.Marshal(&manifest)
 
-  // Write the bundle file:
-  buf := new(bytes.Buffer)
-  bundleWriter := zip.NewWriter(buf)
+	// Write the bundle file:
+	buf := new(bytes.Buffer)
+	bundleWriter := zip.NewWriter(buf)
 
-  for _, file := range manifest.FileList {
-    var outputFile io.Writer
-    outputFile, err = bundleWriter.Create(file)
-    if err != nil {
-      return err
-    }
-    var data []byte
-    data, err = ioutil.ReadFile(file)
+	for _, file := range manifest.FileList {
+		var outputFile io.Writer
+		outputFile, err = bundleWriter.Create(file)
+		if err != nil {
+			return err
+		}
+		var data []byte
+		data, err = ioutil.ReadFile(file)
 
-    _, err = outputFile.Write(data)
+		_, err = outputFile.Write(data)
 
-    if err != nil {
-      return err
-    }
-  }
+		if err != nil {
+			return err
+		}
+	}
 
-  // Write manifest file:
-  var newManifest io.Writer
-  newManifest, err = bundleWriter.Create("manifest.json")
-  _, err = newManifest.Write(newManifestData)
+	// Write manifest file:
+	var newManifest io.Writer
+	newManifest, err = bundleWriter.Create("manifest.json")
+	_, err = newManifest.Write(newManifestData)
 
-  err = bundleWriter.Close()
-  err = ioutil.WriteFile(bundleOutput, buf.Bytes(), 0755)
+	err = bundleWriter.Close()
+	err = ioutil.WriteFile(bundleOutput, buf.Bytes(), 0755)
 
-  return err
+	return err
 }

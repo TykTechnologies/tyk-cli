@@ -22,6 +22,7 @@ import (
 var module, submodule, command string
 
 var bundleOutput, privKey string
+var forceInsecure *bool
 
 const (
 	defaultBundleOutput = "bundle.zip"
@@ -44,6 +45,7 @@ func init() {
 
 	flag.StringVar(&bundleOutput, "output", "", "Bundle output")
 	flag.StringVar(&privKey, "key", "", "Key for bundle signature")
+	forceInsecure = flag.Bool("y", false, "Skip bundle signing")
 
 	flag.Parse()
 }
@@ -193,6 +195,12 @@ func bundleBuild(manifest *tykcommon.BundleManifest) (err error) {
 		}
 
 		manifest.Signature = base64.StdEncoding.EncodeToString(signed)
+	} else {
+		if *forceInsecure == false {
+			fmt.Println("No key specified, confirmation?")
+			// Wait for confirmation
+		}
+		fmt.Println("Skipping signing step.")
 	}
 
 	var newManifestData []byte

@@ -5,6 +5,7 @@ import (
 	"github.com/TykTechnologies/tykcommon"
 
 	"archive/zip"
+	"bufio"
 	"bytes"
 	"crypto/md5"
 	"encoding/base64"
@@ -152,10 +153,7 @@ func bundleBuild(manifest *tykcommon.BundleManifest) (err error) {
 		bundleOutput = defaultBundleOutput
 	}
 
-	if privKey == "" {
-		// Warning?
-		fmt.Println("The bundle won't be signed.")
-	} else {
+	if privKey != "" {
 		fmt.Println("The bundle will be signed.")
 		useSignature = true
 	}
@@ -197,10 +195,14 @@ func bundleBuild(manifest *tykcommon.BundleManifest) (err error) {
 		manifest.Signature = base64.StdEncoding.EncodeToString(signed)
 	} else {
 		if *forceInsecure == false {
-			fmt.Println("No key specified, confirmation?")
-			// Wait for confirmation
+			fmt.Print("The bundle will be unsigned, type \"y\" to confirm: ")
+			reader := bufio.NewReader(os.Stdin)
+			text, _ := reader.ReadString('\n')
+			if text != "y\n" {
+				fmt.Println("Aborting")
+				os.Exit(1)
+			}
 		}
-		fmt.Println("Skipping signing step.")
 	}
 
 	var newManifestData []byte

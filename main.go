@@ -123,6 +123,7 @@ func bundleValidateManifest(manifest *tykcommon.BundleManifest) (err error) {
   var definedHooks int
   definedHooks = len(manifest.CustomMiddleware.Pre) + len(manifest.CustomMiddleware.Post) + len(manifest.CustomMiddleware.PostKeyAuth)
 
+  // We should count the auth check middleware (single), if it's present:
   if manifest.CustomMiddleware.AuthCheck.Name != "" {
     definedHooks++
   }

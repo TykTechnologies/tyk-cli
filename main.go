@@ -15,7 +15,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"strings"
 )
 
 // tyk-cli <module> <submodule> <command> [--options] args...
@@ -159,47 +158,42 @@ func bundleBuild(manifest *tykcommon.BundleManifest) (err error) {
 		useSignature = true
 	}
 
-	var signer goverify.Signer
-
-	if useSignature {
-		signer, err = goverify.LoadPrivateKeyFromFile(privKey)
-		if err != nil {
-			return err
-		}
-	}
-
-	// Checksum and signature:
-
-	var bundleChecksums []string
-	var bundleSignatures []string
+	var bundleData bytes.Buffer
 
 	for _, file := range manifest.FileList {
 		var data []byte
 		data, err = ioutil.ReadFile(file)
+
 		if err != nil {
 			fmt.Println("*** Error: ", err)
 			return err
 		}
-		hash := fmt.Sprintf("%x", md5.Sum(data))
-		bundleChecksums = append(bundleChecksums, hash)
 
-		if useSignature {
-			var signed []byte
-			signed, err = signer.Sign(data)
-
-			sig := base64.StdEncoding.EncodeToString(signed)
-			bundleSignatures = append(bundleSignatures, sig)
-			fmt.Printf("Signature: %v %s\n", sig, file)
-		}
+		bundleData.Write(data)
 	}
 
-	mergedChecksums := strings.Join(bundleChecksums, "")
-	mergedSignatures := strings.Join(bundleSignatures, "")
-
 	// Update the manifest file:
+	manifest.Checksum = fmt.Sprintf("%x", md5.Sum(bundleData.Bytes()))
 
-	manifest.Checksum = fmt.Sprintf("%x", md5.Sum([]byte(mergedChecksums)))
-	manifest.Signature = mergedSignatures
+	// If a private key is specified, sign the data:
+	if useSignature {
+		var signer goverify.Signer
+		signer, err = goverify.LoadPrivateKeyFromFile(privKey)
+
+		if err != nil {
+			// Error: Couldn't read the private key
+			return err
+		}
+		var signed []byte
+		signed, err = signer.Sign(bundleData.Bytes())
+
+		if err != nil {
+			// Error: Couldn't sign the data.
+			return err
+		}
+
+		manifest.Signature = base64.StdEncoding.EncodeToString(signed)
+	}
 
 	var newManifestData []byte
 	newManifestData, err = json.Marshal(&manifest)

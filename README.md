@@ -2,6 +2,13 @@
 
 Tyk CLI utility.
 
+## Install
+
+```
+go get github.com/TykTechnologies/tyk-cli
+go install github.com/TykTechnologies/tyk-cli
+```
+
 ## Available modules
 
 ### Bundle

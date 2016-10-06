@@ -1,1 +1,6 @@
 main
+tyk-cli
+mykey.pem
+bundle.zip
+output
+mymiddleware.py

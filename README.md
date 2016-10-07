@@ -36,3 +36,7 @@ If you follow the standard behavior and need to sign your bundles, provide the p
 ```
 tyk-cli bundle build -output bundle-latest.zip -key mykey.pem
 ```
+
+## License
+
+Tyk is released under the MPL v2.0 please see the [LICENSE.md](LICENSE.md) file for a full version of the license.

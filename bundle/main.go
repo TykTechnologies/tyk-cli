@@ -1,19 +1,19 @@
 package bundle
 
-import(
-  "github.com/TykTechnologies/goverify"
-  "github.com/TykTechnologies/tykcommon"
-  "io"
-  "io/ioutil"
-  "encoding/json"
-  "encoding/base64"
-  "archive/zip"
-  "crypto/md5"
-  "bufio"
-  "errors"
-  "bytes"
-  "fmt"
-  "os"
+import (
+	"archive/zip"
+	"bufio"
+	"bytes"
+	"crypto/md5"
+	"encoding/base64"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"github.com/TykTechnologies/goverify"
+	"github.com/TykTechnologies/tykcommon"
+	"io"
+	"io/ioutil"
+	"os"
 )
 
 var bundleOutput, privKey string
@@ -28,9 +28,9 @@ func init() {
 
 // Bundle will handle the bundle command calls.
 func Bundle(command string, thisBundleOutput string, thisPrivKey string, thisForceInsecure *bool) (err error) {
-  bundleOutput = thisBundleOutput
-  privKey = thisPrivKey
-  forceInsecure = thisForceInsecure
+	bundleOutput = thisBundleOutput
+	privKey = thisPrivKey
+	forceInsecure = thisForceInsecure
 
 	switch command {
 	case "build":
@@ -77,10 +77,10 @@ func BundleValidateManifest(manifest *tykcommon.BundleManifest) (err error) {
 		}
 	}
 
-  // The file list references a nonexistent file:
-  if err != nil {
-    return err
-  }
+	// The file list references a nonexistent file:
+	if err != nil {
+		return err
+	}
 
 	// The custom middleware block must specify at least one hook:
 	var definedHooks int

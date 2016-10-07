@@ -31,10 +31,11 @@ func Bundle(command string, thisBundleOutput string, thisPrivKey string, thisFor
   bundleOutput = thisBundleOutput
   privKey = thisPrivKey
   forceInsecure = thisForceInsecure
+
 	switch command {
 	case "build":
 		var manifestPath = "./manifest.json"
-		if _, err := os.Stat(manifestPath); err == nil {
+		if _, err = os.Stat(manifestPath); err == nil {
 			var manifestData []byte
 			manifestData, err = ioutil.ReadFile(manifestPath)
 
@@ -46,7 +47,7 @@ func Bundle(command string, thisBundleOutput string, thisPrivKey string, thisFor
 				break
 			}
 
-			err = bundleValidateManifest(&manifest)
+			err = BundleValidateManifest(&manifest)
 
 			if err != nil {
 				fmt.Println("Bundle validation error:")
@@ -66,8 +67,8 @@ func Bundle(command string, thisBundleOutput string, thisPrivKey string, thisFor
 	return err
 }
 
-// bundleValidateManifest will validate the manifest file before building a bundle.
-func bundleValidateManifest(manifest *tykcommon.BundleManifest) (err error) {
+// BundleValidateManifest will validate the manifest file before building a bundle.
+func BundleValidateManifest(manifest *tykcommon.BundleManifest) (err error) {
 	// Validate manifest file list:
 	for _, file := range manifest.FileList {
 		if _, statErr := os.Stat(file); statErr != nil {
@@ -75,6 +76,11 @@ func bundleValidateManifest(manifest *tykcommon.BundleManifest) (err error) {
 			break
 		}
 	}
+
+  // The file list references a nonexistent file:
+  if err != nil {
+    return err
+  }
 
 	// The custom middleware block must specify at least one hook:
 	var definedHooks int

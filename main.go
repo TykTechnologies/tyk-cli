@@ -14,7 +14,7 @@ import (
 var module, submodule, command string
 
 var bundleOutput, privKey string
-var forceInsecure *bool
+var forceInsecure, showVersion *bool
 
 func init() {
 	if len(os.Args) == 1 {
@@ -34,6 +34,7 @@ func init() {
 	flag.StringVar(&bundleOutput, "output", "", "Bundle output")
 	flag.StringVar(&privKey, "key", "", "Key for bundle signature")
 	forceInsecure = flag.Bool("y", false, "Skip bundle signing")
+	showVersion = flag.Bool("v", false, "Show version")
 
 	flag.Parse()
 }
@@ -44,6 +45,11 @@ func main() {
 
 	fmt.Println("module =", module)
 	fmt.Println("command =", command)
+
+	if *showVersion {
+		fmt.Println("tyk-cli", VERSION)
+		os.Exit(0)
+	}
 
 	var err error
 

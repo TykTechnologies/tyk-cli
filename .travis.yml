@@ -1,0 +1,13 @@
+language: go
+sudo: false
+
+go:
+  - 1.7
+
+install:
+  - go get -d -v ./...
+  - go build -v ./...
+  - go get golang.org/x/tools/cover
+
+script:
+  - go test *_test.go -v -covermode=count -coverprofile=coverage.out

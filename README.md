@@ -2,6 +2,8 @@
 
 Tyk CLI utility.
 
+[![Build Status](https://travis-ci.org/TykTechnologies/tyk-cli.svg?branch=master)](https://travis-ci.org/TykTechnologies/tyk-cli)
+
 ## Install
 
 ```

@@ -12,9 +12,10 @@ import (
 
 const (
 	testManifestName  = "manifest.json"
-	testManifestPerm  = 0755
+	testPerm          = 0755
 	testBundleName    = "bundle.zip"
 	testBundleAltName = "mybundle.zip"
+	testDummyFilename = "mymiddleware.py"
 )
 
 func TestBundleUnknownCommand(t *testing.T) {
@@ -36,7 +37,7 @@ func TestBundleBuildCommand(t *testing.T) {
 	}
 
 	noManifest := []byte("")
-	ioutil.WriteFile(testManifestName, noManifest, testManifestPerm)
+	ioutil.WriteFile(testManifestName, noManifest, testPerm)
 
 	err = bundle.Bundle("build", "", "", &force)
 	if err == nil {
@@ -46,7 +47,7 @@ func TestBundleBuildCommand(t *testing.T) {
 	os.Remove(testManifestName)
 
 	emptyManifest := []byte("{}")
-	ioutil.WriteFile(testManifestName, emptyManifest, testManifestPerm)
+	ioutil.WriteFile(testManifestName, emptyManifest, testPerm)
 
 	err = bundle.Bundle("build", "", "", &force)
 	if err == nil {
@@ -121,13 +122,15 @@ func TestBundleBasicBuild(t *testing.T) {
 		},
 	}
 
+	ioutil.WriteFile(testDummyFilename, []byte(""), testPerm)
+
 	var testManifestData []byte
 	testManifestData, err = json.Marshal(&testManifest)
 	if err != nil {
 		t.Fatal("Couldn't marshal the test manifest.")
 	}
 
-	ioutil.WriteFile(testManifestName, testManifestData, testManifestPerm)
+	ioutil.WriteFile(testManifestName, testManifestData, testPerm)
 
 	err = bundle.Bundle("build", "", "", &force)
 
@@ -147,6 +150,6 @@ func TestBundleBasicBuild(t *testing.T) {
 	}
 
 	os.Remove(testBundleAltName)
-
 	os.Remove(testManifestName)
+	os.Remove(testDummyFilename)
 }

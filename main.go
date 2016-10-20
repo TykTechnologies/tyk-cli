@@ -41,11 +41,6 @@ func init() {
 
 // main is the entrypoint.
 func main() {
-	fmt.Println("tyk-cli:", flag.CommandLine, os.Args)
-
-	fmt.Println("module =", module)
-	fmt.Println("command =", command)
-
 	if *showVersion {
 		fmt.Println("tyk-cli", VERSION)
 		os.Exit(0)

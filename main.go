@@ -1,63 +1,21 @@
+// Copyright © 2016 NAME HERE <EMAIL ADDRESS>
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package main
 
-import (
-	"errors"
-	"flag"
-	"fmt"
-	"os"
+import "github.com/TykTechnologies/tyk-cli/cmd"
 
-	bundle "github.com/TykTechnologies/tyk-cli/bundle"
-)
-
-// tyk-cli <module> <submodule> <command> [--options] args...
-
-var module, submodule, command string
-
-var bundleOutput, privKey string
-var forceInsecure, showVersion *bool
-
-func init() {
-	if len(os.Args) == 1 {
-		fmt.Println("No module specified!")
-		os.Exit(1)
-	}
-	if len(os.Args) == 2 {
-		fmt.Println("No command specified!")
-		os.Exit(1)
-	}
-
-	module = os.Args[1]
-	command = os.Args[2]
-
-	os.Args = os.Args[2:]
-
-	flag.StringVar(&bundleOutput, "output", "", "Bundle output")
-	flag.StringVar(&privKey, "key", "", "Key for bundle signature")
-	forceInsecure = flag.Bool("y", false, "Skip bundle signing")
-	showVersion = flag.Bool("v", false, "Show version")
-
-	flag.Parse()
-}
-
-// main is the entrypoint.
 func main() {
-	if *showVersion {
-		fmt.Println("tyk-cli", VERSION)
-		os.Exit(0)
-	}
-
-	var err error
-
-	switch module {
-	case "bundle":
-		fmt.Println("Using bundle module.")
-		err = bundle.Bundle(command, bundleOutput, privKey, forceInsecure)
-	default:
-		err = errors.New("Invalid module")
-	}
-
-	if err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(1)
-	}
+	cmd.Execute()
 }

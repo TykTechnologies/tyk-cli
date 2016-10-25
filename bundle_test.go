@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/TykTechnologies/tyk-cli/bundle"
+	"github.com/TykTechnologies/tyk-cli/commands/bundle"
 	"github.com/TykTechnologies/tykcommon"
 	"io/ioutil"
 	"os"

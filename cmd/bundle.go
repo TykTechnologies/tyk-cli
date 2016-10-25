@@ -15,8 +15,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 )
 
@@ -26,8 +24,7 @@ var bundleCmd = &cobra.Command{
 	Short: "Manage plugin bundles",
 	Long: `This module lets you manage Tyk plugin bundles.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO: Work your own magic here
-		fmt.Println("bundle called")
+		cmd.Usage()
 	},
 }
 

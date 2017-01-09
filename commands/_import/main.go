@@ -9,42 +9,44 @@ import (
 	"os"
 )
 
-type APIDefinition struct {
-	Id  int
-	Key string
-}
-
-type APIs struct {
-	Collection []APIDefinition
-}
-
 func Apis(args []string) {
 	if len(args) == 4 {
 		call := request.New(args[0], args[1], args[2])
-		url := fmt.Sprintf("%s:%s/api/apis", call.Domain, call.Port)
-		file, err := ioutil.ReadFile(utils.HandleFilePath("~/Documents/tykVagrant/example/apis37.json"))
-		if err != nil {
-			fmt.Printf("File error: %v\n", err)
-			os.Exit(1)
-		}
-		apis := gjson.GetBytes(file, "apis")
-		for i := range apis.Array() {
-			api := apis.Array()[i]
-			payload := []byte(api.Raw)
-			req, err := call.FullRequest("POST", url, payload)
-			_, err = call.Client.Do(req)
-			if err != nil {
-				return
-			} else {
-				fmt.Printf(`
-{
+		uri := fmt.Sprintf("%s:%s/api/apis", call.Domain, call.Port)
+		input_file := args[3]
+		parseJSON(input_file, uri, call)
+	}
+}
+
+func parseJSON(input_file string, uri string, call *request.Request) {
+	file, err := ioutil.ReadFile(utils.HandleFilePath(input_file))
+	if err != nil {
+		fmt.Printf("File error: %v\n", err)
+		os.Exit(1)
+	}
+	apis := gjson.GetBytes(file, "apis")
+	for i := range apis.Array() {
+		api := apis.Array()[i]
+		postAPI(api, uri, call)
+	}
+}
+
+func postAPI(api gjson.Result, uri string, call *request.Request) {
+	payload := []byte(api.Raw)
+	req, err := call.FullRequest("POST", uri, payload)
+	_, err = call.Client.Do(req)
+	if err != nil {
+		return
+	} else {
+		apiCreatedMessage(api.Get("api_definition.id"))
+	}
+}
+
+func apiCreatedMessage(id gjson.Result) {
+	fmt.Printf(`{
   "Status": "OK",
   "Message": "API created",
   "Meta": "%v"
-}"
-`, api.Get("api_definition.id"))
-			}
-
-		}
-	}
+},
+`, id)
 }

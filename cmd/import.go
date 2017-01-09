@@ -30,7 +30,7 @@ var importCmd = &cobra.Command{
 	Long:  `This module lets you import API definition from a JSON file.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO: Work your own magic here
-		args = []string{key, domain, port, output}
+		args = []string{key, domain, port, input}
 		_import.Apis(args)
 		fmt.Println("import called")
 	},

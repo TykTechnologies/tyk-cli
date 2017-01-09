@@ -1,14 +1,22 @@
 package _import
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	request "github.com/TykTechnologies/tyk-cli/request"
 	utils "github.com/TykTechnologies/tyk-cli/utils"
+	"github.com/tidwall/gjson"
 	"io/ioutil"
 	"os"
 )
+
+type APIDefinition struct {
+	Id  int
+	Key string
+}
+
+type APIs struct {
+	Collection []APIDefinition
+}
 
 func Apis(args []string) {
 	if len(args) == 4 {
@@ -19,15 +27,24 @@ func Apis(args []string) {
 			fmt.Printf("File error: %v\n", err)
 			os.Exit(1)
 		}
-		payload, err := json.Marshal(file)
-		fmt.Printf("PAYLOAD\n")
-		fmt.Printf("PAYLOAD%v\n", bytes.NewBuffer(payload))
-		req, err := call.FullRequest("POST", url, payload)
-		resp, err := call.Client.Do(req)
-		if err != nil {
-			return
-		} else {
-			fmt.Printf("%v", resp)
+		apis := gjson.GetBytes(file, "apis")
+		for i := range apis.Array() {
+			api := apis.Array()[i]
+			payload := []byte(api.Raw)
+			req, err := call.FullRequest("POST", url, payload)
+			_, err = call.Client.Do(req)
+			if err != nil {
+				return
+			} else {
+				fmt.Printf(`
+{
+  "Status": "OK",
+  "Message": "API created",
+  "Meta": "%v"
+}"
+`, api.Get("api_definition.id"))
+			}
+
 		}
 	}
 }

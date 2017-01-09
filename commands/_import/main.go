@@ -4,20 +4,16 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	request "github.com/TykTechnologies/tyk-cli/request"
 	utils "github.com/TykTechnologies/tyk-cli/utils"
 	"io/ioutil"
-	"net/http"
 	"os"
-	"time"
 )
 
 func Apis(args []string) {
 	if len(args) == 4 {
-		authorisation, domain, port := args[0],
-			utils.CheckDomain(args[1]),
-			args[2]
-		client := &http.Client{Timeout: 10 * time.Second}
-		url := fmt.Sprintf("%s:%s/api/apis", domain, port)
+		call := request.New(args[0], args[1], args[2])
+		url := fmt.Sprintf("%s:%s/api/apis", call.Domain, call.Port)
 		file, err := ioutil.ReadFile(utils.HandleFilePath("~/Documents/tykVagrant/example/apis37.json"))
 		if err != nil {
 			fmt.Printf("File error: %v\n", err)
@@ -26,8 +22,8 @@ func Apis(args []string) {
 		payload, err := json.Marshal(file)
 		fmt.Printf("PAYLOAD\n")
 		fmt.Printf("PAYLOAD%v\n", bytes.NewBuffer(payload))
-		req, err := utils.HttpRequest("POST", url, authorisation, payload)
-		resp, err := client.Do(req)
+		req, err := call.FullRequest("POST", url, payload)
+		resp, err := call.Client.Do(req)
 		if err != nil {
 			return
 		} else {

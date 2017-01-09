@@ -3,22 +3,19 @@ package export
 import (
 	"bytes"
 	"fmt"
+	request "github.com/TykTechnologies/tyk-cli/request"
 	utils "github.com/TykTechnologies/tyk-cli/utils"
 	"io"
 	"net/http"
 	"os"
-	"time"
 )
 
 func Apis(args []string) {
 	if len(args) == 4 {
-		authorisation, domain, port := args[0],
-			utils.CheckDomain(args[1]),
-			args[2]
-		client := &http.Client{Timeout: 10 * time.Second}
-		url := fmt.Sprintf("%s:%s/api/apis", domain, port)
-		req, err := utils.HttpRequest("GET", url, authorisation, nil)
-		resp, err := client.Do(req)
+		call := request.New(args[0], args[1], args[2])
+		url := fmt.Sprintf("%s:%s/api/apis", call.Domain, call.Port)
+		req, err := call.FullRequest("GET", url, nil)
+		resp, err := call.Client.Do(req)
 		output_file := args[3]
 		exportResponse(resp, err, output_file)
 	}

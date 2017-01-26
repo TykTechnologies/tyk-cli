@@ -19,37 +19,44 @@ func Apis(args []string) {
 }
 
 func parseJSON(input_file string, uri string, call *request.Request) {
-	var f interface{}
+	var fileObject interface{}
 	file, _ := ioutil.ReadFile(utils.HandleFilePath(input_file))
-	err := json.Unmarshal([]byte(file), &f)
+	err := json.Unmarshal([]byte(file), &fileObject)
 	if err != nil {
 		fmt.Printf("File error: %v\n", err)
 		os.Exit(1)
 	}
-	m := utils.InterfaceToMap(f)
-	apis := m["apis"].([]interface{})
+	fileMap := utils.InterfaceToMap(fileObject)
+	apis := fileMap["apis"].([]interface{})
 	for i := range apis {
 		definition := map[string]interface{}{
-			"api_definition": utils.InterfaceToMap(apis[i])["api_definition"],
+			"api_definition": utils.InterfaceToMap(
+				apis[i],
+			)["api_definition"],
 		}
-		api, err := json.Marshal(definition)
-		if err != nil {
-			fmt.Println(err)
-		} else {
-			id := fmt.Sprintf("%v", utils.InterfaceToMap(definition["api_definition"])["id"])
-			postAPI(api, id, uri, call)
-		}
+		postAPI(definition, uri, call)
 	}
 }
 
-func postAPI(api []byte, id string, uri string, call *request.Request) {
+func postAPI(definition map[string]interface{}, uri string, call *request.Request) {
+	api, id := apiAndId(definition)
 	req, err := call.FullRequest("POST", uri, api)
 	_, err = call.Client.Do(req)
 	if err != nil {
-		return
+		fmt.Println(err)
 	} else {
 		apiCreatedMessage(id)
 	}
+}
+
+func apiAndId(definition map[string]interface{}) (api []byte, id string) {
+	api, err := json.Marshal(definition)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		id = fmt.Sprintf("%v", utils.InterfaceToMap(definition["api_definition"])["id"])
+	}
+	return
 }
 
 func apiCreatedMessage(id string) {

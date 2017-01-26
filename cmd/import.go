@@ -17,7 +17,7 @@ package cmd
 import (
 	"fmt"
 
-	_import "github.com/TykTechnologies/tyk-cli/commands/_import"
+	importPkg "github.com/TykTechnologies/tyk-cli/commands/importPkg"
 	"github.com/spf13/cobra"
 )
 
@@ -31,7 +31,7 @@ var importCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO: Work your own magic here
 		args = []string{key, domain, port, input}
-		_import.Apis(args)
+		importPkg.Apis(args)
 		fmt.Println("import called")
 	},
 }

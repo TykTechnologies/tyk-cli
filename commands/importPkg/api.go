@@ -1,4 +1,4 @@
-package _import
+package importPkg
 
 import (
 	"encoding/json"
@@ -9,18 +9,19 @@ import (
 	"os"
 )
 
+// Apis is a public function for importing APIs
 func Apis(args []string) {
 	if len(args) == 4 {
 		call := request.New(args[0], args[1], args[2])
 		uri := fmt.Sprintf("%s:%s/api/apis", call.Domain, call.Port)
-		input_file := args[3]
-		parseJSON(input_file, uri, call)
+		inputFile := args[3]
+		parseJSON(inputFile, uri, call)
 	}
 }
 
-func parseJSON(input_file string, uri string, call *request.Request) {
+func parseJSON(inputFile string, uri string, call *request.Request) {
 	var fileObject interface{}
-	file, _ := ioutil.ReadFile(utils.HandleFilePath(input_file))
+	file, _ := ioutil.ReadFile(utils.HandleFilePath(inputFile))
 	err := json.Unmarshal([]byte(file), &fileObject)
 	if err != nil {
 		fmt.Printf("File error: %v\n", err)
@@ -39,7 +40,7 @@ func parseJSON(input_file string, uri string, call *request.Request) {
 }
 
 func postAPI(definition map[string]interface{}, uri string, call *request.Request) {
-	api, id := apiAndId(definition)
+	api, id := apiAndID(definition)
 	req, err := call.FullRequest("POST", uri, api)
 	_, err = call.Client.Do(req)
 	if err != nil {
@@ -49,7 +50,7 @@ func postAPI(definition map[string]interface{}, uri string, call *request.Reques
 	}
 }
 
-func apiAndId(definition map[string]interface{}) (api []byte, id string) {
+func apiAndID(definition map[string]interface{}) (api []byte, id string) {
 	api, err := json.Marshal(definition)
 	if err != nil {
 		fmt.Println(err)

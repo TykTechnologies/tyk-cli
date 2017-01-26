@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// HandleFilePath function handles special characters in file paths
 func HandleFilePath(file string) string {
 	homepath := fmt.Sprintf("%s/", os.Getenv("HOME"))
 	replacer := strings.NewReplacer("~/", homepath)

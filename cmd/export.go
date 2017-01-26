@@ -16,7 +16,7 @@ package cmd
 
 import (
 	"fmt"
-	export "github.com/TykTechnologies/tyk-cli/commands/export"
+	exportPkg "github.com/TykTechnologies/tyk-cli/commands/exportPkg"
 	"github.com/spf13/cobra"
 )
 
@@ -30,7 +30,7 @@ var exportCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO: Work your own magic here
 		args = []string{key, domain, port, output}
-		export.Apis(args)
+		exportPkg.Apis(args)
 		fmt.Println("export called")
 	},
 }

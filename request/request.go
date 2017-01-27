@@ -2,7 +2,8 @@ package request
 
 import (
 	"bytes"
-	utils "github.com/TykTechnologies/tyk-cli/utils"
+	"fmt"
+	"github.com/TykTechnologies/tyk-cli/utils"
 	"net/http"
 	"time"
 )
@@ -22,7 +23,8 @@ func New(auth, dom, prt string) *Request {
 }
 
 // FullRequest function is used to generate a HTTP request with headers
-func (request *Request) FullRequest(requestType string, url string, payload []byte) (*http.Request, error) {
+func (request *Request) FullRequest(requestType string, path string, payload []byte) (*http.Request, error) {
+	url := fmt.Sprintf("%s:%s%s", request.Domain, request.Port, path)
 	req, err := http.NewRequest(requestType, url, bytes.NewBuffer(payload))
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", request.Authorisation)

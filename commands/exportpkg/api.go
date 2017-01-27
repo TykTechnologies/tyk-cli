@@ -1,10 +1,10 @@
-package exportPkg
+package exportpkg
 
 import (
 	"bytes"
 	"fmt"
-	request "github.com/TykTechnologies/tyk-cli/request"
-	utils "github.com/TykTechnologies/tyk-cli/utils"
+	"github.com/TykTechnologies/tyk-cli/request"
+	"github.com/TykTechnologies/tyk-cli/utils"
 	"io"
 	"net/http"
 	"os"
@@ -14,8 +14,7 @@ import (
 func Apis(args []string) {
 	if len(args) == 4 {
 		call := request.New(args[0], args[1], args[2])
-		uri := fmt.Sprintf("%s:%s/api/apis", call.Domain, call.Port)
-		req, err := call.FullRequest("GET", uri, nil)
+		req, err := call.FullRequest("GET", "/api/apis", nil)
 		resp, err := call.Client.Do(req)
 		outputFile := args[3]
 		exportResponse(resp, err, outputFile)

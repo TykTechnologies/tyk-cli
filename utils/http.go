@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"regexp"
 )
@@ -9,10 +10,14 @@ import (
 // CheckDomain function checks the format of the domain that is input
 func CheckDomain(inputString string) string {
 	if !isProtocolPresent(inputString) {
-		fmt.Println("Please add a protocol to your domain")
+		printMessage(os.Stdout, "Please add a protocol to your domain")
 		os.Exit(-1)
 	}
 	return inputString
+}
+
+func printMessage(w io.Writer, message string) {
+	fmt.Fprintln(w, message)
 }
 
 func isProtocolPresent(arg string) bool {

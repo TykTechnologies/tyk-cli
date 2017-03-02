@@ -6,3 +6,5 @@ output
 mymiddleware.py
 manifest.json
 mypubkey
+*.cov
+.DS_Store

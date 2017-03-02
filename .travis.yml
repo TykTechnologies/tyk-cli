@@ -3,11 +3,15 @@ sudo: false
 
 go:
   - 1.7
+  - 1.8
+    env: LATEST_GO=true
 
 install:
   - go get -d -v ./...
   - go build -v ./...
   - go get golang.org/x/tools/cover
+  - go get -u golang.org/x/tools/cmd/goimports github.com/{wadey/gocovmerge,mattn/goveralls}
 
 script:
-  - go test *_test.go -v -covermode=count -coverprofile=coverage.out
+  - ./ci-test.sh
+  - if [[ $LATEST_GO ]]; then goveralls -coverprofile=<(gocovmerge *.cov); fi

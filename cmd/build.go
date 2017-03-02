@@ -17,7 +17,7 @@ package cmd
 import (
 	"fmt"
 
-	bundle "github.com/TykTechnologies/tyk-cli/commands/bundle"
+	"github.com/TykTechnologies/tyk-cli/commands/bundle"
 	"github.com/spf13/cobra"
 )
 
@@ -30,8 +30,7 @@ var buildCmd = &cobra.Command{
 	Short: "Builds a plugin bundle",
 	Long:  `This command will create a bundle, it will take a manifest file and its specified files as input.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		var err error
-		err = bundle.Bundle("build", buildOutput, key, &skipSigning)
+		err := bundle.Bundle("build", buildOutput, key, &skipSigning)
 		if err != nil {
 			fmt.Println("Error:", err)
 		}

@@ -16,12 +16,12 @@ import (
 	"os"
 )
 
-var bundleOutput, privKey string
-var forceInsecure *bool
-
-const (
-	defaultBundleOutput = "bundle.zip"
+var (
+	bundleOutput, privKey string
+	forceInsecure         *bool
 )
+
+const defaultBundleOutput = "./bundle.zip"
 
 func init() {
 }
@@ -34,7 +34,7 @@ func Bundle(command string, thisBundleOutput string, thisPrivKey string, thisFor
 
 	switch command {
 	case "build":
-		var manifestPath = "./manifest.json"
+		manifestPath := "./manifest.json"
 		if _, err = os.Stat(manifestPath); err == nil {
 			var manifestData []byte
 			manifestData, err = ioutil.ReadFile(manifestPath)

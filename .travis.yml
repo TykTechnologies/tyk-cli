@@ -1,16 +1,21 @@
 language: go
 sudo: false
 
-go:
-  - 1.7
-  - 1.8
-    env: LATEST_GO=true
+notifications:
+  on_success: never
+  on_failure: always
+
+matrix:
+  include:
+    - go: 1.7.x
+    - go: 1.8.x
+      env: LATEST_GO=true
 
 install:
-  - go get -d -v ./...
-  - go build -v ./...
   - go get golang.org/x/tools/cover
   - go get -u golang.org/x/tools/cmd/goimports github.com/{wadey/gocovmerge,mattn/goveralls}
+  - go get -d -v ./...
+  - go build -v ./...
 
 script:
   - ./ci-test.sh

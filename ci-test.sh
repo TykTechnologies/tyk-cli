@@ -4,7 +4,6 @@ set -e
 
 MATRIX=(
   ""
-  "-tags 'coprocess'"
 )
 
 show() {

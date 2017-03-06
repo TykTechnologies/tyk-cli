@@ -1,13 +1,22 @@
 language: go
 sudo: false
 
-go:
-  - 1.7
+notifications:
+  on_success: never
+  on_failure: always
+
+matrix:
+  include:
+    - go: 1.7.x
+    - go: 1.8.x
+      env: LATEST_GO=true
 
 install:
+  - go get golang.org/x/tools/cover
+  - go get -u golang.org/x/tools/cmd/goimports github.com/{wadey/gocovmerge,mattn/goveralls}
   - go get -d -v ./...
   - go build -v ./...
-  - go get golang.org/x/tools/cover
 
 script:
-  - go test *_test.go -v -covermode=count -coverprofile=coverage.out
+  - ./ci-test.sh
+  - if [[ $LATEST_GO ]]; then goveralls -coverprofile=<(gocovmerge *.cov); fi

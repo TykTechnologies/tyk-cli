@@ -10,18 +10,18 @@ import (
 	"errors"
 	"fmt"
 	"github.com/TykTechnologies/goverify"
-	"github.com/TykTechnologies/tykcommon"
+	"github.com/TykTechnologies/tyk/apidef"
 	"io"
 	"io/ioutil"
 	"os"
 )
 
-var bundleOutput, privKey string
-var forceInsecure *bool
-
-const (
-	defaultBundleOutput = "bundle.zip"
+var (
+	bundleOutput, privKey string
+	forceInsecure         *bool
 )
+
+const defaultBundleOutput = "./bundle.zip"
 
 func init() {
 }
@@ -34,12 +34,12 @@ func Bundle(command string, thisBundleOutput string, thisPrivKey string, thisFor
 
 	switch command {
 	case "build":
-		var manifestPath = "./manifest.json"
+		manifestPath := "./manifest.json"
 		if _, err = os.Stat(manifestPath); err == nil {
 			var manifestData []byte
 			manifestData, err = ioutil.ReadFile(manifestPath)
 
-			var manifest tykcommon.BundleManifest
+			var manifest apidef.BundleManifest
 			err = json.Unmarshal(manifestData, &manifest)
 
 			if err != nil {
@@ -66,7 +66,7 @@ func Bundle(command string, thisBundleOutput string, thisPrivKey string, thisFor
 }
 
 // BundleValidateManifest will validate the manifest file before building a bundle.
-func BundleValidateManifest(manifest *tykcommon.BundleManifest) (err error) {
+func BundleValidateManifest(manifest *apidef.BundleManifest) (err error) {
 	// Validate manifest file list:
 	for _, file := range manifest.FileList {
 		if _, statErr := os.Stat(file); statErr != nil {
@@ -104,7 +104,7 @@ func BundleValidateManifest(manifest *tykcommon.BundleManifest) (err error) {
 }
 
 // bundleBuild will build and generate a bundle file.
-func bundleBuild(manifest *tykcommon.BundleManifest) (err error) {
+func bundleBuild(manifest *apidef.BundleManifest) (err error) {
 	var useSignature bool
 
 	if bundleOutput == "" {

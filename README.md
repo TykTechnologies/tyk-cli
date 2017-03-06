@@ -3,7 +3,7 @@
 Tyk CLI utility.
 
 [![Build Status](https://travis-ci.org/TykTechnologies/tyk-cli.svg?branch=master)](https://travis-ci.org/TykTechnologies/tyk-cli)
-
+[![Coverage Status](https://coveralls.io/repos/github/TykTechnologies/tyk-cli/badge.svg?branch=master)](https://coveralls.io/github/TykTechnologies/tyk-cli?branch=master)
 ## Install
 
 ```

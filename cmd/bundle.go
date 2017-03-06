@@ -22,7 +22,7 @@ import (
 var bundleCmd = &cobra.Command{
 	Use:   "bundle",
 	Short: "Manage plugin bundles",
-	Long: `This module lets you manage Tyk plugin bundles.`,
+	Long:  `This module lets you manage Tyk plugin bundles.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Usage()
 	},

@@ -81,7 +81,7 @@ func TestBundleValidateManifestWithNoDriver(t *testing.T) {
 	manifest := apidef.BundleManifest{
 		CustomMiddleware: apidef.MiddlewareSection{
 			Pre: []apidef.MiddlewareDefinition{
-				apidef.MiddlewareDefinition{},
+				{},
 			},
 		},
 	}
@@ -136,7 +136,7 @@ func validManifest() apidef.BundleManifest {
 	return apidef.BundleManifest{
 		CustomMiddleware: apidef.MiddlewareSection{
 			Pre: []apidef.MiddlewareDefinition{
-				apidef.MiddlewareDefinition{
+				{
 					Name: "mymiddleware",
 					Path: "./mymiddleware.py",
 				},

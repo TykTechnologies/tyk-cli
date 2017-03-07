@@ -3,8 +3,9 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/TykTechnologies/tyk-cli/commands/bundle"
 	"github.com/spf13/cobra"
+
+	"github.com/TykTechnologies/tyk-cli/commands/bundle"
 )
 
 var buildOutput, key string

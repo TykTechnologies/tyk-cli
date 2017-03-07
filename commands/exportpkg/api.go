@@ -3,11 +3,12 @@ package exportpkg
 import (
 	"bytes"
 	"fmt"
-	"github.com/TykTechnologies/tyk-cli/request"
-	"github.com/TykTechnologies/tyk-cli/utils"
 	"io"
 	"net/http"
 	"os"
+
+	"github.com/TykTechnologies/tyk-cli/request"
+	"github.com/TykTechnologies/tyk-cli/utils"
 )
 
 // Apis is a public function for exporting APIs to a specified JSON file

@@ -2,8 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/TykTechnologies/tyk-cli/commands/exportpkg"
+
 	"github.com/spf13/cobra"
+
+	"github.com/TykTechnologies/tyk-cli/commands/exportpkg"
 )
 
 var domain, port, output string

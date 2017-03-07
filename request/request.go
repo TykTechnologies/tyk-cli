@@ -3,9 +3,10 @@ package request
 import (
 	"bytes"
 	"fmt"
-	"github.com/TykTechnologies/tyk-cli/utils"
 	"net/http"
 	"time"
+
+	"github.com/TykTechnologies/tyk-cli/utils"
 )
 
 // Request struct used to set parameters for a HTTP request object

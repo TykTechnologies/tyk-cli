@@ -2,10 +2,11 @@ package bundle
 
 import (
 	"encoding/json"
-	"github.com/TykTechnologies/tyk/apidef"
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/TykTechnologies/tyk/apidef"
 )
 
 const (

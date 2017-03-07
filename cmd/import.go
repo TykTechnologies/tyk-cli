@@ -2,8 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/TykTechnologies/tyk-cli/commands/importpkg"
+
 	"github.com/spf13/cobra"
+
+	"github.com/TykTechnologies/tyk-cli/commands/importpkg"
 )
 
 var input string

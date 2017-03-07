@@ -3,10 +3,11 @@ package importpkg
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/TykTechnologies/tyk-cli/request"
-	"github.com/TykTechnologies/tyk-cli/utils"
 	"io/ioutil"
 	"os"
+
+	"github.com/TykTechnologies/tyk-cli/request"
+	"github.com/TykTechnologies/tyk-cli/utils"
 )
 
 // Apis is a public function for importing APIs

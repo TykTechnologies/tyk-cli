@@ -101,8 +101,8 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func TestFullRequest(t *testing.T) {
-	request := New("12345", "http://www.example.com", "3000")
-	req, err := request.FullRequest("GET", "http://localhost:3000/api/apis", nil)
+	request := New("12345", "http://localhost", "3000")
+	req, err := request.FullRequest("GET", "/api/apis", nil)
 	if err != nil {
 		t.Fatalf("Got error: %v", err)
 	}
@@ -127,8 +127,8 @@ func TestFullRequest(t *testing.T) {
 }
 
 func TestFullRequestAuthorisation(t *testing.T) {
-	request := New("12345", "http://www.example.com", "3000")
-	req, err := request.FullRequest("GET", "http://localhost:3000/api/apis", nil)
+	request := New("12345", "http://localhost", "3000")
+	req, err := request.FullRequest("GET", "/api/apis", nil)
 	if err != nil {
 		t.Fatalf("Got error: %v", err)
 	}
@@ -145,8 +145,8 @@ func TestFullRequestAuthorisation(t *testing.T) {
 }
 
 func TestFullRequestContentType(t *testing.T) {
-	request := New("12345", "http://www.example.com", "3000")
-	req, err := request.FullRequest("GET", "http://localhost:3000/api/apis", nil)
+	request := New("12345", "http://localhost", "3000")
+	req, err := request.FullRequest("GET", "/api/apis", nil)
 	if err != nil {
 		t.Fatalf("Got error: %v", err)
 	}

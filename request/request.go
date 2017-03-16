@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-
-	"github.com/TykTechnologies/tyk-cli/utils"
 )
 
 // Request struct used to set parameters for a HTTP request object
@@ -19,7 +17,7 @@ type Request struct {
 
 // New function used initialise HTTP request objects
 func New(auth, dom, prt string) *Request {
-	return &Request{auth, utils.CheckDomain(dom), prt,
+	return &Request{auth, checkDomain(dom), prt,
 		&http.Client{Timeout: 10 * time.Second}}
 }
 

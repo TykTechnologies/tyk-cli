@@ -13,16 +13,21 @@ var input string
 var importCmd = &cobra.Command{
 	Use:   "import",
 	Short: "Import API definitions",
-	Long:  `This module lets you import previously exported API definitions from a JSON file.`,
+
+	Long: `This module lets you import previously exported API definitions from a JSON file.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		args = []string{key, domain, port, input}
-		importpkg.Apis(args)
+		importType := map[string]func([]string){
+			"api": importpkg.APIs,
+		}
+		importType[cmd.Parent().Name()](args)
+
 		fmt.Println("import called")
 	},
 }
 
 func init() {
-	RootCmd.AddCommand(importCmd)
+	apiCmd.AddCommand(importCmd)
 
 	importCmd.Flags().StringVarP(&key, "key", "k", "", "Secret Key for the Dashboard API")
 	importCmd.Flags().StringVarP(&domain, "domain", "d", "", "Domain name for your Dashboard")

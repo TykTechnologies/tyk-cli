@@ -9,11 +9,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/TykTechnologies/goverify"
-	"github.com/TykTechnologies/tyk/apidef"
 	"io"
 	"io/ioutil"
 	"os"
+
+	"github.com/TykTechnologies/goverify"
+	"github.com/TykTechnologies/tyk/apidef"
 )
 
 var (

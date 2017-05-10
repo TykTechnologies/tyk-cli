@@ -5,6 +5,7 @@ import (
 	"os"
 	"text/template"
 
+	"github.com/TykTechnologies/tyk-cli/commands/api"
 	"github.com/spf13/cobra"
 )
 
@@ -14,6 +15,8 @@ var testCmd = &cobra.Command{
 	Long:  `This is a subcommand of the 'api' command and can be used to test the validaity of an API.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO: Work your own magic here
+		id := args[0]
+		api.Validate(id)
 
 		fmt.Println("test called")
 	},
@@ -42,7 +45,7 @@ func testUsage(cmd *cobra.Command) {
 			return os.Args[1]
 		},
 	})
-	cmd.SetUsageTemplate(`ArgUsage:{{if .Runnable}}
+	cmd.SetUsageTemplate(`Usage:{{if .Runnable}}
   tyk-cli {{ parent }} [ID] test {{end}}{{if gt .Aliases 0}}
 Aliases:
   {{.NameAndAliases}}

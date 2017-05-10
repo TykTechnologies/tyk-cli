@@ -26,8 +26,6 @@ var apiCmd = &cobra.Command{
 				apiUsage(cmd, true)
 			} else if len(args) > 1 {
 				subCmd := args[1]
-				fmt.Println("ARGS1", args[1])
-				fmt.Println(len(args))
 				switch subCmd {
 				case "test":
 					testCmd.Run(testCmd, []string{apiId})
@@ -70,8 +68,6 @@ Use "{{.CommandPath}} [command] --help" for more information about a command.{{e
 `)
 	cmd.Usage()
 }
-
-//func (n *CobraNamespace) UsageFunc() (f func(*cobra.Command) error)
 
 func init() {
 	if contains(os.Args, "test") && (contains(os.Args, "--help") || contains(os.Args, "-h")) {

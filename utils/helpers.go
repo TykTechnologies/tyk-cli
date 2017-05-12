@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 )
 
@@ -22,12 +23,27 @@ func PrintMessage(w io.Writer, message string) {
 	fmt.Fprintln(w, message)
 }
 
-// Handle Error functions prints the error if it exists
+// Handle Error function prints the error if it exists
 func HandleError(err error, exit bool) {
 	if err != nil {
 		fmt.Println(err)
 		if exit == true {
 			os.Exit(-1)
 		}
+	}
+}
+
+// ReturnErr returns an error if one exists
+func ReturnErr(err error) error {
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// LogErr logs an error if one exists
+func LogErr(err error) {
+	if err != nil {
+		log.Fatal(err)
 	}
 }

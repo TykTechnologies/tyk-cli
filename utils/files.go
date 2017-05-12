@@ -33,3 +33,18 @@ func HandleFilePath(file string) string {
 	abs, _ := filepath.Abs(filtered)
 	return abs
 }
+
+// MkdirPFile will create a file in a parent directory if file/directory
+// doesn't already exist
+func MkdirPFile(filePath string) {
+	if _, err := os.Stat(filePath); os.IsNotExist(err) && filePath != "" {
+		path := strings.Split(filePath, "/")
+		idx := len(path) - 1
+		if idx > 0 {
+			err = os.MkdirAll(strings.Join(path[:idx], "/"), os.ModePerm)
+			LogErr(err)
+		}
+		_, err = os.Create(filePath)
+		LogErr(err)
+	}
+}

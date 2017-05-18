@@ -1,20 +1,24 @@
 package api
 
 import (
-	"encoding/json"
 	"fmt"
-	v "github.com/gima/govalid/v1"
-	"io"
-	"io/ioutil"
 	"log"
+
+	"github.com/TykTechnologies/tyk-cli/utils"
+	v "github.com/gima/govalid/v1"
 )
 
 // Validate is a public function for validating APIs
 func Validate(id string) {
-	fmt.Printf("Import API %v\n", id)
+	apis := New("validate")
+	api, err := apis.Find(id)
+	utils.HandleError(err, true)
+	intfAPI := api.(map[string]interface{})
+	fmt.Printf("JSON valid? %v\n", isValidJSON(intfAPI))
 }
 
-func isValidJSON(input io.Reader) bool {
+//func isValidJSON(input io.Reader) bool {
+func isValidJSON(input map[string]interface{}) bool {
 	var isValid bool
 	schema := v.Object(
 		v.ObjKV("api_model", v.Object()),
@@ -179,14 +183,15 @@ func isValidJSON(input io.Reader) bool {
 			),
 		)),
 	)
-	var inputJSON interface{}
-	inputByte, _ := ioutil.ReadAll(input)
-	err := json.Unmarshal(inputByte, &inputJSON)
-	if err != nil {
-		log.Printf("Error: %v", err)
-		return false
-	}
-	if path, err := schema.Validate(inputJSON.(map[string]interface{})); err == nil {
+	//var inputJSON interface{}
+	//inputByte, _ := ioutil.ReadAll(input)
+	//err := json.Unmarshal(inputByte, &inputJSON)
+	//if err != nil {
+	//log.Printf("Error: %v", err)
+	//return false
+	//}
+	//if path, err := schema.Validate(inputJSON.(map[string]interface{})); err == nil {
+	if path, err := schema.Validate(input); err == nil {
 		log.Print("Validation passed.")
 		isValid = true
 	} else {

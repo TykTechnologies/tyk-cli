@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"text/template"
 
@@ -17,8 +16,6 @@ var testCmd = &cobra.Command{
 		// TODO: Work your own magic here
 		id := args[0]
 		api.Validate(id)
-
-		fmt.Println("test called")
 	},
 }
 

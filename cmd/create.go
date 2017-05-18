@@ -1,13 +1,11 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
-	"strings"
 	"text/template"
 
 	"github.com/TykTechnologies/tyk-cli/commands/api"
-	"github.com/TykTechnologies/tyk-cli/db"
-	"github.com/satori/go.uuid"
 	"github.com/spf13/cobra"
 )
 
@@ -28,9 +26,9 @@ var createCmd = &cobra.Command{
 		case 2:
 			if args[0] == "api" {
 				name := args[1]
-				apiId := strings.Replace(uuid.NewV4().String(), "-", "", -1)
-				API := api.New()
-				API.Create(&db.Item{apiId, name})
+				newAPI := api.New(name)
+				newAPI.Create()
+				fmt.Printf("%v %v created ID %v\n", newAPI.Group(), newAPI.Name, newAPI.Id)
 			}
 		}
 	},

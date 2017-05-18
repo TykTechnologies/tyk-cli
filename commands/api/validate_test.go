@@ -1,28 +1,27 @@
 package api
 
 import (
-	"io"
-	"os"
-	"strings"
 	"testing"
+
+	"github.com/TykTechnologies/tyk-cli/utils"
 )
 
 type ValidJSONTest struct {
-	input  io.Reader
+	input  map[string]interface{}
 	output bool
 }
 
 func TestIsValidJSON(t *testing.T) {
-	validAPI, _ := os.Open("./valid_api.json")
-	headOfAPI := io.LimitReader(validAPI, 64)
+	validAPI := utils.ParseJSONFile("./valid_api.json")
+	onlyAPIDef := validAPI["api_definition"].(map[string]interface{})
+	missingAPIDef := validAPI
+	delete(missingAPIDef, "api_definition")
+
 	tests := []ValidJSONTest{
-		{validAPI, true},
-		{headOfAPI, false},
-		{strings.NewReader(`{ "azul": 14 }`), false},
-		{strings.NewReader(`{ "azul": 14`), false},
-		{strings.NewReader(`"azul": 14}`), false},
-		{strings.NewReader(`cat: persian`), false},
-		{strings.NewReader(``), false},
+		{utils.ParseJSONFile("./valid_api.json"), true},
+		{onlyAPIDef, false},
+		{missingAPIDef, false},
+		{map[string]interface{}(nil), false},
 	}
 	for _, test := range tests {
 		result := isValidJSON(test.input)

@@ -2,9 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"os"
 	"text/template"
+
+	"github.com/spf13/cobra"
 )
 
 var apiCmd = &cobra.Command{
@@ -21,8 +22,6 @@ var apiCmd = &cobra.Command{
 			apiId := args[0]
 			if len(args) == 1 {
 				fmt.Printf("selected api %s, please add subcommand\n", apiId)
-				apiUsage(cmd, true)
-			} else if args[1] == "--help" || args[1] == "-h" {
 				apiUsage(cmd, true)
 			} else if len(args) > 1 {
 				subCmd := args[1]

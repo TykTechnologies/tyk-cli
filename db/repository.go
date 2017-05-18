@@ -2,16 +2,11 @@ package db
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 
 	"github.com/TykTechnologies/tyk-cli/utils"
 	"github.com/boltdb/bolt"
 )
-
-type Bucket struct {
-	BucketName string
-	Group      string
-}
 
 type Item struct {
 	Id   string
@@ -20,41 +15,51 @@ type Item struct {
 
 // Record interface for all objects in the DB
 type Record interface {
-	Create(item *Item) error
-	Find(id string)
+	GetId() string
+	GetName() string
+	BucketName() string
+	Group() string
+	GetRecordData() interface{}
+	Create() error
+	Find(id string) (interface{}, error)
 }
 
-// Create is a public function for creating staged APIs
-func (b *Bucket) Create(item *Item) error {
-	db_file := "./db/bolt.db"
-	utils.MkdirPFile(db_file)
-	bdb, err := bolt.Open(db_file, 0600, nil)
-	utils.LogErr(err)
-	defer bdb.Close()
+func (item *Item) GetId() string {
+	return item.Id
+}
 
-	err = bdb.Update(func(tx *bolt.Tx) error {
-		collection, err := tx.CreateBucketIfNotExists([]byte(b.BucketName))
-		utils.ReturnErr(err)
-		member, err := json.Marshal(item)
-		utils.ReturnErr(err)
-		return collection.Put([]byte(item.Id), member)
-	})
-	fmt.Printf("%v %v created ID %v\n", b.Group, item.Name, item.Id)
-	return utils.ReturnErr(err)
+func (item *Item) GetName() string {
+	return item.Name
+}
+
+func (item *Item) BucketName() string {
+	return "items"
+}
+
+func (item *Item) Group() string {
+	return "Item"
+}
+
+func (item *Item) GetRecordData() interface{} {
+	return item
+}
+
+func (item *Item) Create() error {
+	log.Fatal("Please implement me")
+	return nil
 }
 
 // Find is a public function for finding staged APIs
-func (b *Bucket) Find(id string) []byte {
-	bdb, err := bolt.Open("./db/bolt.db", 0666, &bolt.Options{ReadOnly: true})
-	utils.LogErr(err)
-	defer bdb.Close()
-	var member []byte
+func (item *Item) Find(id string) (interface{}, error) {
+	log.Fatal("Please implement me")
+	return interface{}(nil), nil
+}
 
-	err = bdb.View(func(tx *bolt.Tx) error {
-		collection := tx.Bucket([]byte(b.BucketName))
-		member = collection.Get([]byte(id))
-		fmt.Println(member)
-		return nil
-	})
-	return member
+// AddRecord function adds records to BoltDB
+func AddRecord(tx *bolt.Tx, r Record) error {
+	collection, err := tx.CreateBucketIfNotExists([]byte(r.BucketName()))
+	utils.HandleError(err, true)
+	member, err := json.Marshal(r.GetRecordData())
+	utils.HandleError(err, true)
+	return collection.Put([]byte(r.GetId()), member)
 }

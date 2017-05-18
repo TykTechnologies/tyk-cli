@@ -23,7 +23,7 @@ func isValidJSON(input map[string]interface{}) bool {
 	schema := v.Object(
 		v.ObjKV("api_model", v.Object()),
 		v.ObjKV("api_definition", v.Object(
-			v.ObjKV("id", v.String(v.StrRegExp("[0-9a-fA-F]+"))),
+			//v.ObjKV("id", v.String(v.StrRegExp("[0-9a-fA-F]+"))),
 			v.ObjKV("name", v.String(v.StrMin(2))),
 			v.ObjKV("api_id", v.String(v.StrRegExp("[0-9a-fA-F]+"))),
 			v.ObjKV("org_id", v.String(v.StrRegExp("[0-9a-fA-F]+"))),

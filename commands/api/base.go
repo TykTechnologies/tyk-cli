@@ -15,8 +15,12 @@ type APIDef struct {
 	Id            string
 	Name          string
 	item          db.Item
-	APIModel      interface{}
+	APIModel      ApiModel
 	APIDefinition apidef.APIDefinition
+}
+
+type ApiModel struct {
+	schemaPath string
 }
 
 func (api *APIDef) setAPIDefinition() {
@@ -50,8 +54,8 @@ func (api *APIDef) Group() string {
 func (api *APIDef) GetRecordData() interface{} {
 	api.setAPIDefinition()
 	type rec struct {
-		APIModel      interface{}
-		APIDefinition apidef.APIDefinition
+		APIModel      ApiModel             `json:"api_model"`
+		APIDefinition apidef.APIDefinition `json:"api_definition"`
 	}
 	return rec{api.APIModel, api.APIDefinition}
 }

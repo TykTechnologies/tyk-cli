@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"os"
 )
 
 // SingleOrListIntf function converts map[string]interface{} objects into an interface slice
@@ -26,9 +25,11 @@ func PrintMessage(w io.Writer, message string) {
 // Handle Error function prints the error if it exists
 func HandleError(err error, exit bool) {
 	if err != nil {
-		fmt.Println(err)
-		if exit == true {
-			os.Exit(-1)
+		switch exit {
+		case false:
+			log.Println(err)
+		case true:
+			log.Fatal(err)
 		}
 	}
 }
@@ -39,11 +40,4 @@ func ReturnErr(err error) error {
 		return err
 	}
 	return nil
-}
-
-// LogErr logs an error if one exists
-func LogErr(err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
 }

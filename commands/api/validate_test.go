@@ -30,3 +30,24 @@ func TestIsValidJSON(t *testing.T) {
 		}
 	}
 }
+
+type ValidPathTest struct {
+	input  string
+	output string
+}
+
+func TestHandleValidationPath(t *testing.T) {
+	tests := []ValidPathTest{
+		{"Object->Key[api_definition].Value->String", "[api_definition]"},
+		{"Object->Key[api_definition].Value->Object->Key[org_id].Value->String", "[api_definition][org_id]"},
+		{"Object->Key[api_definition].Value->Object->Key[org_id].Value->Number", "[api_definition][org_id]"},
+		{"Object->Key[api_definition].Value->Object->Key[org].Value->Object->Key[id].Value->Number", "[api_definition][org][id]"},
+		{"", ""},
+	}
+	for _, test := range tests {
+		result := handleValidationPath(test.input)
+		if result != test.output {
+			t.Fatalf(`Unexpected return value. Expected: "%v", got : "%v"`, test.output, result)
+		}
+	}
+}

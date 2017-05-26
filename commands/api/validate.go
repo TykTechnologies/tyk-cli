@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/TykTechnologies/tyk-cli/utils"
 	v "github.com/gima/govalid/v1"
@@ -14,7 +15,7 @@ func Validate(id string) {
 	api, err := apis.Find(id)
 	utils.HandleError(err, true)
 	intfAPI := api.(map[string]interface{})
-	fmt.Printf("JSON valid? %v\n", isValidJSON(intfAPI))
+	isValidJSON(intfAPI)
 }
 
 //func isValidJSON(input io.Reader) bool {
@@ -183,20 +184,21 @@ func isValidJSON(input map[string]interface{}) bool {
 			),
 		)),
 	)
-	//var inputJSON interface{}
-	//inputByte, _ := ioutil.ReadAll(input)
-	//err := json.Unmarshal(inputByte, &inputJSON)
-	//if err != nil {
-	//log.Printf("Error: %v", err)
-	//return false
-	//}
-	//if path, err := schema.Validate(inputJSON.(map[string]interface{})); err == nil {
 	if path, err := schema.Validate(input); err == nil {
 		log.Print("Validation passed.")
 		isValid = true
 	} else {
-		log.Printf("Validation failed at %s. Error (%s)", path, err)
+		pathStr := handleValidationPath(path)
+		log.Printf("Validation: Error\nRequired { option %s }\n%s", pathStr, err)
 		isValid = false
 	}
 	return isValid
+}
+
+func handleValidationPath(path string) string {
+	errStr := fmt.Sprintf("%v", path)
+	valSplit := strings.Split(errStr, ".Value->")
+	valJoin := strings.Join(valSplit[0:len(valSplit)-1], "")
+	objKRepl := strings.Replace(valJoin, "Object->Key", "", -1)
+	return objKRepl
 }

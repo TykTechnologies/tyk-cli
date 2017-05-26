@@ -4,19 +4,20 @@ import (
 	"encoding/json"
 	"log"
 
-	"github.com/TykTechnologies/tyk-cli/utils"
 	"github.com/boltdb/bolt"
+
+	"github.com/TykTechnologies/tyk-cli/utils"
 )
 
 type Item struct {
-	Id   string
-	Name string
+	id   string
+	name string
 }
 
 // Record interface for all objects in the DB
 type Record interface {
-	GetId() string
-	GetName() string
+	Id() string
+	Name() string
 	BucketName() string
 	Group() string
 	GetRecordData() interface{}
@@ -24,12 +25,12 @@ type Record interface {
 	Find(id string) (interface{}, error)
 }
 
-func (item *Item) GetId() string {
-	return item.Id
+func (item *Item) Id() string {
+	return item.id
 }
 
-func (item *Item) GetName() string {
-	return item.Name
+func (item *Item) Name() string {
+	return item.name
 }
 
 func (item *Item) BucketName() string {
@@ -61,5 +62,5 @@ func AddRecord(tx *bolt.Tx, r Record) error {
 	utils.HandleError(err, true)
 	member, err := json.Marshal(r.GetRecordData())
 	utils.HandleError(err, true)
-	return collection.Put([]byte(r.GetId()), member)
+	return collection.Put([]byte(r.Id()), member)
 }

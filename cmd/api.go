@@ -18,19 +18,19 @@ var apiCmd = &cobra.Command{
 		if len(args) < 1 {
 			fmt.Errorf("need to specify api id or subcommand")
 			apiUsage(cmd, false)
-		} else {
-			apiId := args[0]
-			if len(args) == 1 {
-				fmt.Printf("selected api %s, please add subcommand\n", apiId)
-				apiUsage(cmd, true)
-			} else if len(args) > 1 {
-				subCmd := args[1]
-				switch subCmd {
-				case "test":
-					testCmd.Run(testCmd, []string{apiId})
-				default:
-					fmt.Errorf("unknown api subcommand: %s", args[0])
-				}
+			return
+		}
+		apiId := args[0]
+		if len(args) == 1 {
+			fmt.Printf("selected api %s, please add subcommand\n", apiId)
+			apiUsage(cmd, true)
+		} else if len(args) > 1 {
+			subCmd := args[1]
+			switch subCmd {
+			case "test":
+				testCmd.Run(testCmd, []string{apiId})
+			default:
+				fmt.Errorf("unknown api subcommand: %s", args[0])
 			}
 		}
 	},

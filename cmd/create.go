@@ -2,11 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"text/template"
 
-	"github.com/TykTechnologies/tyk-cli/commands/api"
 	"github.com/spf13/cobra"
+
+	"github.com/TykTechnologies/tyk-cli/commands/api"
 )
 
 var createCmd = &cobra.Command{
@@ -22,14 +24,18 @@ var createCmd = &cobra.Command{
 			switch args[0] {
 			case "api":
 				createAPIUsage(cmd)
+			default:
+				log.Println("Please implement me")
 			}
 		case 2:
 			if args[0] == "api" {
 				name := args[1]
 				newAPI := api.New(name)
 				newAPI.Create()
-				fmt.Printf("%v %v created ID %v\n", newAPI.Group(), newAPI.Name, newAPI.Id)
+				fmt.Printf("%v %v created ID %v\n", newAPI.Group(), newAPI.Name(), newAPI.Id())
 			}
+		default:
+			createAPIUsage(cmd)
 		}
 	},
 }

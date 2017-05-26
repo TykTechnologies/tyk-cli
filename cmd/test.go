@@ -4,8 +4,9 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/TykTechnologies/tyk-cli/commands/api"
 	"github.com/spf13/cobra"
+
+	"github.com/TykTechnologies/tyk-cli/commands/api"
 )
 
 var testCmd = &cobra.Command{
@@ -13,7 +14,6 @@ var testCmd = &cobra.Command{
 	Short: "Validate API definitions",
 	Long:  `This is a subcommand of the 'api' command and can be used to test the validaity of an API.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO: Work your own magic here
 		id := args[0]
 		api.Validate(id)
 	},

@@ -5,8 +5,9 @@ import (
 	"log"
 	"strings"
 
-	"github.com/TykTechnologies/tyk-cli/utils"
 	v "github.com/gima/govalid/v1"
+
+	"github.com/TykTechnologies/tyk-cli/utils"
 )
 
 // Validate is a public function for validating APIs

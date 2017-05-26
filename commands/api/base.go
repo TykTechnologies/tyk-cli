@@ -2,18 +2,20 @@ package api
 
 import (
 	"encoding/json"
+	"path/filepath"
 	"strings"
+
+	"github.com/boltdb/bolt"
+	uuid "github.com/satori/go.uuid"
 
 	"github.com/TykTechnologies/tyk-cli/db"
 	"github.com/TykTechnologies/tyk-cli/utils"
 	"github.com/TykTechnologies/tyk/apidef"
-	"github.com/boltdb/bolt"
-	uuid "github.com/satori/go.uuid"
 )
 
 type APIDef struct {
-	Id            string
-	Name          string
+	id            string
+	name          string
 	item          db.Item
 	APIModel      ApiModel
 	APIDefinition apidef.APIDefinition
@@ -24,23 +26,23 @@ type ApiModel struct {
 }
 
 func (api *APIDef) setAPIDefinition() {
-	api.APIDefinition.APIID = api.GetId()
-	api.APIDefinition.Name = api.GetName()
+	api.APIDefinition.APIID = api.Id()
+	api.APIDefinition.Name = api.Name()
 }
 
 func New(name string) *APIDef {
 	api := APIDef{}
-	api.Id = strings.Replace(uuid.NewV4().String(), "-", "", -1)
-	api.Name = name
+	api.id = strings.Replace(uuid.NewV4().String(), "-", "", -1)
+	api.name = name
 	return &api
 }
 
-func (api *APIDef) GetId() string {
-	return api.Id
+func (api *APIDef) Id() string {
+	return api.id
 }
 
-func (api *APIDef) GetName() string {
-	return api.Name
+func (api *APIDef) Name() string {
+	return api.name
 }
 
 func (api *APIDef) BucketName() string {
@@ -62,7 +64,7 @@ func (api *APIDef) GetRecordData() interface{} {
 
 // Create is a public function for creating staged APIs
 func (api *APIDef) Create() error {
-	db_file := "./db/bolt.db"
+	db_file := filepath.Join("db", "bolt.db")
 	utils.MkdirPFile(db_file)
 	bdb, err := bolt.Open(db_file, 0600, nil)
 	utils.HandleError(err, true)
@@ -75,7 +77,8 @@ func (api *APIDef) Create() error {
 
 // Find is a public function for finding staged APIs
 func (apis *APIDef) Find(id string) (interface{}, error) {
-	bdb, err := bolt.Open("./db/bolt.db", 0666, &bolt.Options{ReadOnly: true})
+	db_file := filepath.Join("db", "bolt.db")
+	bdb, err := bolt.Open(db_file, 0666, &bolt.Options{ReadOnly: true})
 	utils.HandleError(err, true)
 	defer bdb.Close()
 	var item interface{}

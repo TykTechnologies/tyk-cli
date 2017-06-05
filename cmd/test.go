@@ -20,13 +20,12 @@ var testCmd = &cobra.Command{
 }
 
 func contains(args []string, item string) bool {
-	isPresent := false
-	for i := range args {
-		if args[i] == item {
-			isPresent = true
+	for _, arg := range args {
+		if arg == item {
+			return true
 		}
 	}
-	return isPresent
+	return false
 }
 
 func init() {

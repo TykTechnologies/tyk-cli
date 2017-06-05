@@ -41,7 +41,10 @@ func MkdirPFile(filePath string) {
 		path := strings.Split(filePath, "/")
 		idx := len(path) - 1
 		if idx > 0 {
-			err = os.MkdirAll(strings.Join(path[:idx], "/"), os.ModePerm)
+			err = os.MkdirAll(
+				strings.Join(path[:idx], "/"),
+				os.ModePerm,
+			)
 			HandleError(err, true)
 		}
 		_, err = os.Create(filePath)

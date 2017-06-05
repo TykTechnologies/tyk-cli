@@ -9,6 +9,8 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TykTechnologies/tyk-cli/commands/api"
+	"github.com/TykTechnologies/tyk-cli/db"
+	"github.com/TykTechnologies/tyk-cli/utils"
 )
 
 var createCmd = &cobra.Command{
@@ -18,26 +20,31 @@ var createCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		args = os.Args[2:]
 		switch len(args) {
-		case 0:
-			createAPIUsage(cmd)
 		case 1:
-			switch args[0] {
-			case "api":
-				createAPIUsage(cmd)
-			default:
-				log.Println("Please implement me")
-			}
+			subCmdUsage(cmd, args)
 		case 2:
 			if args[0] == "api" {
+				bdb, err := db.OpenDB("bolt.db", 0600, false)
+				defer bdb.Close()
+				utils.HandleError(err, true)
 				name := args[1]
 				newAPI := api.New(name)
-				newAPI.Create()
+				newAPI.Create(bdb)
 				fmt.Printf("%v %v created ID %v\n", newAPI.Group(), newAPI.Name(), newAPI.Id())
 			}
 		default:
 			createAPIUsage(cmd)
 		}
 	},
+}
+
+func subCmdUsage(cmd *cobra.Command, args []string) {
+	switch args[0] {
+	case "api":
+		createAPIUsage(cmd)
+	default:
+		log.Println("Please implement me")
+	}
 }
 
 func createAPIUsage(cmd *cobra.Command) {

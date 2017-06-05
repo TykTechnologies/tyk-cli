@@ -2,7 +2,7 @@ package api
 
 import (
 	"encoding/json"
-	"path/filepath"
+	"fmt"
 	"strings"
 
 	"github.com/boltdb/bolt"
@@ -17,11 +17,11 @@ type APIDef struct {
 	id            string
 	name          string
 	item          db.Item
-	APIModel      ApiModel
+	APIModel      APIModel
 	APIDefinition apidef.APIDefinition
 }
 
-type ApiModel struct {
+type APIModel struct {
 	schemaPath string
 }
 
@@ -53,44 +53,33 @@ func (api *APIDef) Group() string {
 	return "API"
 }
 
-func (api *APIDef) GetRecordData() interface{} {
+func (api *APIDef) RecordData() interface{} {
 	api.setAPIDefinition()
 	type rec struct {
-		APIModel      ApiModel             `json:"api_model"`
+		APIModel      APIModel             `json:"api_model"`
 		APIDefinition apidef.APIDefinition `json:"api_definition"`
 	}
 	return rec{api.APIModel, api.APIDefinition}
 }
 
 // Create is a public function for creating staged APIs
-func (api *APIDef) Create() error {
-	db_file := filepath.Join("db", "bolt.db")
-	utils.MkdirPFile(db_file)
-	bdb, err := bolt.Open(db_file, 0600, nil)
-	utils.HandleError(err, true)
-	defer bdb.Close()
-	err = bdb.Update(func(tx *bolt.Tx) error {
+func (api *APIDef) Create(bdb *bolt.DB) error {
+	err := bdb.Update(func(tx *bolt.Tx) error {
 		return db.AddRecord(tx, api)
 	})
 	return utils.ReturnErr(err)
 }
 
 // Find is a public function for finding staged APIs
-func (apis *APIDef) Find(id string) (interface{}, error) {
-	db_file := filepath.Join("db", "bolt.db")
-	bdb, err := bolt.Open(db_file, 0666, &bolt.Options{ReadOnly: true})
-	utils.HandleError(err, true)
-	defer bdb.Close()
+func (apis *APIDef) Find(bdb *bolt.DB, id string) (interface{}, error) {
 	var item interface{}
-
-	err = bdb.View(func(tx *bolt.Tx) error {
+	err := bdb.View(func(tx *bolt.Tx) error {
 		collection := tx.Bucket([]byte(apis.BucketName()))
 		member := collection.Get([]byte(id))
-		err := json.Unmarshal(member, &item)
-		if err != nil {
-			return err
-		}
-		return nil
+		return json.Unmarshal(member, &item)
 	})
-	return item, nil
+	if item == nil {
+		return nil, fmt.Errorf("API not found")
+	}
+	return item, err
 }

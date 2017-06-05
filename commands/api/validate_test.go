@@ -12,16 +12,16 @@ type ValidJSONTest struct {
 }
 
 func TestIsValidJSON(t *testing.T) {
-	validAPI := utils.ParseJSONFile("./valid_api.json")
+	validAPI := utils.ParseJSONFile("valid_api.json")
 	onlyAPIDef := validAPI["api_definition"].(map[string]interface{})
 	missingAPIDef := validAPI
 	delete(missingAPIDef, "api_definition")
 
 	tests := []ValidJSONTest{
-		{utils.ParseJSONFile("./valid_api.json"), true},
+		{utils.ParseJSONFile("valid_api.json"), true},
 		{onlyAPIDef, false},
 		{missingAPIDef, false},
-		{map[string]interface{}(nil), false},
+		{nil, false},
 	}
 	for _, test := range tests {
 		result := isValidJSON(test.input)

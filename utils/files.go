@@ -38,15 +38,12 @@ func HandleFilePath(file string) string {
 // doesn't already exist
 func MkdirPFile(filePath string) {
 	if _, err := os.Stat(filePath); os.IsNotExist(err) && filePath != "" {
-		path := strings.Split(filePath, "/")
-		idx := len(path) - 1
-		if idx > 0 {
-			err = os.MkdirAll(
-				strings.Join(path[:idx], "/"),
-				os.ModePerm,
-			)
+		dir := filepath.Dir(filePath)
+		if len(dir) > 1 {
+			err = os.MkdirAll(dir, os.ModePerm)
 			HandleError(err, true)
 		}
+
 		_, err = os.Create(filePath)
 		HandleError(err, true)
 	}

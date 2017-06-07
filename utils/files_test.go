@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"reflect"
-	"strings"
 	"testing"
 )
 
@@ -61,16 +61,17 @@ func TestMkdirPFile(t *testing.T) {
 		"some/folder/some/file.txt",
 		"file.txt",
 	}
-	for i := range newFiles {
-		MkdirPFile(newFiles[i])
-		if _, err := os.Stat(newFiles[i]); os.IsNotExist(err) {
-			t.Fatalf("Expected to find '%s', instead file not found", newFiles[i])
+	for _, file := range newFiles {
+		MkdirPFile(file)
+		if _, err := os.Stat(file); os.IsNotExist(err) {
+			t.Fatalf("Expected to find '%s', instead file not found", file)
 		}
-		os.Remove(newFiles[i])
-
-	}
-	for i := range newFiles {
-		os.RemoveAll(strings.Split(newFiles[i], "/")[0])
+		os.Remove(file)
+		parent := file
+		for len(filepath.Dir(parent)) > 1 {
+			parent = filepath.Dir(parent)
+		}
+		os.RemoveAll(parent)
 	}
 }
 

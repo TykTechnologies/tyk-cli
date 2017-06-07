@@ -6,8 +6,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/TykTechnologies/tyk-cli/utils"
 	"github.com/boltdb/bolt"
+
+	"github.com/TykTechnologies/tyk-cli/utils"
 )
 
 type Item struct {

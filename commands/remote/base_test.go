@@ -1,6 +1,7 @@
 package remote
 
 import (
+	"bytes"
 	"testing"
 )
 
@@ -22,16 +23,19 @@ var remotes []interface{} = []interface{}{
 }
 
 func TestList(t *testing.T) {
-	result := List(remotes, false)
+	var buf bytes.Buffer
+	List(&buf, remotes, false)
+	result := buf.String()
 	expectedResult := "default\ncatChannel\n"
 	if result != expectedResult {
 		t.Fatalf("Error - expected %v, got %v", expectedResult, result)
 	}
-
 }
 
 func TestListVerbose(t *testing.T) {
-	result := List(remotes, true)
+	var buf bytes.Buffer
+	List(&buf, remotes, true)
+	result := buf.String()
 	expectedResult := "default - http://localhost:3000\ncatChannel - http://localhost:3333\n"
 	if result != expectedResult {
 		t.Fatalf("Error - expected %v, got %v", expectedResult, result)

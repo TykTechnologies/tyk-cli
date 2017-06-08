@@ -9,7 +9,6 @@ import (
 	uuid "github.com/satori/go.uuid"
 
 	"github.com/TykTechnologies/tyk-cli/db"
-	"github.com/TykTechnologies/tyk-cli/utils"
 	"github.com/TykTechnologies/tyk/apidef"
 )
 
@@ -64,10 +63,9 @@ func (api *APIDef) RecordData() interface{} {
 
 // Create is a public function for creating staged APIs
 func (api *APIDef) Create(bdb *bolt.DB) error {
-	err := bdb.Update(func(tx *bolt.Tx) error {
+	return bdb.Update(func(tx *bolt.Tx) error {
 		return db.AddRecord(tx, api)
 	})
-	return utils.ReturnErr(err)
 }
 
 // Find is a public function for finding staged APIs

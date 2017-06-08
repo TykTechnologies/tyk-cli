@@ -33,11 +33,3 @@ func HandleError(err error, exit bool) {
 		}
 	}
 }
-
-// ReturnErr returns an error if one exists
-func ReturnErr(err error) error {
-	if err != nil {
-		return err
-	}
-	return nil
-}

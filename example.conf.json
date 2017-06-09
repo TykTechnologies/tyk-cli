@@ -1,0 +1,11 @@
+{
+  "remotes": [
+    {
+      "alias": "default",
+      "url": "http://localhost:3000",
+      "organisation_name": "Default Org",
+      "org_id": "12345678901234567890",
+      "auth_token": "1234567890abcdef"
+    }
+  ]
+}

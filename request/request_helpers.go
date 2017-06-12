@@ -3,9 +3,8 @@ package request
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
-	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"regexp"
@@ -18,16 +17,6 @@ func GenerateJSON(reader io.ReadCloser) string {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(reader)
 	return buf.String()
-}
-
-// MapToJSON converts map to JSON format
-func MapToJSON(mapObj map[string]interface{}) (output string) {
-	output = fmt.Sprintf("{\n")
-	for i := range mapObj {
-		output += fmt.Sprintf("  \"%v\": \"%s\"\n", i, mapObj[i])
-	}
-	output += fmt.Sprintf("}")
-	return
 }
 
 // CheckDomain function checks the format of the domain that is input
@@ -45,14 +34,16 @@ func isProtocolPresent(arg string) bool {
 }
 
 // OutputResponse function outputs the body of a response to stdout
-func OutputResponse(resp *http.Response) {
-	var responseMessage interface{}
+func OutputResponse(resp *http.Response) []byte {
 	defer resp.Body.Close()
-	respBody, err := ioutil.ReadAll(resp.Body)
-	err = json.Unmarshal(respBody, &responseMessage)
+	var respBody map[string]interface{}
+	err := json.NewDecoder(resp.Body).Decode(&respBody)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
-	msg := responseMessage.(map[string]interface{})
-	utils.PrintMessage(os.Stdout, MapToJSON(msg))
+	output, err := json.MarshalIndent(respBody, "", "  ")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return append(output, []byte("\n")[0])
 }

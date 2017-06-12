@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"reflect"
 	"testing"
 )
@@ -50,5 +51,33 @@ func TestHandleFilePathConvertsTilde(t *testing.T) {
 	result := HandleFilePath("~/Documents/goStuff")
 	if result != expectedResult {
 		t.Fatalf("Expected %s, got %s", expectedResult, result)
+	}
+}
+
+func TestMkdirPFile(t *testing.T) {
+	newFiles := []string{
+		"someFolder/someFile.txt",
+		"someFolder/someFile2.txt",
+		"some/folder/some/file.txt",
+		"file.txt",
+	}
+	for _, file := range newFiles {
+		MkdirPFile(file)
+		if _, err := os.Stat(file); os.IsNotExist(err) {
+			t.Fatalf("Expected to find '%s', instead file not found", file)
+		}
+		os.Remove(file)
+		parent := file
+		for len(filepath.Dir(parent)) > 1 {
+			parent = filepath.Dir(parent)
+		}
+		os.RemoveAll(parent)
+	}
+}
+
+func TestMkdirPFileWithNotInput(t *testing.T) {
+	MkdirPFile("")
+	if _, err := os.Stat(""); !os.IsNotExist(err) {
+		t.Fatalf("Expected file not found, got %s", err)
 	}
 }

@@ -1,53 +1,48 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"text/template"
 
 	"github.com/spf13/cobra"
+
+	"github.com/TykTechnologies/tyk-cli/commands/api"
 )
 
-var apiCmd = &cobra.Command{
-	Use:   "api",
-	Short: "Manage API definitions",
-	Long:  `This module lets you manage API definitions using the Dashboard API.`,
+var testCmd = &cobra.Command{
+	Use:   "test",
+	Short: "Validate API definitions",
+	Long:  `This is a subcommand of the 'api' command and can be used to test the validaity of an API.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		apiUsage(cmd, true)
-		args = os.Args[2:]
-		if len(args) < 1 {
-			fmt.Errorf("need to specify api id or subcommand")
-			apiUsage(cmd, false)
-			return
-		}
-		apiId := args[0]
-		if len(args) == 1 {
-			fmt.Printf("selected api %s, please add subcommand\n", apiId)
-			apiUsage(cmd, true)
-			return
-		}
-		subCmd := args[1]
-		switch subCmd {
-		case "test":
-			testCmd.Run(testCmd, []string{apiId})
-		default:
-			fmt.Errorf("unknown api subcommand: %s", args[0])
-		}
+		id := args[0]
+		api.Validate(id)
 	},
 }
 
-func apiUsage(cmd *cobra.Command, isSubCmd bool) {
-	if isSubCmd != false {
-		cmd.ResetCommands()
+func contains(args []string, item string) bool {
+	for _, arg := range args {
+		if arg == item {
+			return true
+		}
 	}
+	return false
+}
+
+func init() {
+	apiCmd.AddCommand(testCmd)
+}
+
+func testUsage(cmd *cobra.Command) {
 	cobra.AddTemplateFuncs(template.FuncMap{
 		"add": func(i int, j int) int {
 			return i + j
 		},
+		"parent": func() string {
+			return os.Args[1]
+		},
 	})
-	cmd.AddCommand(testCmd)
 	cmd.SetUsageTemplate(`Usage:{{if .Runnable}}
-  {{ .CommandPath}} [ID] [command]{{end}}{{if gt .Aliases 0}}
+  tyk-cli {{ parent }} [ID] test {{end}}{{if gt .Aliases 0}}
 Aliases:
   {{.NameAndAliases}}
 {{end}}{{if .HasExample}}
@@ -66,15 +61,4 @@ Additional help topics:{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
 Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}
 `)
 	cmd.Usage()
-}
-
-func init() {
-	if contains(os.Args, "test") && (contains(os.Args, "--help") || contains(os.Args, "-h")) {
-		RootCmd.AddCommand(testCmd)
-		testUsage(testCmd)
-		os.Exit(-1)
-	} else {
-		RootCmd.AddCommand(apiCmd)
-		apiCmd.AddCommand(testCmd)
-	}
 }

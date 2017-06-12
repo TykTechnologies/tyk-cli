@@ -50,7 +50,3 @@ func TestPrintMessage(t *testing.T) {
 		t.Fatalf("Expected: %v, got: %v", expectedResult, result)
 	}
 }
-
-func TestHandleError(t *testing.T) {
-	HandleError(nil, false)
-}

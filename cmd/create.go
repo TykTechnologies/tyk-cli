@@ -2,52 +2,60 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"text/template"
 
 	"github.com/spf13/cobra"
+
+	"github.com/TykTechnologies/tyk-cli/commands/api"
+	"github.com/TykTechnologies/tyk-cli/db"
 )
 
-var apiCmd = &cobra.Command{
-	Use:   "api",
-	Short: "Manage API definitions",
-	Long:  `This module lets you manage API definitions using the Dashboard API.`,
+var createCmd = &cobra.Command{
+	Use:   "create",
+	Short: "Create new APIs.",
+	Long:  `Create new APIs.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		apiUsage(cmd, true)
 		args = os.Args[2:]
-		if len(args) < 1 {
-			fmt.Errorf("need to specify api id or subcommand")
-			apiUsage(cmd, false)
-			return
-		}
-		apiId := args[0]
-		if len(args) == 1 {
-			fmt.Printf("selected api %s, please add subcommand\n", apiId)
-			apiUsage(cmd, true)
-			return
-		}
-		subCmd := args[1]
-		switch subCmd {
-		case "test":
-			testCmd.Run(testCmd, []string{apiId})
+		switch len(args) {
+		case 1:
+			subCmdUsage(cmd, args)
+		case 2:
+			if args[0] == "api" {
+				bdb, err := db.OpenDB("bolt.db", 0600, false)
+				defer bdb.Close()
+				if err != nil {
+					log.Fatal(err)
+				}
+				name := args[1]
+				newAPI := api.New(name)
+				newAPI.Create(bdb)
+				fmt.Printf("%v %v created ID %v\n", newAPI.Group(), newAPI.Name(), newAPI.Id())
+			}
 		default:
-			fmt.Errorf("unknown api subcommand: %s", args[0])
+			createAPIUsage(cmd)
 		}
 	},
 }
 
-func apiUsage(cmd *cobra.Command, isSubCmd bool) {
-	if isSubCmd != false {
-		cmd.ResetCommands()
+func subCmdUsage(cmd *cobra.Command, args []string) {
+	switch args[0] {
+	case "api":
+		createAPIUsage(cmd)
+	default:
+		log.Println("Please implement me")
 	}
+}
+
+func createAPIUsage(cmd *cobra.Command) {
 	cobra.AddTemplateFuncs(template.FuncMap{
 		"add": func(i int, j int) int {
 			return i + j
 		},
 	})
-	cmd.AddCommand(testCmd)
 	cmd.SetUsageTemplate(`Usage:{{if .Runnable}}
-  {{ .CommandPath}} [ID] [command]{{end}}{{if gt .Aliases 0}}
+  {{ .CommandPath }} api [name] {{end}}{{if gt .Aliases 0}}
 Aliases:
   {{.NameAndAliases}}
 {{end}}{{if .HasExample}}
@@ -69,12 +77,8 @@ Use "{{.CommandPath}} [command] --help" for more information about a command.{{e
 }
 
 func init() {
-	if contains(os.Args, "test") && (contains(os.Args, "--help") || contains(os.Args, "-h")) {
-		RootCmd.AddCommand(testCmd)
-		testUsage(testCmd)
-		os.Exit(-1)
-	} else {
-		RootCmd.AddCommand(apiCmd)
-		apiCmd.AddCommand(testCmd)
+	if contains(os.Args, "--help") || contains(os.Args, "-h") {
+		createAPIUsage(createCmd)
 	}
+	RootCmd.AddCommand(createCmd)
 }

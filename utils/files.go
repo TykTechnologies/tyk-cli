@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,13 +15,11 @@ func ParseJSONFile(inputFile string) map[string]interface{} {
 	var fileObject interface{}
 	file, err := ioutil.ReadFile(HandleFilePath(inputFile))
 	if err != nil {
-		fmt.Printf("JSON file not found\n")
-		os.Exit(1)
+		log.Fatal("JSON file not found")
 	}
 	err = json.Unmarshal([]byte(file), &fileObject)
 	if err != nil {
-		fmt.Printf("File error: %v\n", err)
-		os.Exit(1)
+		log.Fatalf("File error: %v\n", err)
 	}
 	return fileObject.(map[string]interface{})
 }
@@ -32,4 +31,23 @@ func HandleFilePath(file string) string {
 	filtered := replacer.Replace(file)
 	abs, _ := filepath.Abs(filtered)
 	return abs
+}
+
+// MkdirPFile will create a file in a parent directory if file/directory
+// doesn't already exist
+func MkdirPFile(filePath string) {
+	if _, err := os.Stat(filePath); os.IsNotExist(err) && filePath != "" {
+		dir := filepath.Dir(filePath)
+		if len(dir) > 1 {
+			err = os.MkdirAll(dir, os.ModePerm)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+
+		_, err = os.Create(filePath)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 }

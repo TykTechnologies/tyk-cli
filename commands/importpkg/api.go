@@ -3,6 +3,7 @@ package importpkg
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/TykTechnologies/tyk-cli/request"
 	"github.com/TykTechnologies/tyk-cli/utils"
@@ -36,7 +37,7 @@ func postAPI(definition map[string]interface{}, path string, call *request.Reque
 	resp, err := call.Client.Do(req)
 	if err != nil {
 		fmt.Println(err)
-	} else {
-		request.OutputResponse(resp)
+		return
 	}
+	os.Stdout.Write(request.OutputResponse(resp))
 }

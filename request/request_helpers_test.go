@@ -39,20 +39,6 @@ func TestGenerateJSON(t *testing.T) {
 	}
 }
 
-func TestMapToJSON(t *testing.T) {
-	newMap := map[string]interface{}{"Status": "OK", "Message": "Hey"}
-	expectedResult := `{
-  "Status": "OK"
-  "Message": "Hey"
-}`
-	result := MapToJSON(newMap)
-	if result != expectedResult {
-		t.Errorf(
-			"\nExpected: %v\nGot: %v",
-			expectedResult, result)
-	}
-}
-
 func TestCheckDomain(t *testing.T) {
 	expectedResult := "http://www.example.com"
 	result := checkDomain("http://www.example.com")
@@ -110,19 +96,20 @@ func TestOutputResponse(t *testing.T) {
 		t.Fatalf("Got error: %v", err)
 	}
 	expectedResponse := `{
-	    "origin": "5.153.234.114"
-	  }`
+  "origin": "5.153.234.114"
+}
+`
 	recorder := httptest.NewRecorder()
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(expectedResponse))
 	})
 	handler.ServeHTTP(recorder, req)
-	OutputResponse(recorder.Result())
-	if recorder.Body.String() != expectedResponse {
+	result := string(OutputResponse(recorder.Result()))
+	if result != expectedResponse {
 		t.Errorf(
-			"Handler returned unexpected response.\nGot:\n\t%v\nExpected:\n\t%v",
-			recorder.Body.String(),
+			"Handler returned unexpected response.\nGot:\n%v\nExpected:\n%v",
+			result,
 			expectedResponse,
 		)
 	}

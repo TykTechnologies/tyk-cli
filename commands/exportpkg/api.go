@@ -2,6 +2,7 @@ package exportpkg
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -25,15 +26,21 @@ func APIs(args []string) {
 		path := fmt.Sprintf("/api/apis/%s", args[0])
 		req, err = call.FullRequest("GET", path, nil)
 	}
-	utils.HandleError(err, true)
+	if err != nil {
+		log.Fatal(err)
+	}
 	resp, err := call.Client.Do(req)
-	utils.HandleError(err, false)
+	if err != nil {
+		log.Println(err)
+	}
 	if resp.StatusCode != 200 {
 		fmt.Println(resp.Status)
 		os.Exit(-1)
 	}
 	outputFile := args[4]
-	utils.HandleError(err, false)
+	if err != nil {
+		log.Println(err)
+	}
 	exportResponse(resp, outputFile)
 }
 

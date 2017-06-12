@@ -79,8 +79,12 @@ func OpenDB(filename string, permission os.FileMode, readOnly bool) (*bolt.DB, e
 // AddRecord function adds records to BoltDB
 func AddRecord(tx *bolt.Tx, r Record) error {
 	collection, err := tx.CreateBucketIfNotExists([]byte(r.BucketName()))
-	utils.HandleError(err, true)
+	if err != nil {
+		log.Fatal(err)
+	}
 	member, err := json.Marshal(r.RecordData())
-	utils.HandleError(err, true)
+	if err != nil {
+		log.Fatal(err)
+	}
 	return collection.Put([]byte(r.Id()), member)
 }

@@ -8,7 +8,6 @@ import (
 	v "github.com/gima/govalid/v1"
 
 	"github.com/TykTechnologies/tyk-cli/db"
-	"github.com/TykTechnologies/tyk-cli/utils"
 )
 
 // Validate is a public function for validating APIs
@@ -16,9 +15,13 @@ func Validate(id string) {
 	apis := New("validate")
 	bdb, err := db.OpenDB("bolt.db", 0666, true)
 	defer bdb.Close()
-	utils.HandleError(err, true)
+	if err != nil {
+		log.Fatal(err)
+	}
 	api, err := apis.Find(bdb, id)
-	utils.HandleError(err, true)
+	if err != nil {
+		log.Fatal(err)
+	}
 	intfAPI := api.(map[string]interface{})
 	isValidJSON(intfAPI)
 }

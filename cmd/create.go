@@ -10,7 +10,6 @@ import (
 
 	"github.com/TykTechnologies/tyk-cli/commands/api"
 	"github.com/TykTechnologies/tyk-cli/db"
-	"github.com/TykTechnologies/tyk-cli/utils"
 )
 
 var createCmd = &cobra.Command{
@@ -26,7 +25,9 @@ var createCmd = &cobra.Command{
 			if args[0] == "api" {
 				bdb, err := db.OpenDB("bolt.db", 0600, false)
 				defer bdb.Close()
-				utils.HandleError(err, true)
+				if err != nil {
+					log.Fatal(err)
+				}
 				name := args[1]
 				newAPI := api.New(name)
 				newAPI.Create(bdb)

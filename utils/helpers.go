@@ -3,7 +3,6 @@ package utils
 import (
 	"fmt"
 	"io"
-	"log"
 )
 
 // SingleOrListIntf function converts map[string]interface{} objects into an interface slice
@@ -20,16 +19,4 @@ func MapToIntfSlice(fileMap map[string]interface{}, key string) []interface{} {
 // Print a message to an io.Writer
 func PrintMessage(w io.Writer, message string) {
 	fmt.Fprintln(w, message)
-}
-
-// Handle Error function prints the error if it exists
-func HandleError(err error, exit bool) {
-	if err != nil {
-		switch exit {
-		case false:
-			log.Println(err)
-		case true:
-			log.Fatal(err)
-		}
-	}
 }

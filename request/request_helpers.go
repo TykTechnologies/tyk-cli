@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"regexp"
@@ -37,8 +38,12 @@ func OutputResponse(resp *http.Response) []byte {
 	defer resp.Body.Close()
 	var respBody map[string]interface{}
 	err := json.NewDecoder(resp.Body).Decode(&respBody)
-	utils.HandleError(err, false)
+	if err != nil {
+		log.Println(err)
+	}
 	output, err := json.MarshalIndent(respBody, "", "  ")
-	utils.HandleError(err, true)
+	if err != nil {
+		log.Fatal(err)
+	}
 	return append(output, []byte("\n")[0])
 }

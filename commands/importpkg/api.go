@@ -3,6 +3,7 @@ package importpkg
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/TykTechnologies/tyk-cli/request"
@@ -32,7 +33,9 @@ func generateAPIDef(apis []interface{}, call *request.Request) {
 
 func postAPI(definition map[string]interface{}, path string, call *request.Request) {
 	api, err := json.Marshal(definition)
-	utils.HandleError(err, false)
+	if err != nil {
+		log.Println(err)
+	}
 	req, err := call.FullRequest("POST", path, api)
 	resp, err := call.Client.Do(req)
 	if err != nil {

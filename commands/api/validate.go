@@ -14,10 +14,10 @@ import (
 func Validate(id string) {
 	apis := New("validate")
 	bdb, err := db.OpenDB("bolt.db", 0666, true)
-	defer bdb.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer bdb.Close()
 	api, err := apis.Find(bdb, id)
 	if err != nil {
 		log.Fatal(err)

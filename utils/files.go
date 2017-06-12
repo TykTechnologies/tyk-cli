@@ -12,16 +12,15 @@ import (
 
 // ParseJSONFile function converts the contents of a JSON file into a nested map
 func ParseJSONFile(inputFile string) map[string]interface{} {
-	var fileObject interface{}
+	var m map[string]interface{}
 	file, err := ioutil.ReadFile(HandleFilePath(inputFile))
 	if err != nil {
 		log.Fatal("JSON file not found")
 	}
-	err = json.Unmarshal([]byte(file), &fileObject)
-	if err != nil {
+	if err := json.Unmarshal(file, &m); err != nil {
 		log.Fatalf("File error: %v\n", err)
 	}
-	return fileObject.(map[string]interface{})
+	return m
 }
 
 // HandleFilePath function handles special characters in file paths

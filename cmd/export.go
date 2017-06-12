@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 
 	"github.com/TykTechnologies/tyk-cli/commands/exportpkg"
@@ -20,7 +18,6 @@ var exportCmd = &cobra.Command{
 			"api": exportpkg.APIs,
 		}
 		exportType[cmd.Parent().Name()](args)
-		fmt.Println("export called")
 	},
 }
 
@@ -32,5 +29,4 @@ func init() {
 	exportCmd.Flags().StringVarP(&domain, "domain", "d", "", "Domain name for your Dashboard")
 	exportCmd.Flags().StringVarP(&port, "port", "p", "", "Port number for your Dashboard")
 	exportCmd.Flags().StringVarP(&output, "output", "o", "", "Output file name for your JSON string")
-
 }

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/TykTechnologies/tyk-cli/utils"
 )
 
 // Request struct used to set parameters for a HTTP request object

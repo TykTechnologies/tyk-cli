@@ -24,10 +24,10 @@ var createCmd = &cobra.Command{
 		case 2:
 			if args[0] == "api" {
 				bdb, err := db.OpenDB("bolt.db", 0600, false)
-				defer bdb.Close()
 				if err != nil {
 					log.Fatal(err)
 				}
+				defer bdb.Close()
 				name := args[1]
 				newAPI := api.New(name)
 				newAPI.Create(bdb)

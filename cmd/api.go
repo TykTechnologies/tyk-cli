@@ -37,7 +37,7 @@ var apiCmd = &cobra.Command{
 }
 
 func apiUsage(cmd *cobra.Command, isSubCmd bool) {
-	if isSubCmd != false {
+	if isSubCmd {
 		cmd.ResetCommands()
 	}
 	cobra.AddTemplateFuncs(template.FuncMap{

@@ -45,5 +45,5 @@ func OutputResponse(resp *http.Response) []byte {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return append(output, []byte("\n")[0])
+	return append(output, '\n')
 }

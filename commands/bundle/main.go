@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 
@@ -82,8 +81,7 @@ func BundleValidateManifest(manifest *apidef.BundleManifest) (err error) {
 	}
 
 	// The custom middleware block must specify at least one hook:
-	var definedHooks int
-	definedHooks = len(manifest.CustomMiddleware.Pre) + len(manifest.CustomMiddleware.Post) + len(manifest.CustomMiddleware.PostKeyAuth)
+	definedHooks := len(manifest.CustomMiddleware.Pre) + len(manifest.CustomMiddleware.Post) + len(manifest.CustomMiddleware.PostKeyAuth)
 
 	// We should count the auth check middleware (single), if it's present:
 	if manifest.CustomMiddleware.AuthCheck.Name != "" {
@@ -121,9 +119,7 @@ func bundleBuild(manifest *apidef.BundleManifest) (err error) {
 	var bundleData bytes.Buffer
 
 	for _, file := range manifest.FileList {
-		var data []byte
-		data, err = ioutil.ReadFile(file)
-
+		data, err := ioutil.ReadFile(file)
 		if err != nil {
 			fmt.Println("*** Error: ", err)
 			return err
@@ -137,64 +133,53 @@ func bundleBuild(manifest *apidef.BundleManifest) (err error) {
 
 	// If a private key is specified, sign the data:
 	if useSignature {
-		var signer goverify.Signer
-		signer, err = goverify.LoadPrivateKeyFromFile(privKey)
-
+		signer, err := goverify.LoadPrivateKeyFromFile(privKey)
 		if err != nil {
 			// Error: Couldn't read the private key
 			return err
 		}
-		var signed []byte
-		signed, err = signer.Sign(bundleData.Bytes())
-
+		signed, err := signer.Sign(bundleData.Bytes())
 		if err != nil {
 			// Error: Couldn't sign the data.
 			return err
 		}
 
 		manifest.Signature = base64.StdEncoding.EncodeToString(signed)
-	} else {
-		if *forceInsecure == false {
-			fmt.Print("The bundle will be unsigned, type \"y\" to confirm: ")
-			reader := bufio.NewReader(os.Stdin)
-			text, _ := reader.ReadString('\n')
-			if text != "y\n" {
-				fmt.Println("Aborting")
-				os.Exit(1)
-			}
+	} else if !*forceInsecure {
+		fmt.Print("The bundle will be unsigned, type \"y\" to confirm: ")
+		reader := bufio.NewReader(os.Stdin)
+		text, _ := reader.ReadString('\n')
+		if text != "y\n" {
+			fmt.Println("Aborting")
+			os.Exit(1)
 		}
 	}
 
-	var newManifestData []byte
-	newManifestData, err = json.Marshal(&manifest)
+	newManifestData, err := json.Marshal(&manifest)
 
 	// Write the bundle file:
 	buf := new(bytes.Buffer)
 	bundleWriter := zip.NewWriter(buf)
 
 	for _, file := range manifest.FileList {
-		var outputFile io.Writer
-		outputFile, err = bundleWriter.Create(file)
+		outputFile, err := bundleWriter.Create(file)
 		if err != nil {
 			return err
 		}
-		var data []byte
-		data, err = ioutil.ReadFile(file)
-
-		_, err = outputFile.Write(data)
-
+		data, err := ioutil.ReadFile(file)
 		if err != nil {
+			return err
+		}
+
+		if _, err = outputFile.Write(data); err != nil {
 			return err
 		}
 	}
 
 	// Write manifest file:
-	var newManifest io.Writer
-	newManifest, err = bundleWriter.Create("manifest.json")
+	newManifest, err := bundleWriter.Create("manifest.json")
 	_, err = newManifest.Write(newManifestData)
 
-	err = bundleWriter.Close()
-	err = ioutil.WriteFile(bundleOutput, buf.Bytes(), 0755)
-
-	return err
+	bundleWriter.Close()
+	return ioutil.WriteFile(bundleOutput, buf.Bytes(), 0755)
 }

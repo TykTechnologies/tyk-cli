@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"os/exec"
+	"strings"
 	"testing"
 
 	"github.com/TykTechnologies/tyk-cli/utils"
@@ -41,15 +42,15 @@ func TestGenerateJSON(t *testing.T) {
 
 func TestMapToJSON(t *testing.T) {
 	newMap := map[string]interface{}{"Status": "OK", "Message": "Hey"}
-	expectedResult := `{
-  "Status": "OK"
-  "Message": "Hey"
-}`
 	result := MapToJSON(newMap)
-	if result != expectedResult {
-		t.Errorf(
-			"\nExpected: %v\nGot: %v",
-			expectedResult, result)
+	for _, s := range []string{`"Message": "Hey"`, `"Status": "OK"`} {
+		if !strings.Contains(result, s) {
+			t.Errorf(
+				"\nExpected result to contain: %v\nGot: %v",
+				s, result,
+			)
+		}
+
 	}
 }
 

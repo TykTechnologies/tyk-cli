@@ -20,3 +20,13 @@ func MapToIntfSlice(fileMap map[string]interface{}, key string) []interface{} {
 func PrintMessage(w io.Writer, message string) {
 	fmt.Fprintln(w, message)
 }
+
+// Check if a string slice contains a string
+func Contains(arr []string, s string) bool {
+	for _, i := range arr {
+		if i == s {
+			return true
+		}
+	}
+	return false
+}

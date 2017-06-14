@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/TykTechnologies/tyk-cli/cmd/usage"
 	"github.com/TykTechnologies/tyk-cli/commands/importpkg"
 )
 
@@ -28,4 +29,5 @@ func init() {
 	importCmd.Flags().StringVarP(&domain, "domain", "d", "", "Domain name for your Dashboard")
 	importCmd.Flags().StringVarP(&port, "port", "p", "", "Port number for your Dashboard")
 	importCmd.Flags().StringVarP(&input, "input", "i", "", "Input file name for your JSON string")
+	usage.Import(importCmd)
 }

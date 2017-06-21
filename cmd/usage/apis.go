@@ -7,17 +7,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func Remote(cmd *cobra.Command) {
-	usageFunc(cmd, remoteTemplate)
-	if utils.Contains(os.Args, cmd.Name()) && utils.Contains(os.Args, "help") && !utils.Contains(os.Args, "apis") {
+func APIs(cmd *cobra.Command) {
+	usageFunc(cmd, apisTemplate)
+	if utils.Contains(os.Args, "help") && utils.Contains(os.Args, "apis") {
 		cmd.Help()
-		//Added to prevent duplicate help messages
-		os.Exit(-1)
+		return
 	}
 }
 
-var remoteTemplate string = `Usage:{{if .Runnable}}
-  {{ .CommandPath}} [command]{{end}}{{if gt .Aliases 0}}
+var apisTemplate string = `Usage:{{if .Runnable}}
+  tyk-cli remote [alias] apis [command] {{end}}{{if gt .Aliases 0}}
 
 Aliases:
   {{.NameAndAliases}}
@@ -26,15 +25,17 @@ Aliases:
 Examples:
 {{ .Example }}{{end}}{{if .HasAvailableSubCommands}}
 
-Available Subcommands:{{range .Commands}}{{if (or .IsAvailableCommand (eq .Name "help"))}}{{ if (eq .Name "apis") }}
-  [alias] {{rpad .Name .NamePadding }} {{.Short}}{{ else }}
-  {{rpad .Name (add .NamePadding 7) }} {{.Short}}{{end}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}
+Available Subcommands:{{range .Commands}}{{if (or .IsAvailableCommand (eq .Name "help"))}}{{ if (eq .Name "test") }}
+  [ID] {{rpad .Name .NamePadding }} {{.Short}}{{ else }}
+  {{rpad .Name (add .NamePadding 5) }} {{.Short}}{{end}}{{end}}{{end}}
+  {{ end }}{{if .HasAvailableLocalFlags}}
 
 Flags:
 {{.LocalFlags.FlagUsages | trimRightSpace}}{{end}}{{if .HasAvailableInheritedFlags}}
 
 Global Flags:
 {{.InheritedFlags.FlagUsages | trimRightSpace}}{{end}}{{if .HasHelpSubCommands}}
+
 Additional help topics:{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
   {{rpad .CommandPath .CommandPathPadding}} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
 

@@ -37,6 +37,10 @@ func postAPI(definition map[string]interface{}, path string, call *request.Reque
 		log.Println(err)
 	}
 	req, err := call.FullRequest("POST", path, api)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	resp, err := call.Client.Do(req)
 	if err != nil {
 		fmt.Println(err)

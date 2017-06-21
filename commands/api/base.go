@@ -62,6 +62,15 @@ func (api *APIDef) RecordData() interface{} {
 	return rec{api.APIModel, api.APIDefinition}
 }
 
+func (api *APIDef) define(rawDef map[string]interface{}) {
+	b, err := json.Marshal(rawDef)
+	if err != nil {
+		log.Fatal(err)
+	}
+	def, _ := parseDefinition(b)
+	api.APIDefinition = *def
+}
+
 // Create is a public function for creating staged APIs
 func (api *APIDef) Create(bdb *bolt.DB) error {
 	return bdb.Update(func(tx *bolt.Tx) error {
@@ -82,14 +91,41 @@ func Find(bdb *bolt.DB, id string) (APIDef, error) {
 		if member == nil {
 			return fmt.Errorf("API not found")
 		}
-		loader := APIDefinitionLoader{}
-		_, m := loader.ParseDefinition([]byte(member))
-		b, _ := json.Marshal(m["api_definition"])
-		def, _ := loader.ParseDefinition(b)
-		api.APIDefinition = *def
+		_, m := parseDefinition([]byte(member))
+		api.define(m["api_definition"].(map[string]interface{}))
 		return nil
 	})
 	return api, err
+}
+
+// FindByOrgID is a function for listing all APIs in a given organisation
+func FindByOrgID(bdb *bolt.DB, orgID string) ([]APIDef, error) {
+	var list []APIDef
+	err := bdb.View(func(tx *bolt.Tx) error {
+		var api APIDef
+		c := tx.Bucket([]byte("apis"))
+		c.ForEach(func(k, v []byte) error {
+			var rawDef map[string]interface{}
+			err := json.Unmarshal(v, &rawDef)
+			if err != nil {
+				log.Fatal(err)
+			}
+			switch orgID {
+			case "":
+				api.define(rawDef["api_definition"].(map[string]interface{}))
+				list = append(list, api)
+
+			default:
+				if rawDef["api_definition"].(map[string]interface{})["org_id"].(string) == orgID {
+					api.define(rawDef["api_definition"].(map[string]interface{}))
+					list = append(list, api)
+				}
+			}
+			return nil
+		})
+		return nil
+	})
+	return list, err
 }
 
 // Edit is a public function for editing staged APIs
@@ -134,13 +170,7 @@ func (api *APIDef) attributes(params map[string]interface{}) {
 		}
 	}
 	id := api.APIDefinition.APIID
-	loader := APIDefinitionLoader{}
-	b, err := json.Marshal(params)
-	if err != nil {
-		log.Fatal(err)
-	}
-	def, _ := loader.ParseDefinition(b)
-	api.APIDefinition = *def
+	api.define(params)
 	if params["names"] != nil {
 		api.name = params["name"].(string)
 	} else {
@@ -157,10 +187,7 @@ func (api *APIDef) Delete(bdb *bolt.DB) error {
 	})
 }
 
-// TODO - taken from the Main Tyk package
-type APIDefinitionLoader struct{}
-
-func (a *APIDefinitionLoader) ParseDefinition(apiDef []byte) (*apidef.APIDefinition, map[string]interface{}) {
+func parseDefinition(apiDef []byte) (*apidef.APIDefinition, map[string]interface{}) {
 	appConfig := &apidef.APIDefinition{}
 	if err := json.Unmarshal(apiDef, appConfig); err != nil {
 		log.Fatal("[RPC] --> Couldn't unmarshal api configuration: ", err)

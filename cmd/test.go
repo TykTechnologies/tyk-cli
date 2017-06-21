@@ -24,5 +24,5 @@ of an API.`,
 
 func init() {
 	apiCmd.AddCommand(testCmd)
-	usage.Test(testCmd)
+	usage.TestUsage(testCmd)
 }

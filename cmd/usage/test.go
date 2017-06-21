@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func Test(cmd *cobra.Command) {
+func TestUsage(cmd *cobra.Command) {
 	cmd.ResetCommands()
 	usageFunc(cmd, testTemplate)
 	if utils.Contains(os.Args, cmd.Name()) && utils.Contains(os.Args, "help") {

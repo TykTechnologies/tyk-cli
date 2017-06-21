@@ -1,16 +1,24 @@
 package usage
 
 import (
+	"os"
+
+	"github.com/TykTechnologies/tyk-cli/utils"
 	"github.com/spf13/cobra"
 )
 
-func API(cmd *cobra.Command) {
+func Edit(cmd *cobra.Command) {
 	cmd.ResetCommands()
-	usageFunc(cmd, apiTemplate)
+	usageFunc(cmd, editTemplate)
+	if utils.Contains(os.Args, cmd.Name()) && utils.Contains(os.Args, "help") {
+		cmd.Help()
+		//Added to prevent duplicate help messages
+		os.Exit(-1)
+	}
 }
 
-var apiTemplate string = `Usage:{{if .Runnable}}
-  {{ .CommandPath}} [ID] [command]{{end}}{{if gt .Aliases 0}}
+var editTemplate string = `Usage:{{if .Runnable}}
+tyk-cli api [ID] edit '{"api_attributes": "value"}' {{end}}{{if gt .Aliases 0}}
 
 Aliases:
   {{.NameAndAliases}}
@@ -20,14 +28,16 @@ Examples:
 {{ .Example }}{{end}}{{if .HasAvailableSubCommands}}
 
 Available Subcommands:{{range .Commands}}{{if (or .IsAvailableCommand (eq .Name "help"))}}{{ if (eq .Name "test") }}
-  [ID] {{rpad .Name (add .NamePadding 12) }} {{.Short}}{{ else if (eq .Name "edit") }}
-  [ID] {{ .Name  }} '{"key": "value"}' {{.Short}}{{ else }}
-  {{rpad .Name (add .NamePadding 17) }} {{.Short}}{{end}}{{end}}{{end}}{{ end }}{{if .HasAvailableLocalFlags}}
+  [ID] {{rpad .Name .NamePadding }} {{.Short}}{{ else }}
+  {{rpad .Name (add .NamePadding 5) }} {{.Short}}{{end}}{{end}}{{end}}
+  {{ end }}{{if .HasAvailableLocalFlags}}
 
 Flags:
 {{.LocalFlags.FlagUsages | trimRightSpace}}{{end}}{{if .HasAvailableInheritedFlags}}
+
 Global Flags:
 {{.InheritedFlags.FlagUsages | trimRightSpace}}{{end}}{{if .HasHelpSubCommands}}
+
 Additional help topics:{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
   {{rpad .CommandPath .CommandPathPadding}} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
 

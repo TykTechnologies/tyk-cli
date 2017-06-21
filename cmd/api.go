@@ -31,15 +31,22 @@ var apiCmd = &cobra.Command{
 			}
 			return
 		}
-		subCmd := args[1]
+		subCmd := args[1:]
 		apiSubCmds(apiID, subCmd)
 	},
 }
 
-func apiSubCmds(apiID, subCmd string) {
-	switch subCmd {
+func apiSubCmds(apiID string, subCmd []string) {
+	switch subCmd[0] {
 	case "test":
 		testCmd.Run(testCmd, []string{apiID})
+	case "edit":
+		if len(subCmd) > 1 {
+			editCmd.Run(editCmd, []string{apiID, subCmd[1]})
+			return
+		}
+		usage.Edit(editCmd)
+		editCmd.Usage()
 	default:
 		fmt.Printf("unknown api subcommand: %s\n", subCmd)
 	}

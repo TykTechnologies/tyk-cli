@@ -24,7 +24,7 @@ type Record interface {
 	Group() string
 	RecordData() interface{}
 	Create(bdb *bolt.DB) error
-	Find(bdb *bolt.DB, id string) (interface{}, error)
+	Edit(bdb *bolt.DB, params map[string]interface{}) error
 }
 
 func (item *Item) Id() string {
@@ -52,10 +52,16 @@ func (item *Item) Create(bdb *bolt.DB) error {
 	return nil
 }
 
-// Find is a public function for finding staged APIs
-func (item *Item) Find(bdb *bolt.DB, id string) (interface{}, error) {
+// Find is a public function for finding database objects
+func Find(bdb *bolt.DB, id string) (interface{}, error) {
 	log.Fatal("Please implement me")
 	return nil, nil
+}
+
+// Edit is a public function for editing database objects
+func (item *Item) Edit(bdb *bolt.DB, params map[string]interface{}) error {
+	log.Fatal("Please implement me")
+	return nil
 }
 
 // OpenDB is a public function used to open the Database
@@ -77,11 +83,7 @@ func OpenDB(filename string, permission os.FileMode, readOnly bool) (*bolt.DB, e
 }
 
 // AddRecord function adds records to BoltDB
-func AddRecord(tx *bolt.Tx, r Record) error {
-	collection, err := tx.CreateBucketIfNotExists([]byte(r.BucketName()))
-	if err != nil {
-		log.Fatal(err)
-	}
+func AddRecord(collection *bolt.Bucket, r Record) error {
 	member, err := json.Marshal(r.RecordData())
 	if err != nil {
 		log.Fatal(err)

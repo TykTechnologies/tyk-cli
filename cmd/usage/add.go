@@ -8,17 +8,18 @@ import (
 	"github.com/TykTechnologies/tyk-cli/utils"
 )
 
-func Remote(cmd *cobra.Command) {
-	usageFunc(cmd, remoteTemplate)
-	if utils.Contains(os.Args, cmd.Name()) && utils.Contains(os.Args, "help") && !utils.Contains(os.Args, "apis") {
+func Add(cmd *cobra.Command) {
+	cmd.ResetCommands()
+	usageFunc(cmd, addTemplate)
+	if utils.Contains(os.Args, cmd.Name()) && utils.Contains(os.Args, "help") {
 		cmd.Help()
 		//Added to prevent duplicate help messages
 		os.Exit(-1)
 	}
 }
 
-var remoteTemplate string = `Usage:{{if .Runnable}}
-  {{ .CommandPath}} [command]{{end}}{{if gt .Aliases 0}}
+var addTemplate string = `Usage:{{if .Runnable}}
+  tyk-cli remote add {alias} {url} [{type}] {{end}}{{if gt .Aliases 0}}
 
 Aliases:
   {{.NameAndAliases}}
@@ -27,15 +28,16 @@ Aliases:
 Examples:
 {{ .Example }}{{end}}{{if .HasAvailableSubCommands}}
 
-Available Subcommands:{{range .Commands}}{{if (or .IsAvailableCommand (eq .Name "help"))}}{{ if (eq .Name "apis") }}
-  [alias] {{rpad .Name .NamePadding }} {{.Short}}{{ else }}
-  {{rpad .Name (add .NamePadding 8) }} {{.Short}}{{end}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}
+Available Subcommands:{{range .Commands}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
+{{rpad .Name (add .NamePadding 5) }} {{.Short}}{{end}}{{end}}
+  {{ end }}{{if .HasAvailableLocalFlags}}
 
 Flags:
 {{.LocalFlags.FlagUsages | trimRightSpace}}{{end}}{{if .HasAvailableInheritedFlags}}
 
 Global Flags:
 {{.InheritedFlags.FlagUsages | trimRightSpace}}{{end}}{{if .HasHelpSubCommands}}
+
 Additional help topics:{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
   {{rpad .CommandPath .CommandPathPadding}} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
 

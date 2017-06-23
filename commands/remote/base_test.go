@@ -30,7 +30,7 @@ func TestList(t *testing.T) {
 	result := buf.String()
 	expectedResult := "default\ncatChannel\n"
 	if result != expectedResult {
-		t.Fatalf("Error - expected %v, got %v", expectedResult, result)
+		t.Fatalf("Error - expected %s, got %s", expectedResult, result)
 	}
 }
 
@@ -40,6 +40,6 @@ func TestListVerbose(t *testing.T) {
 	result := buf.String()
 	expectedResult := "Dashboard   default         http://localhost:3000\nGateway     catChannel      http://localhost:8080\n"
 	if result != expectedResult {
-		t.Fatalf("Error - expected:\n%v, got:\n%v", expectedResult, result)
+		t.Fatalf("Error - expected:\n%s, got:\n%s", expectedResult, result)
 	}
 }

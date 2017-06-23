@@ -25,18 +25,33 @@ var remoteCmd = &cobra.Command{
 			fmt.Printf("unknown remote subcommand: %s\n", args[0])
 			cmd.Usage()
 		default:
-			remSubCmds(cmd, args)
+			if utils.Contains([]string{"add", "remove", "rm"}, args[0]) {
+				remSubCmds(cmd, args)
+				return
+			}
+			aliasSubCmds(cmd, args)
 		}
 	},
 }
 
 func remSubCmds(cmd *cobra.Command, args []string) {
+	subCmd := args[0]
+	switch subCmd {
+	case "add":
+		addCmd.Run(addCmd, args[1:])
+	default:
+		fmt.Printf("unknown remote subcommand: %s\n", args[0])
+		cmd.Usage()
+	}
+}
+
+func aliasSubCmds(cmd *cobra.Command, args []string) {
 	alias := args[0]
 	subCmd := args[1]
 	switch subCmd {
 	case "apis":
 		apis := append([]string{alias}, args[2:]...)
-		apisCmd.Run(testCmd, apis)
+		apisCmd.Run(apisCmd, apis)
 	default:
 		fmt.Printf("unknown remote subcommand: %s\n", args[0])
 		cmd.Usage()

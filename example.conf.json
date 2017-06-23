@@ -1,20 +1,21 @@
 {
+  "admin-auth": "12345",
   "remotes": [
     {
       "alias": "default",
-      "type": "Dashboard",
-      "url": "http://localhost:3000",
-      "organisation_name": "Default Org",
+      "auth_token": "1234567890abcdef",
       "org_id": "12345678901234567890",
-      "auth_token": "1234567890abcdef"
+      "organisation_name": "Default Org",
+      "type": "Dashboard",
+      "url": "http://localhost:3000"
     },
     {
       "alias": "second",
-      "type": "Gateway",
-      "url": "http://localhost:8080",
-      "organisation_name": "Default",
+      "auth_token": "1234567890abcdef1",
       "org_id": "123456789012345678901",
-      "auth_token": "1234567890abcdef1"
+      "organisation_name": "Default",
+      "type": "Gateway",
+      "url": "http://localhost:8080"
     }
   ]
 }

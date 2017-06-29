@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 
@@ -16,19 +15,25 @@ import (
 	"github.com/TykTechnologies/tyk-cli/utils"
 )
 
-func Add(fileName string, args []string) error {
+func Add(fileName string, args []string, push bool) error {
 	conf := utils.ParseJSONFile(fileName)
 	remotes := conf["remotes"].([]interface{})
-	adminAuth := conf["admin-auth"].(string)
 	alias := args[0]
-	uri := args[1]
 	remType := "Dashboard"
+	uri := returnIfPush(push, args[1])
+	adminAuth := returnIfPush(push, conf["admin-auth"].(string))
+	var orgID string
+	var err error
+	if push {
+		orgID, err = createOrg(uri, adminAuth, alias)
+	} else {
+		orgID = "Default Org."
+	}
+	if err != nil {
+		return err
+	}
 	if len(args) == 3 {
 		remType = args[2]
-	}
-	orgID, err := createOrg(uri, adminAuth, alias)
-	if err != nil {
-		log.Fatal(err)
 	}
 	remote := map[string]interface{}{
 		"alias":             alias,
@@ -51,10 +56,10 @@ func Add(fileName string, args []string) error {
 	return nil
 }
 
-func createOrg(uri, adminAuth, owner string) (interface{}, error) {
+func createOrg(uri, adminAuth, owner string) (string, error) {
 	u, err := url.ParseRequestURI(uri)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	host := fmt.Sprintf("%v://%s", u.Scheme, u.Hostname())
 	call := request.New(adminAuth, host, u.Port())
@@ -65,28 +70,96 @@ func createOrg(uri, adminAuth, owner string) (interface{}, error) {
 	}
 	payload, err := json.Marshal(newOrg)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	req, err := http.NewRequest("POST", fmt.Sprintf("%v/admin/organisations/", uri), bytes.NewBuffer(payload))
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("admin-auth", adminAuth)
 	resp, err := call.Client.Do(req)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	var respBody map[string]interface{}
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	err = json.Unmarshal(b, &respBody)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	return respBody["Meta"], nil
+	return respBody["Meta"].(string), nil
+}
+
+func returnIfPush(push bool, value string) string {
+	if push {
+		return value
+	}
+	return ""
+}
+
+func Remove(fileName string, args []string, force bool) error {
+	conf := utils.ParseJSONFile(fileName)
+	remotes := conf["remotes"].([]interface{})
+	alias := args[0]
+	for _, v := range remotes {
+		if v.(map[string]interface{})["alias"].(string) == alias {
+			if force {
+				adminAuth := conf["admin-auth"].(string)
+				orgID := v.(map[string]interface{})["org_id"].(string)
+				uri := v.(map[string]interface{})["url"].(string)
+				err := deleteOrg(uri, adminAuth, orgID)
+				if err != nil {
+					return err
+				}
+				fmt.Printf("Deleted organisation %v\n", alias)
+			}
+			remotes[len(remotes)-1], v = v, remotes[len(remotes)-1]
+			remotes = remotes[:len(remotes)-1]
+		}
+	}
+	conf["remotes"] = remotes
+	newConf, err := json.MarshalIndent(conf, "", "  ")
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile(fileName, newConf, 0644)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func deleteOrg(uri, adminAuth, orgID string) error {
+	u, err := url.ParseRequestURI(uri)
+	if err != nil {
+		return err
+	}
+	host := fmt.Sprintf("%s://%s", u.Scheme, u.Hostname())
+	call := request.New(adminAuth, host, u.Port())
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/admin/organisations/%s", uri, orgID), nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("admin-auth", adminAuth)
+	resp, err := call.Client.Do(req)
+	if err != nil {
+		return err
+	}
+	var respBody map[string]interface{}
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(b, &respBody)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func List(w io.Writer, conf []interface{}, verbose bool) {

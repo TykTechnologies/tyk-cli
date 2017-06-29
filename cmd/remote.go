@@ -39,6 +39,10 @@ func remSubCmds(cmd *cobra.Command, args []string) {
 	switch subCmd {
 	case "add":
 		addCmd.Run(addCmd, args[1:])
+	case "rm":
+		rmCmd.Run(rmCmd, args[1:])
+	case "remove":
+		rmCmd.Run(rmCmd, args[1:])
 	default:
 		fmt.Printf("unknown remote subcommand: %s\n", args[0])
 		cmd.Usage()

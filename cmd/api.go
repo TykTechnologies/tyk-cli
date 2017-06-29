@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/spf13/cobra"
+
 	"github.com/TykTechnologies/tyk-cli/cmd/usage"
 	"github.com/TykTechnologies/tyk-cli/utils"
-	"github.com/spf13/cobra"
 )
 
 var apiCmd = &cobra.Command{

@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/spf13/cobra"
+
 	"github.com/TykTechnologies/tyk-cli/cmd/usage"
 	"github.com/TykTechnologies/tyk-cli/commands/api"
 	"github.com/TykTechnologies/tyk-cli/db"
-	"github.com/spf13/cobra"
 )
 
 // editCmd represents the edit command

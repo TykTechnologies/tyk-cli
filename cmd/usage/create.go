@@ -3,8 +3,9 @@ package usage
 import (
 	"os"
 
-	"github.com/TykTechnologies/tyk-cli/utils"
 	"github.com/spf13/cobra"
+
+	"github.com/TykTechnologies/tyk-cli/utils"
 )
 
 func CreateAPI(cmd *cobra.Command) {

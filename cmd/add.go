@@ -1,9 +1,10 @@
 package cmd
 
 import (
+	"github.com/spf13/cobra"
+
 	"github.com/TykTechnologies/tyk-cli/cmd/usage"
 	"github.com/TykTechnologies/tyk-cli/commands/remote"
-	"github.com/spf13/cobra"
 )
 
 var push bool

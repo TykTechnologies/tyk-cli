@@ -53,22 +53,24 @@ func (api *APIDef) Group() string {
 	return "API"
 }
 
+type rec struct {
+	APIModel      APIModel             `json:"api_model"`
+	APIDefinition apidef.APIDefinition `json:"api_definition"`
+}
+
 func (api *APIDef) RecordData() interface{} {
 	api.SetAPIDefinition()
-	type rec struct {
-		APIModel      APIModel             `json:"api_model"`
-		APIDefinition apidef.APIDefinition `json:"api_definition"`
-	}
 	return rec{api.APIModel, api.APIDefinition}
 }
 
-func (api *APIDef) define(rawDef map[string]interface{}) {
+func (api *APIDef) define(rawDef map[string]interface{}) error {
 	b, err := json.Marshal(rawDef)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	def, _ := parseDefinition(b)
 	api.APIDefinition = *def
+	return nil
 }
 
 // Create is a public function for creating staged APIs
@@ -76,7 +78,7 @@ func (api *APIDef) Create(bdb *bolt.DB) error {
 	return bdb.Update(func(tx *bolt.Tx) error {
 		collection, err := tx.CreateBucketIfNotExists([]byte(api.BucketName()))
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		return db.AddRecord(collection, api)
 	})
@@ -92,10 +94,49 @@ func Find(bdb *bolt.DB, id string) (APIDef, error) {
 			return fmt.Errorf("API not found")
 		}
 		_, m := parseDefinition([]byte(member))
-		api.define(m["api_definition"].(map[string]interface{}))
+		err := api.define(m["api_definition"].(map[string]interface{}))
+		if err != nil {
+			return err
+		}
 		return nil
 	})
 	return api, err
+}
+
+// FindByName is a function for finding APIs with a specific name
+func FindByName(bdb *bolt.DB, name string) ([]APIDef, error) {
+	var list []APIDef
+	err := bdb.View(func(tx *bolt.Tx) error {
+		var api APIDef
+		c := tx.Bucket([]byte("apis"))
+		c.ForEach(func(k, v []byte) error {
+			var rawDef map[string]interface{}
+			err := json.Unmarshal(v, &rawDef)
+			if err != nil {
+				log.Fatal(err)
+			}
+			switch name {
+			case "":
+				err := api.define(rawDef["api_definition"].(map[string]interface{}))
+				if err != nil {
+					return err
+				}
+				list = append(list, api)
+
+			default:
+				if rawDef["api_definition"].(map[string]interface{})["name"].(string) == name {
+					err := api.define(rawDef["api_definition"].(map[string]interface{}))
+					if err != nil {
+						return err
+					}
+					list = append(list, api)
+				}
+			}
+			return nil
+		})
+		return nil
+	})
+	return list, err
 }
 
 // FindByOrgID is a function for listing all APIs in a given organisation
@@ -112,12 +153,18 @@ func FindByOrgID(bdb *bolt.DB, orgID string) ([]APIDef, error) {
 			}
 			switch orgID {
 			case "":
-				api.define(rawDef["api_definition"].(map[string]interface{}))
+				err := api.define(rawDef["api_definition"].(map[string]interface{}))
+				if err != nil {
+					return err
+				}
 				list = append(list, api)
 
 			default:
 				if rawDef["api_definition"].(map[string]interface{})["org_id"].(string) == orgID {
-					api.define(rawDef["api_definition"].(map[string]interface{}))
+					err := api.define(rawDef["api_definition"].(map[string]interface{}))
+					if err != nil {
+						return err
+					}
 					list = append(list, api)
 				}
 			}
@@ -134,19 +181,22 @@ func (api *APIDef) Edit(bdb *bolt.DB, params map[string]interface{}) error {
 	var apiInt interface{}
 	m, err := json.Marshal(api)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	err = json.Unmarshal(m, &apiInt)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	api.attributes(params)
+	err = api.attributes(params)
+	if err != nil {
+		return err
+	}
 	err = bdb.Update(func(tx *bolt.Tx) error {
 		collection := tx.Bucket([]byte(api.BucketName()))
 		return collection.Delete([]byte(id))
 	})
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	return bdb.Update(func(tx *bolt.Tx) error {
 		collection := tx.Bucket([]byte(api.BucketName()))
@@ -154,7 +204,7 @@ func (api *APIDef) Edit(bdb *bolt.DB, params map[string]interface{}) error {
 	})
 }
 
-func (api *APIDef) attributes(params map[string]interface{}) {
+func (api *APIDef) attributes(params map[string]interface{}) error {
 	var originalDef map[string]interface{}
 	m, err := json.Marshal(api.APIDefinition)
 	if err != nil {
@@ -170,13 +220,17 @@ func (api *APIDef) attributes(params map[string]interface{}) {
 		}
 	}
 	id := api.APIDefinition.APIID
-	api.define(params)
+	err = api.define(params)
+	if err != nil {
+		return err
+	}
 	if params["names"] != nil {
 		api.name = params["name"].(string)
 	} else {
 		api.name = api.APIDefinition.Name
 	}
 	api.id = id
+	return nil
 }
 
 // Delete is a public function for deleting staged API
@@ -184,6 +238,13 @@ func (api *APIDef) Delete(bdb *bolt.DB) error {
 	return bdb.Update(func(tx *bolt.Tx) error {
 		collection := tx.Bucket([]byte(api.BucketName()))
 		return collection.Delete([]byte(api.Id()))
+	})
+}
+
+// DeleteAll is a public function for deleting all staged APIs
+func DeleteAll(bdb *bolt.DB) error {
+	return bdb.Update(func(tx *bolt.Tx) error {
+		return tx.DeleteBucket([]byte("apis"))
 	})
 }
 

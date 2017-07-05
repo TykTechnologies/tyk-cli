@@ -20,8 +20,8 @@ func Add(fileName string, args []string, push bool) error {
 	remotes := conf["remotes"].([]interface{})
 	alias := args[0]
 	remType := "Dashboard"
-	uri := returnIfPush(push, args[1])
-	adminAuth := returnIfPush(push, conf["admin-auth"].(string))
+	uri := args[1]
+	adminAuth := ifTrueReturn(push, conf["admin-auth"].(string))
 	var orgID string
 	var err error
 	if push {
@@ -94,8 +94,8 @@ func createOrg(uri, adminAuth, owner string) (string, error) {
 	return respBody["Meta"].(string), nil
 }
 
-func returnIfPush(push bool, value string) string {
-	if push {
+func ifTrueReturn(t bool, value string) string {
+	if t {
 		return value
 	}
 	return ""

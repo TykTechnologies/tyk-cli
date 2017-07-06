@@ -68,8 +68,6 @@ func TestContains(t *testing.T) {
 		result := Contains(test.inputArr, test.inputS)
 		if result != test.output {
 			t.Fatalf(`Unexpected return value. Expected: "%v", got : "%v"`, test.output, result)
-
 		}
-
 	}
 }

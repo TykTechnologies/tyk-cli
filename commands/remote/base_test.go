@@ -2,8 +2,66 @@ package remote
 
 import (
 	"bytes"
+	"encoding/json"
+	"io/ioutil"
 	"testing"
+
+	"github.com/TykTechnologies/tyk-cli/utils"
 )
+
+func TestAdd(t *testing.T) {
+	fileName := "./test.conf.json"
+	newAlias := "cats"
+	err := wipeRemotes(fileName)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = Add(fileName, []string{newAlias, "http://tyk-docker.com:3000", "Dashboard"}, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	conf := utils.ParseJSONFile(fileName)
+	remotes := conf["remotes"].([]interface{})
+	var found map[string]interface{}
+	for _, i := range remotes {
+		remote := i.(map[string]interface{})
+		if i.(map[string]interface{})["alias"] == newAlias {
+			found = remote
+		}
+	}
+	if len(found) == 0 {
+		t.Fatal("Error: remote not created")
+	}
+}
+
+func TestRemove(t *testing.T) {
+	fileName := "./test.conf.json"
+	newAlias := "cats"
+	err := wipeRemotes(fileName)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = Add(fileName, []string{newAlias, "http://tyk-docker.com:3000", "Dashboard"}, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = Remove(fileName, []string{newAlias}, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	conf := utils.ParseJSONFile(fileName)
+	remotes := conf["remotes"].([]interface{})
+	var found map[string]interface{}
+	for _, i := range remotes {
+		remote := i.(map[string]interface{})
+		if i.(map[string]interface{})["alias"] == newAlias {
+			found = remote
+		}
+	}
+	if len(found) != 0 {
+		t.Fatal("Error: remote not removed")
+	}
+}
 
 var remotes []interface{} = []interface{}{
 	map[string]interface{}{
@@ -42,4 +100,51 @@ func TestListVerbose(t *testing.T) {
 	if result != expectedResult {
 		t.Fatalf("Error - expected:\n%s, got:\n%s", expectedResult, result)
 	}
+}
+
+/*
+ TODO - Failing test
+func TestListAPIs(t *testing.T) {
+	alias := remotes[0].(map[string]interface{})["alias"].(string)
+	orgID := remotes[0].(map[string]interface{})["org_id"].(string)
+	bdb, err := db.OpenDB("test.db", 0600, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer bdb.Close()
+	testAPI := api.New("Persia")
+	err = testAPI.Create(bdb)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = testAPI.Edit(bdb, map[string]interface{}{"org_id": orgID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var buf bytes.Buffer
+	ListAPIs(&buf, remotes, []string{alias})
+	result := buf.String()
+	expectedResult := fmt.Sprintf("Staged APIs listed under Org. ID %v:\n%v - %v", orgID, testAPI.Id(), testAPI.Name())
+	if result != expectedResult {
+		t.Fatalf("Error - expected:\n%s, got:\n%s", expectedResult, result)
+	}
+	err = api.DeleteAll(bdb)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+*/
+
+func wipeRemotes(fileName string) error {
+	conf := utils.ParseJSONFile(fileName)
+	conf["remotes"] = []interface{}{}
+	newConf, err := json.MarshalIndent(conf, "", "  ")
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile(fileName, newConf, 0644)
+	if err != nil {
+		return err
+	}
+	return nil
 }

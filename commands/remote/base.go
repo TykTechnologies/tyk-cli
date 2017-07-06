@@ -173,7 +173,7 @@ func List(w io.Writer, conf []interface{}, verbose bool) {
 	}
 }
 
-func ListApis(w io.Writer, conf []interface{}, args []string) error {
+func ListAPIs(w io.Writer, conf []interface{}, args []string) error {
 	alias := args[0]
 	var orgID string
 	for _, remote := range conf {

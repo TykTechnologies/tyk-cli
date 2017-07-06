@@ -17,7 +17,7 @@ var apisCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 0 {
 			conf := utils.ParseJSONFile("example.conf.json")["remotes"].([]interface{})
-			remote.ListApis(os.Stdout, conf, args)
+			remote.ListAPIs(os.Stdout, conf, args)
 			return
 		}
 		cmd.Usage()

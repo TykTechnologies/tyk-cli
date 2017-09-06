@@ -10,10 +10,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/TykTechnologies/goverify"
-	"github.com/TykTechnologies/tykcommon"
 	"io"
 	"io/ioutil"
 	"os"
+	"github.com/TykTechnologies/tyk/apidef"
 )
 
 var bundleOutput, privKey string
@@ -39,7 +39,7 @@ func Bundle(command string, thisBundleOutput string, thisPrivKey string, thisFor
 			var manifestData []byte
 			manifestData, err = ioutil.ReadFile(manifestPath)
 
-			var manifest tykcommon.BundleManifest
+			var manifest apidef.BundleManifest
 			err = json.Unmarshal(manifestData, &manifest)
 
 			if err != nil {
@@ -66,7 +66,7 @@ func Bundle(command string, thisBundleOutput string, thisPrivKey string, thisFor
 }
 
 // BundleValidateManifest will validate the manifest file before building a bundle.
-func BundleValidateManifest(manifest *tykcommon.BundleManifest) (err error) {
+func BundleValidateManifest(manifest *apidef.BundleManifest) (err error) {
 	// Validate manifest file list:
 	for _, file := range manifest.FileList {
 		if _, statErr := os.Stat(file); statErr != nil {
@@ -82,14 +82,14 @@ func BundleValidateManifest(manifest *tykcommon.BundleManifest) (err error) {
 
 	// The custom middleware block must specify at least one hook:
 	var definedHooks int
-	definedHooks = len(manifest.CustomMiddleware.Pre) + len(manifest.CustomMiddleware.Post) + len(manifest.CustomMiddleware.PostKeyAuth)
+	definedHooks = len(manifest.CustomMiddleware.Pre) + len(manifest.CustomMiddleware.Pre) + len(manifest.CustomMiddleware.Post) + len(manifest.CustomMiddleware.PostKeyAuth)
 
 	// We should count the auth check middleware (single), if it's present:
 	if manifest.CustomMiddleware.AuthCheck.Name != "" {
 		definedHooks++
 	}
 
-	if definedHooks == 0 {
+	if definedHooks == 0 && manifest.CustomMiddleware.Driver != apidef.GrpcProxyDriver {
 		err = errors.New("No hooks defined!")
 		return err
 	}
@@ -104,7 +104,7 @@ func BundleValidateManifest(manifest *tykcommon.BundleManifest) (err error) {
 }
 
 // bundleBuild will build and generate a bundle file.
-func bundleBuild(manifest *tykcommon.BundleManifest) (err error) {
+func bundleBuild(manifest *apidef.BundleManifest) (err error) {
 	var useSignature bool
 
 	if bundleOutput == "" {

@@ -31,7 +31,8 @@ func (api *APIDef) setAPIDefinition() {
 
 func New(name string) *APIDef {
 	api := APIDef{}
-	api.id = strings.Replace(uuid.NewV4().String(), "-", "", -1)
+	id, _ := uuid.NewV4()
+	api.id = strings.Replace(id.String(), "-", "", -1)
 	api.name = name
 	return &api
 }

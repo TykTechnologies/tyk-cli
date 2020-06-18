@@ -4,6 +4,9 @@ Tyk CLI utility.
 
 [![Build Status](https://travis-ci.org/TykTechnologies/tyk-cli.svg?branch=master)](https://travis-ci.org/TykTechnologies/tyk-cli)
 [![Coverage Status](https://coveralls.io/repos/github/TykTechnologies/tyk-cli/badge.svg?branch=master)](https://coveralls.io/github/TykTechnologies/tyk-cli?branch=master)
+
+**Note:** Starting on Tyk Gateway v2.8, the bundle command is included as part of the gateway binary so it's no longer required to install `tyk-cli` as a separate tool, see [here](https://tyk.io/docs/plugins/rich-plugins/plugin-bundles/#getting-the-bundler-tool) for more details.
+
 ## Install
 
 	go get -u github.com/TykTechnologies/tyk-cli

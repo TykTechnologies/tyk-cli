@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
@@ -12,13 +13,21 @@ import (
 
 // Validate is a public function for validating APIs
 func Validate(id string) {
-	apis := New("validate")
-	bdb, err := db.OpenDB("bolt.db", 0666, true)
+	bdb, err := db.OpenDB("bolt.db", 0444, true)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer bdb.Close()
-	api, err := apis.Find(bdb, id)
+	apiDef, err := Find(bdb, id)
+	if err != nil {
+		log.Fatal(err)
+	}
+	var api interface{}
+	m, err := json.Marshal(apiDef)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = json.Unmarshal(m, &api)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -26,7 +35,6 @@ func Validate(id string) {
 	isValidJSON(intfAPI)
 }
 
-//func isValidJSON(input io.Reader) bool {
 func isValidJSON(input map[string]interface{}) bool {
 	var isValid bool
 	schema := v.Object(

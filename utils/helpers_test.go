@@ -50,3 +50,24 @@ func TestPrintMessage(t *testing.T) {
 		t.Fatalf("Expected: %v, got: %v", expectedResult, result)
 	}
 }
+
+type ContainsTest struct {
+	inputArr []string
+	inputS   string
+	output   bool
+}
+
+func TestContains(t *testing.T) {
+	tests := []ContainsTest{
+		{[]string{"cat", "dog", "hamster", "rabbit"}, "cat", true},
+		{[]string{"cat", "dog", "hamster", "rabbit"}, "pony", false},
+		{[]string{}, "cat", false},
+	}
+
+	for _, test := range tests {
+		result := Contains(test.inputArr, test.inputS)
+		if result != test.output {
+			t.Fatalf(`Unexpected return value. Expected: "%v", got : "%v"`, test.output, result)
+		}
+	}
+}

@@ -1,3 +1,5 @@
+# DEPREACATED
+
 # tyk-cli
 
 Tyk CLI utility.

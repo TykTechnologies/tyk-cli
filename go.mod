@@ -11,9 +11,3 @@ require (
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.9.0
 )
-
-// replace (
-// 	// taken from the TykTechnologies/tyk modfile corresponding to https://github.com/TykTechnologies/tyk/releases/tag/v4.0.0-rc8
-// 	github.com/TykTechnologies/tyk => github.com/TykTechnologies/tyk v1.9.2-0.20211122145119-8d2475933c21
-// 	github.com/jensneuse/graphql-go-tools => github.com/TykTechnologies/graphql-go-tools v1.6.2-0.20211108163221-71ca10e362db
-// )

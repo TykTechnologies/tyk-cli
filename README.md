@@ -9,7 +9,7 @@ Tyk CLI utility.
 
 ## Install
 
-	go get -u github.com/TykTechnologies/tyk-cli
+	go install github.com/TykTechnologies/tyk-cli@latest
 
 ## Available modules
 

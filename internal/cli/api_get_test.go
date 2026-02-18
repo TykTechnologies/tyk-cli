@@ -58,7 +58,7 @@ func TestAPIGet_WithOASOnly_JSON(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "/api/apis/oas/test-api-id", r.URL.Path)
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(mockOAS)
+		_ = json.NewEncoder(w).Encode(mockOAS)
 	}))
 	defer server.Close()
 
@@ -110,7 +110,7 @@ func TestAPIGet_WithOASOnly_YAML(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "/api/apis/oas/test-api-id", r.URL.Path)
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(mockOAS)
+		_ = json.NewEncoder(w).Encode(mockOAS)
 	}))
 	defer server.Close()
 
@@ -169,7 +169,7 @@ func TestAPIGet_WithoutOASOnly_ShowsFullOutput(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "/api/apis/oas/test-api-id", r.URL.Path)
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(mockOAS)
+		_ = json.NewEncoder(w).Encode(mockOAS)
 	}))
 	defer server.Close()
 
@@ -222,7 +222,7 @@ func TestAPIGet_WithOASOnly_HumanOutput_ShowsNoSummary(t *testing.T) {
 	
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(mockOAS)
+		_ = json.NewEncoder(w).Encode(mockOAS)
 	}))
 	defer server.Close()
 
@@ -276,7 +276,7 @@ func TestAPIGet_WithoutOASOnly_HumanOutput_ShowsSummary(t *testing.T) {
 	
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(mockOAS)
+		_ = json.NewEncoder(w).Encode(mockOAS)
 	}))
 	defer server.Close()
 
@@ -331,7 +331,7 @@ func TestAPIGet_WithoutOASOnly_HumanOutput_ShowsSummary(t *testing.T) {
 func TestAPIGet_ErrorHandling(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("API not found"))
+		_, _ = w.Write([]byte("API not found"))
 	}))
 	defer server.Close()
 

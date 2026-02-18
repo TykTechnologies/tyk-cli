@@ -202,7 +202,7 @@ Examples:
 	}
 
 	cmd.Flags().StringP("file", "f", "", "Path to policy YAML file (use '-' for stdin) (required)")
-	cmd.MarkFlagRequired("file")
+	_ = cmd.MarkFlagRequired("file")
 
 	return cmd
 }
@@ -325,7 +325,7 @@ func runPolicyDelete(cmd *cobra.Command, args []string) error {
 	if !skipConfirmation {
 		fmt.Fprintf(os.Stderr, "Are you sure you want to delete policy '%s' (%s)? [y/N]: ", dp.Name, policyID)
 		var response string
-		fmt.Scanln(&response)
+		_, _ = fmt.Scanln(&response)
 		if strings.ToLower(response) != "y" && strings.ToLower(response) != "yes" {
 			fmt.Fprintf(os.Stderr, "Delete operation cancelled.\n")
 			return nil

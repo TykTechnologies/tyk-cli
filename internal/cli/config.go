@@ -97,9 +97,9 @@ Examples:
 	cmd.Flags().String("org-id", "", "Organization ID")
 	cmd.Flags().Bool("set-default", false, "Set this environment as the default")
 
-	cmd.MarkFlagRequired("dashboard-url")
-	cmd.MarkFlagRequired("auth-token")
-	cmd.MarkFlagRequired("org-id")
+	_ = cmd.MarkFlagRequired("dashboard-url")
+	_ = cmd.MarkFlagRequired("auth-token")
+	_ = cmd.MarkFlagRequired("org-id")
 
 	return cmd
 }

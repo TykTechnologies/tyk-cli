@@ -93,7 +93,7 @@ func TestClient_doRequest(t *testing.T) {
 			"path":   r.URL.Path,
 			"status": "success",
 		}
-		json.NewEncoder(w).Encode(response)
+		_ = json.NewEncoder(w).Encode(response)
 	}))
 	defer server.Close()
 
@@ -119,7 +119,7 @@ func TestClient_handleResponse(t *testing.T) {
 	t.Run("successful response", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			response := map[string]string{"status": "success", "message": "OK"}
-			json.NewEncoder(w).Encode(response)
+			_ = json.NewEncoder(w).Encode(response)
 		}))
 		defer server.Close()
 
@@ -140,7 +140,7 @@ func TestClient_handleResponse(t *testing.T) {
 				"status":  404,
 				"message": "API not found",
 			}
-			json.NewEncoder(w).Encode(response)
+			_ = json.NewEncoder(w).Encode(response)
 		}))
 		defer server.Close()
 
@@ -187,7 +187,7 @@ func TestClient_GetOASAPI(t *testing.T) {
 
 		// Return raw OAS document (as the Tyk Dashboard does)
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(mockOASDoc)
+		_ = json.NewEncoder(w).Encode(mockOASDoc)
 	}))
 	defer server.Close()
 
@@ -210,7 +210,7 @@ func TestClient_CreateOASAPI(t *testing.T) {
 		if r.Method == http.MethodPost && r.URL.Path == "/api/apis/oas" {
 			// Handle create request - return basic response with ID
 			response := types.APIResponse{Status: "success", ID: "new-api-id"}
-			json.NewEncoder(w).Encode(response)
+			_ = json.NewEncoder(w).Encode(response)
 		} else if r.Method == http.MethodGet && r.URL.Path == "/api/apis/oas/new-api-id" {
 			// Return raw OAS document similar to Dashboard
 			oasDoc := map[string]interface{}{
@@ -231,7 +231,7 @@ func TestClient_CreateOASAPI(t *testing.T) {
 					},
 				},
 			}
-			json.NewEncoder(w).Encode(oasDoc)
+			_ = json.NewEncoder(w).Encode(oasDoc)
 		} else {
 			http.NotFound(w, r)
 		}
@@ -270,7 +270,7 @@ func TestClient_ListOASAPIs(t *testing.T) {
 		assert.Equal(t, "/api/apis/oas", r.URL.Path)
 		// Ensure pagination param is passed when provided
 		assert.Equal(t, "2", r.URL.Query().Get("p"))
-		json.NewEncoder(w).Encode(types.OASAPIListResponse{
+		_ = json.NewEncoder(w).Encode(types.OASAPIListResponse{
 			APIResponse: types.APIResponse{Status: "success"},
 			APIs:        mockAPIs,
 		})
@@ -295,7 +295,7 @@ func TestClient_Health(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t, "/health", r.URL.Path)
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("OK"))
+			_, _ = w.Write([]byte("OK"))
 		}))
 		defer server.Close()
 
@@ -312,7 +312,7 @@ func TestClient_Health(t *testing.T) {
 	t.Run("unhealthy dashboard", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusServiceUnavailable)
-			w.Write([]byte("Service Unavailable"))
+			_, _ = w.Write([]byte("Service Unavailable"))
 		}))
 		defer server.Close()
 

@@ -8,35 +8,14 @@ import (
 	"os"
 	"testing"
 
-	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/require"
 	"github.com/tyktech/tyk-cli/pkg/types"
 )
 
-// Helper to prepare root with config context
-func prepareRootWithEnv(t *testing.T, dashURL string) *cobra.Command {
-	t.Helper()
-	root := NewRootCommand("test", "commit", "time")
-	// Find 'api list'
-	listCmd, _, err := root.Find([]string{"api", "list"})
-	require.NoError(t, err)
-
-	// Inject config into context
-	cfg := &types.Config{
-		DefaultEnvironment: "test",
-		Environments: map[string]*types.Environment{
-			"test": {Name: "test", DashboardURL: dashURL, AuthToken: "token", OrgID: "org"},
-		},
-	}
-	listCmd.SetContext(withConfig(context.Background(), cfg))
-	listCmd.SetContext(withOutputFormat(listCmd.Context(), types.OutputHuman))
-	return root
-}
-
 func TestAPIList_JSONOutput(t *testing.T) {
 	mockAPIs := []*types.OASAPI{{ID: "id1", Name: "Name1"}}
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		json.NewEncoder(w).Encode(types.OASAPIListResponse{APIs: mockAPIs})
+		_ = json.NewEncoder(w).Encode(types.OASAPIListResponse{APIs: mockAPIs})
 	}))
 	defer server.Close()
 
@@ -58,7 +37,7 @@ func TestAPIList_JSONOutput(t *testing.T) {
 
 func TestAPIList_HumanOutput_NoAPIs(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		json.NewEncoder(w).Encode(types.OASAPIListResponse{APIs: []*types.OASAPI{}})
+		_ = json.NewEncoder(w).Encode(types.OASAPIListResponse{APIs: []*types.OASAPI{}})
 	}))
 	defer server.Close()
 

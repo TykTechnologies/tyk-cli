@@ -82,7 +82,7 @@ func (m *Manager) LoadConfig() error {
 				AuthToken:    authToken,
 				OrgID:        orgID,
 			}
-			m.SaveEnvironment(env, true)
+			_ = m.SaveEnvironment(env, true)
 		}
 	}
 
@@ -125,7 +125,7 @@ func (m *Manager) SetFromFlags(dashURL, authToken, orgID string) {
 	
 	// If we had to create a temp environment, save it
 	if activeEnv.Name == "temp" {
-		m.SaveEnvironment(activeEnv, true)
+		_ = m.SaveEnvironment(activeEnv, true)
 	}
 }
 

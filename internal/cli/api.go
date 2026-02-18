@@ -36,13 +36,6 @@ func truncateWithEllipsis(s string, max int) string {
     return s[:max-3] + "..."
 }
 
-func min(a, b int) int {
-    if a < b {
-        return a
-    }
-    return b
-}
-
 // computeTableLayout returns column widths for ID/Name/Path and whether to use a stacked fallback.
 func computeTableLayout(termWidth int) (idW, nameW, pathW int, stacked bool) {
     if termWidth < 20 {
@@ -254,8 +247,8 @@ After creation, you can:
 	cmd.Flags().String("custom-domain", "", "Custom domain for the API")
 	cmd.Flags().String("description", "", "API description")
 
-	cmd.MarkFlagRequired("name")
-	cmd.MarkFlagRequired("upstream-url")
+	_ = cmd.MarkFlagRequired("name")
+	_ = cmd.MarkFlagRequired("upstream-url")
 
 	return cmd
 }
@@ -328,7 +321,7 @@ Examples:
     cmd.Flags().String("version-name", "", "Version name (defaults to info.version or v1)")
     cmd.Flags().Bool("set-default", true, "Set this version as the default")
 
-	cmd.MarkFlagRequired("file")
+	_ = cmd.MarkFlagRequired("file")
 
 	return cmd
 }
@@ -544,7 +537,7 @@ func runInteractiveAPIList(c *client.Client, startPage int) error {
         return fmt.Errorf("failed to enable raw terminal mode: %w", err)
     }
     defer func() {
-        term.Restore(int(os.Stdin.Fd()), oldState)
+        _ = term.Restore(int(os.Stdin.Fd()), oldState)
         showCursor(os.Stderr)
     }()
 
@@ -908,24 +901,6 @@ func stripExistingAPIID(oasData map[string]interface{}) map[string]interface{} {
 	return oasData
 }
 
-// extractAPIIDFromOAS extracts API ID from x-tyk-api-gateway.info.id
-func extractAPIIDFromOAS(oasData map[string]interface{}) (string, bool) {
-	if xTyk, exists := oasData["x-tyk-api-gateway"]; exists {
-		if xTykMap, ok := xTyk.(map[string]interface{}); ok {
-			if info, exists := xTykMap["info"]; exists {
-				if infoMap, ok := info.(map[string]interface{}); ok {
-					if id, exists := infoMap["id"]; exists {
-						if idStr, ok := id.(string); ok && idStr != "" {
-							return idStr, true
-						}
-					}
-				}
-			}
-		}
-	}
-	return "", false
-}
-
 // runAPIApply implements the 'tyk api apply' command (declarative upsert)
 func runAPIApply(cmd *cobra.Command, args []string) error {
     // Get flags
@@ -1205,7 +1180,7 @@ func runAPIDelete(cmd *cobra.Command, args []string) error {
 	if !skipConfirmation {
 		fmt.Printf("Are you sure you want to delete API '%s' (%s)? [y/N]: ", apiID, api.Name)
 		var response string
-		fmt.Scanln(&response)
+		_, _ = fmt.Scanln(&response)
 		if strings.ToLower(response) != "y" && strings.ToLower(response) != "yes" {
 			fmt.Println("Delete operation cancelled")
 			return nil

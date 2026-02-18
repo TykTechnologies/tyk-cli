@@ -306,10 +306,7 @@ func TestConvertToYAML(t *testing.T) {
 	yamlBytes, err := ConvertToYAML(sampleOAS)
 	require.NoError(t, err)
 
-	// Parse YAML back to verify
-	var parsed map[string]interface{}
-	err = json.Unmarshal(yamlBytes, &parsed)
-	// YAML parsing would require yaml.Unmarshal, but we can at least check it's not empty
+	// Verify YAML output is not empty and contains expected content
 	assert.NotEmpty(t, yamlBytes)
 	assert.Contains(t, string(yamlBytes), "openapi: 3.0.0")
 	assert.Contains(t, string(yamlBytes), "title: Test API")

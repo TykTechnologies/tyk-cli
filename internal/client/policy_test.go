@@ -52,7 +52,7 @@ func TestClient_ListPolicies(t *testing.T) {
 			Data:  []types.DashboardPolicy{gold, silver},
 			Pages: 1,
 		}
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 	}))
 	defer server.Close()
 
@@ -74,7 +74,7 @@ func TestClient_ListPolicies_Empty(t *testing.T) {
 			Data:  nil,
 			Pages: 0,
 		}
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 	}))
 	defer server.Close()
 
@@ -97,7 +97,7 @@ func TestClient_GetPolicy(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodGet, r.Method)
 		assert.Equal(t, "/api/portal/policies/gold", r.URL.Path)
-		json.NewEncoder(w).Encode(gold)
+		_ = json.NewEncoder(w).Encode(gold)
 	}))
 	defer server.Close()
 
@@ -115,7 +115,7 @@ func TestClient_GetPolicy(t *testing.T) {
 func TestClient_GetPolicy_NotFound(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
 			"status": 404, "message": "policy not found",
 		})
 	}))
@@ -151,7 +151,7 @@ func TestClient_CreatePolicy(t *testing.T) {
 		assert.Equal(t, "new-policy", payload.MID)
 
 		// Dashboard returns a Message response with the created policy ID in Meta
-		json.NewEncoder(w).Encode(types.APIResponse{
+		_ = json.NewEncoder(w).Encode(types.APIResponse{
 			Status:  "success",
 			Message: "created",
 			Meta:    "new-policy",
@@ -184,7 +184,7 @@ func TestClient_UpdatePolicy(t *testing.T) {
 		require.NoError(t, json.Unmarshal(body, &payload))
 		assert.Equal(t, "Gold Plan Updated", payload.Name)
 
-		json.NewEncoder(w).Encode(types.APIResponse{
+		_ = json.NewEncoder(w).Encode(types.APIResponse{
 			Status:  "success",
 			Message: "updated",
 		})
@@ -208,7 +208,7 @@ func TestClient_DeletePolicy(t *testing.T) {
 		assert.Equal(t, http.MethodDelete, r.Method)
 		assert.Equal(t, "/api/portal/policies/free-tier", r.URL.Path)
 
-		json.NewEncoder(w).Encode(types.APIResponse{
+		_ = json.NewEncoder(w).Encode(types.APIResponse{
 			Status:  "success",
 			Message: "deleted",
 		})
@@ -226,7 +226,7 @@ func TestClient_DeletePolicy(t *testing.T) {
 func TestClient_DeletePolicy_NotFound(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
 			"status": 404, "message": "policy not found",
 		})
 	}))

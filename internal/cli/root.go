@@ -62,6 +62,7 @@ with support for OpenAPI 3.0 specifications.`,
 	// Add subcommands
 	rootCmd.AddCommand(NewInitCommand())
 	rootCmd.AddCommand(NewAPICommand())
+	rootCmd.AddCommand(NewPolicyCommand())
 	rootCmd.AddCommand(NewConfigCommand())
 
 	return rootCmd

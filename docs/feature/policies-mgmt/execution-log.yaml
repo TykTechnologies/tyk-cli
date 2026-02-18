@@ -69,5 +69,30 @@ events:
   s: EXECUTED
   sid: 01-03
   t: '2026-02-18T12:50:24Z'
+- d: PASS
+  p: COMMIT
+  s: EXECUTED
+  sid: 01-03
+  t: '2026-02-18T12:50:50Z'
+- d: PASS
+  p: PREPARE
+  s: EXECUTED
+  sid: 02-01
+  t: '2026-02-18T12:53:05Z'
+- d: PASS
+  p: RED_ACCEPTANCE
+  s: EXECUTED
+  sid: 02-01
+  t: '2026-02-18T12:53:21Z'
+- d: PASS
+  p: RED_UNIT
+  s: EXECUTED
+  sid: 02-01
+  t: '2026-02-18T12:54:08Z'
+- d: PASS
+  p: GREEN
+  s: EXECUTED
+  sid: 02-01
+  t: '2026-02-18T12:57:06Z'
 project_id: policies-mgmt
 schema_version: '3.0'

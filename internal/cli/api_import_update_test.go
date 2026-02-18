@@ -120,12 +120,12 @@ func TestRunAPIImportOAS_WithFile(t *testing.T) {
 		if r.Method == http.MethodPost && strings.Contains(r.URL.Path, "/api/apis/oas") {
 			// Simulate API creation
 			createResp := mockCreateAPIResponse()
-			json.NewEncoder(w).Encode(createResp)
+			_ = json.NewEncoder(w).Encode(createResp)
 		} else if r.Method == http.MethodGet && strings.Contains(r.URL.Path, "/api/apis/oas/new-api-456") {
 			// Simulate getting the created API details
 			api := mockCreatedOASAPI()
 			// Return the OAS document directly as the API endpoint does
-			json.NewEncoder(w).Encode(api.OAS)
+			_ = json.NewEncoder(w).Encode(api.OAS)
 		}
 	}))
 	defer server.Close()
@@ -146,7 +146,7 @@ func TestRunAPIImportOAS_WithFile(t *testing.T) {
 	cmd.SetContext(withOutputFormat(cmd.Context(), types.OutputJSON))
 
 	// Set flags
-	cmd.Flags().Set("file", tmpFile)
+	_ = cmd.Flags().Set("file", tmpFile)
 
 	// Execute command
 	err := cmd.Execute()
@@ -184,8 +184,8 @@ func TestRunAPIImportOAS_BothInputs(t *testing.T) {
 	cmd.SetContext(withConfig(context.Background(), config))
 
 	// Set both file and url flags
-	cmd.Flags().Set("file", "/tmp/test.yaml")
-	cmd.Flags().Set("url", "https://example.com/api.yaml")
+	_ = cmd.Flags().Set("file", "/tmp/test.yaml")
+	_ = cmd.Flags().Set("url", "https://example.com/api.yaml")
 
 	err := cmd.Execute()
 
@@ -216,11 +216,11 @@ func TestRunAPIUpdateOAS_Success(t *testing.T) {
 			// Simulate getting existing API
 			existingAPI := mockCreatedOASAPI()
 			existingAPI.ID = testAPIID
-			json.NewEncoder(w).Encode(existingAPI.OAS)
+			_ = json.NewEncoder(w).Encode(existingAPI.OAS)
 		} else if r.Method == http.MethodPut && strings.Contains(r.URL.Path, testAPIID) {
 			// Simulate API update
 			updateResp := types.APIResponse{ID: testAPIID, Message: "Updated"}
-			json.NewEncoder(w).Encode(updateResp)
+			_ = json.NewEncoder(w).Encode(updateResp)
 		}
 	}))
 	defer server.Close()
@@ -242,7 +242,7 @@ func TestRunAPIUpdateOAS_Success(t *testing.T) {
 
 	// Set args and flags
 	cmd.SetArgs([]string{testAPIID})
-	cmd.Flags().Set("file", tmpFile)
+	_ = cmd.Flags().Set("file", tmpFile)
 
 	// Execute command
 	err := cmd.Execute()
@@ -299,7 +299,7 @@ func TestRunAPIApply_PlainOASRejection(t *testing.T) {
 	cmd.SetContext(withConfig(context.Background(), config))
 
 	// Set file flag
-	cmd.Flags().Set("file", tmpFile)
+	_ = cmd.Flags().Set("file", tmpFile)
 
 	// Execute command
 	err := cmd.Execute()
@@ -326,12 +326,12 @@ func TestRunAPIApply_MissingIDCreatesAPI(t *testing.T) {
     server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         if r.Method == http.MethodPost && strings.Contains(r.URL.Path, "/api/apis/oas") {
             createResp := mockCreateAPIResponse()
-            json.NewEncoder(w).Encode(createResp)
+            _ = json.NewEncoder(w).Encode(createResp)
             return
         }
         if r.Method == http.MethodGet && strings.Contains(r.URL.Path, "/api/apis/oas/new-api-456") {
             api := mockCreatedOASAPI()
-            json.NewEncoder(w).Encode(api.OAS)
+            _ = json.NewEncoder(w).Encode(api.OAS)
             return
         }
         http.NotFound(w, r)
@@ -347,7 +347,7 @@ func TestRunAPIApply_MissingIDCreatesAPI(t *testing.T) {
     }
     cmd.SetContext(withConfig(context.Background(), config))
 
-    cmd.Flags().Set("file", tmpFile)
+    _ = cmd.Flags().Set("file", tmpFile)
 
     // Execute command: should succeed and create new API
     err := cmd.Execute()
@@ -382,7 +382,7 @@ func TestLoadOASFromURL_Success(t *testing.T) {
 	testOAS := mockCleanOAS()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(testOAS)
+		_ = json.NewEncoder(w).Encode(testOAS)
 	}))
 	defer server.Close()
 
@@ -413,7 +413,7 @@ func TestLoadOASFromURL_HTTPError(t *testing.T) {
 func TestLoadOASFromURL_InvalidJSON(t *testing.T) {
 	// Create a test server that returns invalid JSON
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("invalid json content"))
+		_, _ = w.Write([]byte("invalid json content"))
 	}))
 	defer server.Close()
 

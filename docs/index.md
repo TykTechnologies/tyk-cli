@@ -21,7 +21,9 @@ brew tap sedkis/tyk && brew install tyk
 Quick links
 - Getting Started: {{ site.baseurl }}/getting-started
 - Configuration: {{ site.baseurl }}/configuration
- - Manage APIs: {{ site.baseurl }}/manage-apis/
+- Manage APIs: {{ site.baseurl }}/manage-apis/
+- Manage Policies: {{ site.baseurl }}/manage-policies
+- Policy Design: {{ site.baseurl }}/policy-design
 - Examples: {{ site.baseurl }}/examples/
 - FAQ: {{ site.baseurl }}/faq
 - Contributing: {{ site.baseurl }}/contributing

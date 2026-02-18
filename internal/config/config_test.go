@@ -199,7 +199,7 @@ func TestManagerPartialFlagOverride(t *testing.T) {
 		OrgID:        "base-org-id",
 	}
 	
-	manager.SaveEnvironment(baseEnv, true)
+	_ = manager.SaveEnvironment(baseEnv, true)
 
 	// Override only dashboard URL with flag
 	flagDashURL := "http://flag-dashboard:3000"

@@ -23,7 +23,7 @@ func TestAPIListInteractiveFlag(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "/api/apis/oas", r.URL.Path)
-		json.NewEncoder(w).Encode(types.OASAPIListResponse{
+		_ = json.NewEncoder(w).Encode(types.OASAPIListResponse{
 			APIResponse: types.APIResponse{Status: "success"},
 			APIs:        mockAPIs,
 		})
@@ -257,7 +257,7 @@ func TestAPIListWithRealEndpoint(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "/api/apis", r.URL.Path)
-		json.NewEncoder(w).Encode(dashboardResponse)
+		_ = json.NewEncoder(w).Encode(dashboardResponse)
 	}))
 	defer server.Close()
 

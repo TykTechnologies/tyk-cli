@@ -88,80 +88,6 @@ func runQuickSetup(scanner *bufio.Scanner, skipTest bool) error {
 	return nil
 }
 
-func runFullWizard(scanner *bufio.Scanner, skipTest bool) error {
-	fmt.Println("🎯 Full Setup Wizard")
-	fmt.Println("-------------------")
-	fmt.Println()
-
-	var environments []*types.Environment
-
-	// Ask how many environments to set up
-	fmt.Println("How many environments do you want to configure?")
-	fmt.Println("1. Just one (development)")  
-	fmt.Println("2. Two (development + production)")
-	fmt.Println("3. Three (development + staging + production)")
-	fmt.Println("4. Custom")
-	fmt.Println()
-
-	choice := askChoice(scanner, "Enter your choice (1-4)", []string{"1", "2", "3", "4"})
-	
-	var envNames []string
-	switch choice {
-	case "1":
-		envNames = []string{"development"}
-	case "2":
-		envNames = []string{"development", "production"}
-	case "3":
-		envNames = []string{"development", "staging", "production"}
-	case "4":
-		envNames = askCustomEnvironments(scanner)
-	}
-
-	fmt.Printf("\n🔧 Setting up %d environment(s)...\n\n", len(envNames))
-
-	for i, envName := range envNames {
-		fmt.Printf("--- Environment %d/%d: %s ---\n", i+1, len(envNames), envName)
-		
-		env, err := gatherEnvironmentInfo(scanner, envName, i == 0)
-		if err != nil {
-			return err
-		}
-		
-		if !skipTest {
-			fmt.Printf("\n🔍 Testing connection to %s...\n", envName)
-			if err := testConnection(env); err != nil {
-				fmt.Printf("⚠️  Connection test failed: %v\n", err)
-				if !askYesNo(scanner, "Continue with this environment anyway?") {
-					continue
-				}
-			} else {
-				fmt.Println("✅ Connection successful!")
-			}
-		}
-
-		environments = append(environments, env)
-		fmt.Println()
-	}
-
-	if len(environments) == 0 {
-		return fmt.Errorf("no environments configured")
-	}
-
-	// Ask which environment should be active
-	activeEnv := selectActiveEnvironment(scanner, environments)
-	
-	// Save all environments
-	for _, env := range environments {
-		isDefault := (env.Name == activeEnv)
-		if err := saveEnvironment(env, isDefault); err != nil {
-			return fmt.Errorf("failed to save %s environment: %w", env.Name, err)
-		}
-	}
-
-	printSuccess(activeEnv)
-	return nil
-}
-
 func gatherEnvironmentInfo(scanner *bufio.Scanner, envName string, isFirst bool) (*types.Environment, error) {
 	env := &types.Environment{Name: envName}
 
@@ -208,49 +134,6 @@ func gatherEnvironmentInfo(scanner *bufio.Scanner, envName string, isFirst bool)
 	}
 
 	return env, nil
-}
-
-func askCustomEnvironments(scanner *bufio.Scanner) []string {
-	var envNames []string
-	
-	fmt.Println("\nEnter environment names (one per line, empty line to finish):")
-	
-	for {
-		name := askString(scanner, "Environment name", "")
-		if name == "" {
-			break
-		}
-		envNames = append(envNames, name)
-	}
-	
-	if len(envNames) == 0 {
-		envNames = []string{"development"} // Default fallback
-	}
-	
-	return envNames
-}
-
-func selectActiveEnvironment(scanner *bufio.Scanner, environments []*types.Environment) string {
-	if len(environments) == 1 {
-		return environments[0].Name
-	}
-
-	fmt.Println("🎯 Which environment should be active by default?")
-	for i, env := range environments {
-		fmt.Printf("%d. %s\n", i+1, env.Name)
-	}
-	fmt.Println()
-
-	choices := make([]string, len(environments))
-	for i := range environments {
-		choices[i] = fmt.Sprintf("%d", i+1)
-	}
-
-	choice := askChoice(scanner, "Select active environment", choices)
-	idx := 0
-	fmt.Sscanf(choice, "%d", &idx)
-	
-	return environments[idx-1].Name
 }
 
 func testConnection(env *types.Environment) error {
@@ -349,18 +232,3 @@ func askYesNo(scanner *bufio.Scanner, prompt string) bool {
 	return input == "y" || input == "yes"
 }
 
-func askChoice(scanner *bufio.Scanner, prompt string, choices []string) string {
-	for {
-		fmt.Printf("%s: ", prompt)
-		scanner.Scan()
-		input := strings.TrimSpace(scanner.Text())
-		
-		for _, choice := range choices {
-			if input == choice {
-				return input
-			}
-		}
-		
-		fmt.Printf("Invalid choice. Please select from: %s\n", strings.Join(choices, ", "))
-	}
-}

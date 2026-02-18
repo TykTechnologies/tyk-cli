@@ -163,12 +163,12 @@ func runPolicyGet(cmd *cobra.Command, args []string) error {
 	}
 
 	// Human mode: summary to stderr, YAML to stdout
-	fmt.Fprintf(os.Stderr, "Policy: %s\n", pf.Metadata.Name)
-	fmt.Fprintf(os.Stderr, "  ID:   %s\n", pf.Metadata.ID)
-	if len(pf.Metadata.Tags) > 0 {
-		fmt.Fprintf(os.Stderr, "  Tags: %s\n", strings.Join(pf.Metadata.Tags, ", "))
+	fmt.Fprintf(os.Stderr, "Policy: %s\n", pf.Name)
+	fmt.Fprintf(os.Stderr, "  ID:   %s\n", pf.ID)
+	if len(pf.Tags) > 0 {
+		fmt.Fprintf(os.Stderr, "  Tags: %s\n", strings.Join(pf.Tags, ", "))
 	}
-	apiCount := len(pf.Spec.Access)
+	apiCount := len(pf.Access)
 	fmt.Fprintf(os.Stderr, "  APIs: %d\n", apiCount)
 
 	yamlData, err := yaml.Marshal(pf)
@@ -235,7 +235,7 @@ func runPolicyApply(cmd *cobra.Command, args []string) error {
 		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to fetch API list: %v", err)}
 	}
 
-	requests := buildResolveRequests(pf.Spec.Access)
+	requests := buildResolveRequests(pf.Access)
 	resolved, resolveErrs := policy.ResolveAccessEntries(requests, toResolverAPIs(apis))
 	if len(resolveErrs) > 0 {
 		return &ExitError{Code: int(types.ExitBadArgs), Message: joinErrorMessages(resolveErrs)}
@@ -252,7 +252,7 @@ func runPolicyApply(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check if policy already exists (upsert semantics)
-	_, getErr := c.GetPolicy(ctx, pf.Metadata.ID)
+	_, getErr := c.GetPolicy(ctx, pf.ID)
 	policyExists := getErr == nil
 	if getErr != nil && !isNotFoundError(getErr) {
 		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to check existing policy: %v", getErr)}
@@ -260,15 +260,15 @@ func runPolicyApply(cmd *cobra.Command, args []string) error {
 
 	// Create or update based on existence check
 	if policyExists {
-		if err := c.UpdatePolicy(ctx, pf.Metadata.ID, &dp); err != nil {
+		if err := c.UpdatePolicy(ctx, pf.ID, &dp); err != nil {
 			return &ExitError{Code: 1, Message: fmt.Sprintf("failed to update policy: %v", err)}
 		}
-		fmt.Fprintf(os.Stderr, "Policy '%s' (%s) updated.\n", pf.Metadata.Name, pf.Metadata.ID)
+		fmt.Fprintf(os.Stderr, "Policy '%s' (%s) updated.\n", pf.Name, pf.ID)
 	} else {
 		if err := c.CreatePolicy(ctx, &dp); err != nil {
 			return &ExitError{Code: 1, Message: fmt.Sprintf("failed to create policy: %v", err)}
 		}
-		fmt.Fprintf(os.Stderr, "Policy '%s' (%s) created.\n", pf.Metadata.Name, pf.Metadata.ID)
+		fmt.Fprintf(os.Stderr, "Policy '%s' (%s) created.\n", pf.Name, pf.ID)
 	}
 
 	return nil
@@ -402,27 +402,21 @@ func runPolicyInit(cmd *cobra.Command, args []string) error {
 
 	// Generate scaffold
 	pf := types.PolicyFile{
-		APIVersion: "tyk.tyktech/v1",
-		Kind:       "Policy",
-		Metadata: types.PolicyMetadata{
-			ID:   id,
-			Name: name,
+		ID:   id,
+		Name: name,
+		RateLimit: &types.RateLimit{
+			Requests: 1000,
+			Per:      types.Duration("1m"),
 		},
-		Spec: types.PolicySpec{
-			RateLimit: &types.RateLimit{
-				Requests: 1000,
-				Per:      types.Duration("1m"),
-			},
-			Quota: &types.Quota{
-				Limit:  100000,
-				Period: types.Duration("30d"),
-			},
-			KeyTTL: types.Duration("0"),
-			Access: []types.AccessEntry{
-				{
-					Name:     "your-api-name",
-					Versions: []string{"Default"},
-				},
+		Quota: &types.Quota{
+			Limit:  100000,
+			Period: types.Duration("30d"),
+		},
+		KeyTTL: types.Duration("0"),
+		Access: []types.AccessEntry{
+			{
+				Name:     "your-api-name",
+				Versions: []string{"Default"},
 			},
 		},
 	}

@@ -10,19 +10,13 @@ import (
 
 func validPolicyFile() types.PolicyFile {
 	return types.PolicyFile{
-		APIVersion: "tyk.tyktech/v1",
-		Kind:       "Policy",
-		Metadata: types.PolicyMetadata{
-			ID:   "gold",
-			Name: "Gold Plan",
-		},
-		Spec: types.PolicySpec{
-			RateLimit: &types.RateLimit{Requests: 1000, Per: "60"},
-			Quota:     &types.Quota{Limit: 100000, Period: "30d"},
-			KeyTTL:    "0",
-			Access: []types.AccessEntry{
-				{Name: "users-api", Versions: []string{"v1"}},
-			},
+		ID:   "gold",
+		Name: "Gold Plan",
+		RateLimit: &types.RateLimit{Requests: 1000, Per: "60"},
+		Quota:     &types.Quota{Limit: 100000, Period: "30d"},
+		KeyTTL:    "0",
+		Access: []types.AccessEntry{
+			{Name: "users-api", Versions: []string{"v1"}},
 		},
 	}
 }
@@ -40,39 +34,19 @@ func TestValidatePolicy_MissingRequiredFields(t *testing.T) {
 		expectedKind  string
 	}{
 		{
-			"missing metadata.id",
-			func(pf *types.PolicyFile) { pf.Metadata.ID = "" },
-			"metadata.id", "schema",
+			"missing id",
+			func(pf *types.PolicyFile) { pf.ID = "" },
+			"id", "schema",
 		},
 		{
-			"missing metadata.name",
-			func(pf *types.PolicyFile) { pf.Metadata.Name = "" },
-			"metadata.name", "schema",
-		},
-		{
-			"missing apiVersion",
-			func(pf *types.PolicyFile) { pf.APIVersion = "" },
-			"apiVersion", "schema",
-		},
-		{
-			"wrong apiVersion",
-			func(pf *types.PolicyFile) { pf.APIVersion = "wrong/v1" },
-			"apiVersion", "schema",
-		},
-		{
-			"missing kind",
-			func(pf *types.PolicyFile) { pf.Kind = "" },
-			"kind", "schema",
-		},
-		{
-			"wrong kind",
-			func(pf *types.PolicyFile) { pf.Kind = "Deployment" },
-			"kind", "schema",
+			"missing name",
+			func(pf *types.PolicyFile) { pf.Name = "" },
+			"name", "schema",
 		},
 		{
 			"empty access list",
-			func(pf *types.PolicyFile) { pf.Spec.Access = nil },
-			"spec.access", "schema",
+			func(pf *types.PolicyFile) { pf.Access = nil },
+			"access", "schema",
 		},
 	}
 
@@ -104,18 +78,18 @@ func TestValidatePolicy_InvalidDurations(t *testing.T) {
 	}{
 		{
 			"invalid rateLimit.per",
-			func(pf *types.PolicyFile) { pf.Spec.RateLimit.Per = "abc" },
-			"spec.rateLimit.per",
+			func(pf *types.PolicyFile) { pf.RateLimit.Per = "abc" },
+			"rateLimit.per",
 		},
 		{
 			"invalid quota.period",
-			func(pf *types.PolicyFile) { pf.Spec.Quota.Period = "1.5h" },
-			"spec.quota.period",
+			func(pf *types.PolicyFile) { pf.Quota.Period = "1.5h" },
+			"quota.period",
 		},
 		{
 			"invalid keyTTL",
-			func(pf *types.PolicyFile) { pf.Spec.KeyTTL = "-1" },
-			"spec.keyTTL",
+			func(pf *types.PolicyFile) { pf.KeyTTL = "-1" },
+			"keyTTL",
 		},
 	}
 
@@ -170,7 +144,7 @@ func TestValidatePolicy_SelectorConstraints(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			pf := validPolicyFile()
-			pf.Spec.Access = []types.AccessEntry{tt.entry}
+			pf.Access = []types.AccessEntry{tt.entry}
 			errs := ValidatePolicy(pf)
 			require.NotEmpty(t, errs)
 
@@ -188,17 +162,15 @@ func TestValidatePolicy_SelectorConstraints(t *testing.T) {
 
 func TestValidatePolicy_CollectsAllErrors(t *testing.T) {
 	pf := types.PolicyFile{
-		// Missing apiVersion, kind, metadata.id, metadata.name
-		Spec: types.PolicySpec{
-			RateLimit: &types.RateLimit{Requests: 1000, Per: "abc"},
-			Access: []types.AccessEntry{
-				{Name: "foo", ID: "bar"}, // multiple selectors
-			},
+		// Missing id, name
+		RateLimit: &types.RateLimit{Requests: 1000, Per: "abc"},
+		Access: []types.AccessEntry{
+			{Name: "foo", ID: "bar"}, // multiple selectors
 		},
 	}
 
 	errs := ValidatePolicy(pf)
-	// Should have at least: apiVersion, kind, metadata.id, metadata.name, duration, selector = 6
-	assert.GreaterOrEqual(t, len(errs), 6,
-		"expected at least 6 errors for multiply-broken policy, got %d: %v", len(errs), errs)
+	// Should have at least: id, name, duration, selector = 4
+	assert.GreaterOrEqual(t, len(errs), 4,
+		"expected at least 4 errors for multiply-broken policy, got %d: %v", len(errs), errs)
 }

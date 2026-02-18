@@ -121,6 +121,30 @@ tyk api delete <api-id> --yes       # Delete without confirmation
 tyk api convert --file api.yaml --format apidef  # Convert OAS to Tyk format
 ```
 
+### Policy Management
+```bash
+# Scaffold a new policy file
+tyk policy init --id gold --name "Gold Plan"
+
+# List policies
+tyk policy list                     # Paginated table
+tyk policy list --json              # JSON output
+
+# Get a policy (outputs CLI-schema YAML)
+tyk policy get <policy-id>          # YAML to stdout, summary to stderr
+tyk policy get <policy-id> --json   # JSON output
+
+# Apply a policy (idempotent upsert — creates or updates)
+tyk policy apply -f policy.yaml     # From file
+tyk policy apply -f -               # From stdin
+
+# Delete a policy
+tyk policy delete <policy-id>       # Interactive confirmation
+tyk policy delete <policy-id> --yes # Skip confirmation
+```
+
+Policies use a human-friendly **CLI schema** with readable durations (`30d`, `1h`) and API selectors by name, listen path, or tags. The CLI converts to Dashboard wire format on apply. See the [Policy Guide](https://sedkis.github.io/tyk-cli/manage-policies) for the full YAML reference.
+
 ## ⚙️ Configuration
 
 The Tyk CLI uses a unified environment/configuration system with the following precedence (highest to lowest):
@@ -210,20 +234,22 @@ make test
 
 ```
 tyk-cli/
-├── cmd/           # CLI commands and subcommands
-├── internal/      # Internal packages
-│   ├── config/    # Configuration management
-│   ├── client/    # HTTP client for Tyk Dashboard API
-│   └── util/      # Utilities and helpers
-├── pkg/           # Public packages (if any)
-├── test/          # Integration tests
-└── docs/          # Documentation
+├── cmd/              # Entry point
+├── internal/         # Internal packages
+│   ├── cli/          # Cobra command definitions (api, policy, config)
+│   ├── config/       # Configuration management
+│   ├── client/       # HTTP client for Tyk Dashboard API
+│   ├── policy/       # Policy domain logic (duration, validation, selectors, conversion)
+│   ├── oas/          # OAS file handling
+│   └── filehandler/  # File utilities
+├── pkg/types/        # Shared types (API, policy, config)
+├── test/             # Integration tests
+└── docs/             # Documentation (Jekyll site)
 ```
 
 ## 🗺️ Roadmap
 
 ### 🔧 Other lifecycle objects
-- Tyk Security Policies
 - Tyk API Tokens / Credentials
 
 ### 🔧 Enhanced Features

@@ -60,8 +60,47 @@ Next steps:
 tyk api import-oas --file path/to/my-api.yaml
 ```
 
-5) Check it worked
-- See your API in the Tyk Dashboard
+## 5) Create your first policy
+
+Generate a scaffold:
+```bash
+tyk policy init --id gold --name "Gold Plan"
+```
+
+Edit `policies/gold.yaml` to configure rate limits and API access:
+```yaml
+apiVersion: tyk.tyktech/v1
+kind: Policy
+metadata:
+  id: gold
+  name: Gold Plan
+spec:
+  rateLimit:
+    requests: 1000
+    per: 1m
+  quota:
+    limit: 100000
+    period: 30d
+  access:
+    - name: httpbin          # Resolves by API name
+      versions: [Default]
+```
+
+Apply it:
+```bash
+tyk policy apply -f policies/gold.yaml
+```
+
+Verify:
+```bash
+tyk policy list
+tyk policy get gold
+```
+
+> See the full [Policy Guide]({{ site.baseurl }}/manage-policies) for selectors, durations, and advanced usage.
+
+## 6) Check it worked
+- See your API and policy in the Tyk Dashboard
 - Hit a simple endpoint or health route
 
 Tips

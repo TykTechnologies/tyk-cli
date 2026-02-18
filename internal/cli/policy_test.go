@@ -139,23 +139,19 @@ func writeTempPolicyFile(t *testing.T, content string) string {
 }
 
 // validPlatinumPolicyYAML is the canonical test policy file content.
-const validPlatinumPolicyYAML = `apiVersion: tyk.tyktech/v1
-kind: Policy
-metadata:
-  id: platinum
-  name: Platinum Plan
-  tags: [platinum, paid]
-spec:
-  rateLimit:
-    requests: 5000
-    per: 1m
-  quota:
-    limit: 500000
-    period: 30d
-  keyTTL: 0
-  access:
-    - name: users-api
-      versions: [v1]
+const validPlatinumPolicyYAML = `id: platinum
+name: Platinum Plan
+tags: [platinum, paid]
+rateLimit:
+  requests: 5000
+  per: 1m
+quota:
+  limit: 500000
+  period: 30d
+keyTTL: 0
+access:
+  - name: users-api
+    versions: [v1]
 `
 
 // ===========================================================================
@@ -521,10 +517,6 @@ func TestPolicyGet_Human(t *testing.T) {
 	stderrStr := string(stderr)
 	assert.Contains(t, stderrStr, "Gold Plan")
 
-	// stdout should contain valid CLI schema YAML
-	stdoutStr := string(stdout)
-	assert.Contains(t, stdoutStr, "kind: Policy")
-
 	// Verify YAML is parseable
 	var yamlResult map[string]interface{}
 	err = yaml.Unmarshal(stdout, &yamlResult)
@@ -563,10 +555,8 @@ func TestPolicyGet_JSON(t *testing.T) {
 	err = json.Unmarshal(stdout, &result)
 	require.NoError(t, err, "output should be valid JSON")
 
-	metadata, ok := result["metadata"].(map[string]interface{})
-	require.True(t, ok)
-	assert.Equal(t, "gold", metadata["id"])
-	assert.Equal(t, "Gold Plan", metadata["name"])
+	assert.Equal(t, "gold", result["id"])
+	assert.Equal(t, "Gold Plan", result["name"])
 }
 
 func TestPolicyGet_NotFound(t *testing.T) {
@@ -612,22 +602,18 @@ func TestPolicyApply_ListenPathSelector(t *testing.T) {
 	}))
 	defer server.Close()
 
-	policyYAML := `apiVersion: tyk.tyktech/v1
-kind: Policy
-metadata:
-  id: path-test
-  name: Path Test Policy
-spec:
-  rateLimit:
-    requests: 100
-    per: 60
-  quota:
-    limit: 10000
-    period: 86400
-  keyTTL: 0
-  access:
-    - listenPath: /orders/
-      versions: [v1]
+	policyYAML := `id: path-test
+name: Path Test Policy
+rateLimit:
+  requests: 100
+  per: 60
+quota:
+  limit: 10000
+  period: 86400
+keyTTL: 0
+access:
+  - listenPath: /orders/
+    versions: [v1]
 `
 	policyFile := writeTempPolicyFile(t, policyYAML)
 
@@ -662,22 +648,18 @@ func TestPolicyApply_DurationConversion(t *testing.T) {
 	}))
 	defer server.Close()
 
-	policyYAML := `apiVersion: tyk.tyktech/v1
-kind: Policy
-metadata:
-  id: dur-test
-  name: Duration Test
-spec:
-  rateLimit:
-    requests: 1000
-    per: 1m
-  quota:
-    limit: 100000
-    period: 30d
-  keyTTL: 24h
-  access:
-    - name: users-api
-      versions: [v1]
+	policyYAML := `id: dur-test
+name: Duration Test
+rateLimit:
+  requests: 1000
+  per: 1m
+quota:
+  limit: 100000
+  period: 30d
+keyTTL: 24h
+access:
+  - name: users-api
+    versions: [v1]
 `
 	policyFile := writeTempPolicyFile(t, policyYAML)
 
@@ -700,22 +682,18 @@ func TestPolicyApply_NameNotFound(t *testing.T) {
 	}))
 	defer server.Close()
 
-	policyYAML := `apiVersion: tyk.tyktech/v1
-kind: Policy
-metadata:
-  id: typo-test
-  name: Typo Test
-spec:
-  rateLimit:
-    requests: 100
-    per: 60
-  quota:
-    limit: 10000
-    period: 86400
-  keyTTL: 0
-  access:
-    - name: inventori-api
-      versions: [v1]
+	policyYAML := `id: typo-test
+name: Typo Test
+rateLimit:
+  requests: 100
+  per: 60
+quota:
+  limit: 10000
+  period: 86400
+keyTTL: 0
+access:
+  - name: inventori-api
+    versions: [v1]
 `
 	policyFile := writeTempPolicyFile(t, policyYAML)
 
@@ -757,22 +735,18 @@ func TestPolicyApply_NameAmbiguous(t *testing.T) {
 	}))
 	defer server.Close()
 
-	policyYAML := `apiVersion: tyk.tyktech/v1
-kind: Policy
-metadata:
-  id: ambig-test
-  name: Ambiguous Test
-spec:
-  rateLimit:
-    requests: 100
-    per: 60
-  quota:
-    limit: 10000
-    period: 86400
-  keyTTL: 0
-  access:
-    - name: api-service
-      versions: [v1]
+	policyYAML := `id: ambig-test
+name: Ambiguous Test
+rateLimit:
+  requests: 100
+  per: 60
+quota:
+  limit: 10000
+  period: 86400
+keyTTL: 0
+access:
+  - name: api-service
+    versions: [v1]
 `
 	policyFile := writeTempPolicyFile(t, policyYAML)
 
@@ -787,21 +761,17 @@ spec:
 
 func TestPolicyApply_MissingID(t *testing.T) {
 
-	policyYAML := `apiVersion: tyk.tyktech/v1
-kind: Policy
-metadata:
-  name: No ID Policy
-spec:
-  rateLimit:
-    requests: 100
-    per: 60
-  quota:
-    limit: 10000
-    period: 86400
-  keyTTL: 0
-  access:
-    - name: users-api
-      versions: [v1]
+	policyYAML := `name: No ID Policy
+rateLimit:
+  requests: 100
+  per: 60
+quota:
+  limit: 10000
+  period: 86400
+keyTTL: 0
+access:
+  - name: users-api
+    versions: [v1]
 `
 	policyFile := writeTempPolicyFile(t, policyYAML)
 
@@ -811,27 +781,23 @@ spec:
 	exitErr, ok := err.(*ExitError)
 	require.True(t, ok, "should return ExitError")
 	assert.Equal(t, 2, exitErr.Code)
-	assert.Contains(t, exitErr.Message, "metadata.id")
+	assert.Contains(t, exitErr.Message, "id")
 }
 
 func TestPolicyApply_InvalidDuration(t *testing.T) {
 
-	policyYAML := `apiVersion: tyk.tyktech/v1
-kind: Policy
-metadata:
-  id: bad-dur
-  name: Bad Duration
-spec:
-  rateLimit:
-    requests: 100
-    per: abc
-  quota:
-    limit: 10000
-    period: 86400
-  keyTTL: 0
-  access:
-    - name: users-api
-      versions: [v1]
+	policyYAML := `id: bad-dur
+name: Bad Duration
+rateLimit:
+  requests: 100
+  per: abc
+quota:
+  limit: 10000
+  period: 86400
+keyTTL: 0
+access:
+  - name: users-api
+    versions: [v1]
 `
 	policyFile := writeTempPolicyFile(t, policyYAML)
 
@@ -1007,22 +973,20 @@ func TestPolicyInit_NewFile(t *testing.T) {
 	require.NoError(t, err, "scaffold should be valid YAML")
 
 	// Verify schema fields
-	assert.Equal(t, "tyk.tyktech/v1", pf.APIVersion)
-	assert.Equal(t, "Policy", pf.Kind)
-	assert.Equal(t, "my-policy", pf.Metadata.ID)
-	assert.Equal(t, "My Policy", pf.Metadata.Name)
+	assert.Equal(t, "my-policy", pf.ID)
+	assert.Equal(t, "My Policy", pf.Name)
 
 	// Verify sensible defaults
-	require.NotNil(t, pf.Spec.RateLimit, "scaffold should have default rateLimit")
-	assert.Equal(t, int64(1000), pf.Spec.RateLimit.Requests)
-	assert.Equal(t, types.Duration("1m"), pf.Spec.RateLimit.Per)
-	require.NotNil(t, pf.Spec.Quota, "scaffold should have default quota")
-	assert.Equal(t, int64(100000), pf.Spec.Quota.Limit)
-	assert.Equal(t, types.Duration("30d"), pf.Spec.Quota.Period)
-	assert.Equal(t, types.Duration("0"), pf.Spec.KeyTTL)
-	require.Len(t, pf.Spec.Access, 1, "scaffold should have one placeholder access entry")
-	assert.Equal(t, "your-api-name", pf.Spec.Access[0].Name)
-	assert.Equal(t, []string{"Default"}, pf.Spec.Access[0].Versions)
+	require.NotNil(t, pf.RateLimit, "scaffold should have default rateLimit")
+	assert.Equal(t, int64(1000), pf.RateLimit.Requests)
+	assert.Equal(t, types.Duration("1m"), pf.RateLimit.Per)
+	require.NotNil(t, pf.Quota, "scaffold should have default quota")
+	assert.Equal(t, int64(100000), pf.Quota.Limit)
+	assert.Equal(t, types.Duration("30d"), pf.Quota.Period)
+	assert.Equal(t, types.Duration("0"), pf.KeyTTL)
+	require.Len(t, pf.Access, 1, "scaffold should have one placeholder access entry")
+	assert.Equal(t, "your-api-name", pf.Access[0].Name)
+	assert.Equal(t, []string{"Default"}, pf.Access[0].Versions)
 }
 
 func TestPolicyInit_FileExistsNoOverwrite(t *testing.T) {
@@ -1164,10 +1128,8 @@ func TestPolicyIntegration_FullLifecycle(t *testing.T) {
 
 	var getResult map[string]interface{}
 	require.NoError(t, json.Unmarshal(stdout, &getResult))
-	metadata, ok := getResult["metadata"].(map[string]interface{})
-	require.True(t, ok)
-	assert.Equal(t, "platinum", metadata["id"])
-	assert.Equal(t, "Platinum Plan", metadata["name"])
+	assert.Equal(t, "platinum", getResult["id"])
+	assert.Equal(t, "Platinum Plan", getResult["name"])
 
 	// Step 5: Delete the policy
 	err = executePolicyDeleteCmd(t, server.URL, types.OutputHuman, "platinum", true)

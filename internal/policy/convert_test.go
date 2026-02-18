@@ -15,21 +15,15 @@ func TestCLIToWire(t *testing.T) {
 	}
 
 	pf := types.PolicyFile{
-		APIVersion: "tyk.tyktech/v1",
-		Kind:       "Policy",
-		Metadata: types.PolicyMetadata{
-			ID:   "gold",
-			Name: "Gold Plan",
-			Tags: []string{"gold", "paid"},
-		},
-		Spec: types.PolicySpec{
-			RateLimit: &types.RateLimit{Requests: 1000, Per: "60"},
-			Quota:     &types.Quota{Limit: 100000, Period: "30d"},
-			KeyTTL:    "0",
-			Access: []types.AccessEntry{
-				{Name: "users-api", Versions: []string{"v1"}},
-				{ListenPath: "/orders/", Versions: []string{"v1", "v2"}},
-			},
+		ID:   "gold",
+		Name: "Gold Plan",
+		Tags: []string{"gold", "paid"},
+		RateLimit: &types.RateLimit{Requests: 1000, Per: "60"},
+		Quota:     &types.Quota{Limit: 100000, Period: "30d"},
+		KeyTTL:    "0",
+		Access: []types.AccessEntry{
+			{Name: "users-api", Versions: []string{"v1"}},
+			{ListenPath: "/orders/", Versions: []string{"v1", "v2"}},
 		},
 	}
 
@@ -92,21 +86,19 @@ func TestWireToCLI(t *testing.T) {
 
 	pf := WireToCLI(dp, apis)
 
-	assert.Equal(t, "tyk.tyktech/v1", pf.APIVersion)
-	assert.Equal(t, "Policy", pf.Kind)
-	assert.Equal(t, "gold", pf.Metadata.ID)
-	assert.Equal(t, "Gold Plan", pf.Metadata.Name)
-	assert.Equal(t, []string{"gold", "paid"}, pf.Metadata.Tags)
-	assert.Equal(t, int64(1000), pf.Spec.RateLimit.Requests)
-	assert.Equal(t, types.Duration("1m"), pf.Spec.RateLimit.Per)
-	assert.Equal(t, int64(100000), pf.Spec.Quota.Limit)
-	assert.Equal(t, types.Duration("30d"), pf.Spec.Quota.Period)
-	assert.Equal(t, types.Duration("0"), pf.Spec.KeyTTL)
+	assert.Equal(t, "gold", pf.ID)
+	assert.Equal(t, "Gold Plan", pf.Name)
+	assert.Equal(t, []string{"gold", "paid"}, pf.Tags)
+	assert.Equal(t, int64(1000), pf.RateLimit.Requests)
+	assert.Equal(t, types.Duration("1m"), pf.RateLimit.Per)
+	assert.Equal(t, int64(100000), pf.Quota.Limit)
+	assert.Equal(t, types.Duration("30d"), pf.Quota.Period)
+	assert.Equal(t, types.Duration("0"), pf.KeyTTL)
 
-	require.Len(t, pf.Spec.Access, 2)
+	require.Len(t, pf.Access, 2)
 	// Access entries come from map iteration, so sort by name for stable assertion
 	accessByName := make(map[string]types.AccessEntry)
-	for _, a := range pf.Spec.Access {
+	for _, a := range pf.Access {
 		key := a.Name
 		if key == "" {
 			key = a.ID
@@ -125,20 +117,14 @@ func TestWireToCLI(t *testing.T) {
 func TestRoundTrip_CLIToWireToCLI(t *testing.T) {
 	// Original CLI policy
 	original := types.PolicyFile{
-		APIVersion: "tyk.tyktech/v1",
-		Kind:       "Policy",
-		Metadata: types.PolicyMetadata{
-			ID:   "silver",
-			Name: "Silver Plan",
-			Tags: []string{"silver"},
-		},
-		Spec: types.PolicySpec{
-			RateLimit: &types.RateLimit{Requests: 500, Per: "1h"},
-			Quota:     &types.Quota{Limit: 50000, Period: "1d"},
-			KeyTTL:    "24h",
-			Access: []types.AccessEntry{
-				{Name: "users-api", Versions: []string{"v1"}},
-			},
+		ID:   "silver",
+		Name: "Silver Plan",
+		Tags: []string{"silver"},
+		RateLimit: &types.RateLimit{Requests: 500, Per: "1h"},
+		Quota:     &types.Quota{Limit: 50000, Period: "1d"},
+		KeyTTL:    "24h",
+		Access: []types.AccessEntry{
+			{Name: "users-api", Versions: []string{"v1"}},
 		},
 	}
 
@@ -158,16 +144,16 @@ func TestRoundTrip_CLIToWireToCLI(t *testing.T) {
 	roundTrip := WireToCLI(wire, apis)
 
 	// Semantic equivalence (duration strings may normalize)
-	assert.Equal(t, original.Metadata.ID, roundTrip.Metadata.ID)
-	assert.Equal(t, original.Metadata.Name, roundTrip.Metadata.Name)
-	assert.Equal(t, original.Spec.RateLimit.Requests, roundTrip.Spec.RateLimit.Requests)
+	assert.Equal(t, original.ID, roundTrip.ID)
+	assert.Equal(t, original.Name, roundTrip.Name)
+	assert.Equal(t, original.RateLimit.Requests, roundTrip.RateLimit.Requests)
 
 	// Duration round-trip: "1h" -> 3600 -> "1h"
-	assert.Equal(t, types.Duration("1h"), roundTrip.Spec.RateLimit.Per)
-	assert.Equal(t, types.Duration("1d"), roundTrip.Spec.Quota.Period)
-	assert.Equal(t, types.Duration("1d"), roundTrip.Spec.KeyTTL)
+	assert.Equal(t, types.Duration("1h"), roundTrip.RateLimit.Per)
+	assert.Equal(t, types.Duration("1d"), roundTrip.Quota.Period)
+	assert.Equal(t, types.Duration("1d"), roundTrip.KeyTTL)
 
-	require.Len(t, roundTrip.Spec.Access, 1)
-	assert.Equal(t, "users-api", roundTrip.Spec.Access[0].Name)
-	assert.Equal(t, []string{"v1"}, roundTrip.Spec.Access[0].Versions)
+	require.Len(t, roundTrip.Access, 1)
+	assert.Equal(t, "users-api", roundTrip.Access[0].Name)
+	assert.Equal(t, []string{"v1"}, roundTrip.Access[0].Versions)
 }

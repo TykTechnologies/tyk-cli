@@ -11,19 +11,19 @@ import (
 // The caller is responsible for resolving selectors before calling this function.
 func CLIToWire(pf types.PolicyFile, resolved []ResolvedAccess, orgID string) (types.DashboardPolicy, error) {
 	dp := types.DashboardPolicy{
-		MID:        pf.Metadata.ID,
-		Name:       pf.Metadata.Name,
+		MID:        pf.ID,
+		Name:       pf.Name,
 		OrgID:      orgID,
-		Tags:       pf.Metadata.Tags,
+		Tags:       pf.Tags,
 		Active:     true,
 		IsInactive: false,
 	}
 
 	// Rate limit
-	if pf.Spec.RateLimit != nil {
-		dp.Rate = pf.Spec.RateLimit.Requests
-		if pf.Spec.RateLimit.Per != "" {
-			per, err := ParseDuration(string(pf.Spec.RateLimit.Per))
+	if pf.RateLimit != nil {
+		dp.Rate = pf.RateLimit.Requests
+		if pf.RateLimit.Per != "" {
+			per, err := ParseDuration(string(pf.RateLimit.Per))
 			if err != nil {
 				return types.DashboardPolicy{}, fmt.Errorf("rateLimit.per: %w", err)
 			}
@@ -32,10 +32,10 @@ func CLIToWire(pf types.PolicyFile, resolved []ResolvedAccess, orgID string) (ty
 	}
 
 	// Quota
-	if pf.Spec.Quota != nil {
-		dp.QuotaMax = pf.Spec.Quota.Limit
-		if pf.Spec.Quota.Period != "" {
-			period, err := ParseDuration(string(pf.Spec.Quota.Period))
+	if pf.Quota != nil {
+		dp.QuotaMax = pf.Quota.Limit
+		if pf.Quota.Period != "" {
+			period, err := ParseDuration(string(pf.Quota.Period))
 			if err != nil {
 				return types.DashboardPolicy{}, fmt.Errorf("quota.period: %w", err)
 			}
@@ -44,8 +44,8 @@ func CLIToWire(pf types.PolicyFile, resolved []ResolvedAccess, orgID string) (ty
 	}
 
 	// Key TTL
-	if pf.Spec.KeyTTL != "" {
-		ttl, err := ParseDuration(string(pf.Spec.KeyTTL))
+	if pf.KeyTTL != "" {
+		ttl, err := ParseDuration(string(pf.KeyTTL))
 		if err != nil {
 			return types.DashboardPolicy{}, fmt.Errorf("keyTTL: %w", err)
 		}
@@ -71,18 +71,14 @@ func CLIToWire(pf types.PolicyFile, resolved []ResolvedAccess, orgID string) (ty
 // It uses the provided API list for best-effort reverse resolution of API IDs to names.
 func WireToCLI(dp types.DashboardPolicy, apis []ResolverAPI) types.PolicyFile {
 	pf := types.PolicyFile{
-		APIVersion: "tyk.tyktech/v1",
-		Kind:       "Policy",
-		Metadata: types.PolicyMetadata{
-			ID:   dp.MID,
-			Name: dp.Name,
-			Tags: dp.Tags,
-		},
+		ID:   dp.MID,
+		Name: dp.Name,
+		Tags: dp.Tags,
 	}
 
 	// Rate limit
 	if dp.Rate > 0 || dp.Per > 0 {
-		pf.Spec.RateLimit = &types.RateLimit{
+		pf.RateLimit = &types.RateLimit{
 			Requests: dp.Rate,
 			Per:      types.Duration(FormatDuration(dp.Per)),
 		}
@@ -90,14 +86,14 @@ func WireToCLI(dp types.DashboardPolicy, apis []ResolverAPI) types.PolicyFile {
 
 	// Quota
 	if dp.QuotaMax > 0 || dp.QuotaRenewalRate > 0 {
-		pf.Spec.Quota = &types.Quota{
+		pf.Quota = &types.Quota{
 			Limit:  dp.QuotaMax,
 			Period: types.Duration(FormatDuration(dp.QuotaRenewalRate)),
 		}
 	}
 
 	// Key TTL
-	pf.Spec.KeyTTL = types.Duration(FormatDuration(dp.KeyExpiresIn))
+	pf.KeyTTL = types.Duration(FormatDuration(dp.KeyExpiresIn))
 
 	// Build API name lookup
 	apiByID := make(map[string]ResolverAPI, len(apis))
@@ -125,7 +121,7 @@ func WireToCLI(dp types.DashboardPolicy, apis []ResolverAPI) types.PolicyFile {
 			entry.ID = apiID
 		}
 
-		pf.Spec.Access = append(pf.Spec.Access, entry)
+		pf.Access = append(pf.Access, entry)
 	}
 
 	return pf

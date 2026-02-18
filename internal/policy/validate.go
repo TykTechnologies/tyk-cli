@@ -6,90 +6,65 @@ import (
 	"github.com/tyktech/tyk-cli/pkg/types"
 )
 
-const (
-	requiredAPIVersion = "tyk.tyktech/v1"
-	requiredKind       = "Policy"
-)
-
 // ValidatePolicy validates a PolicyFile and collects all errors before returning.
 // It checks schema (required fields, types), duration formats, and selector constraints.
 func ValidatePolicy(pf types.PolicyFile) types.ValidationErrors {
 	var errs types.ValidationErrors
 
 	// Schema: required fields
-	if pf.APIVersion == "" {
+	if pf.ID == "" {
 		errs = append(errs, types.ValidationError{
-			Field: "apiVersion", Message: "required field missing", Kind: "schema",
-		})
-	} else if pf.APIVersion != requiredAPIVersion {
-		errs = append(errs, types.ValidationError{
-			Field: "apiVersion", Message: fmt.Sprintf("must be %q", requiredAPIVersion), Kind: "schema",
+			Field: "id", Message: "required field missing", Kind: "schema",
 		})
 	}
 
-	if pf.Kind == "" {
+	if pf.Name == "" {
 		errs = append(errs, types.ValidationError{
-			Field: "kind", Message: "required field missing", Kind: "schema",
-		})
-	} else if pf.Kind != requiredKind {
-		errs = append(errs, types.ValidationError{
-			Field: "kind", Message: fmt.Sprintf("must be %q", requiredKind), Kind: "schema",
+			Field: "name", Message: "required field missing", Kind: "schema",
 		})
 	}
 
-	if pf.Metadata.ID == "" {
+	if len(pf.Access) == 0 {
 		errs = append(errs, types.ValidationError{
-			Field: "metadata.id", Message: "required field missing", Kind: "schema",
-		})
-	}
-
-	if pf.Metadata.Name == "" {
-		errs = append(errs, types.ValidationError{
-			Field: "metadata.name", Message: "required field missing", Kind: "schema",
-		})
-	}
-
-	if len(pf.Spec.Access) == 0 {
-		errs = append(errs, types.ValidationError{
-			Field: "spec.access", Message: "at least one access entry required", Kind: "schema",
+			Field: "access", Message: "at least one access entry required", Kind: "schema",
 		})
 	}
 
 	// Duration validation
-	if pf.Spec.RateLimit != nil {
-		if pf.Spec.RateLimit.Per != "" {
-			if _, err := ParseDuration(string(pf.Spec.RateLimit.Per)); err != nil {
+	if pf.RateLimit != nil {
+		if pf.RateLimit.Per != "" {
+			if _, err := ParseDuration(string(pf.RateLimit.Per)); err != nil {
 				errs = append(errs, types.ValidationError{
-					Field: "spec.rateLimit.per", Message: err.Error(), Kind: "duration",
+					Field: "rateLimit.per", Message: err.Error(), Kind: "duration",
 				})
 			}
 		}
 	}
 
-	if pf.Spec.Quota != nil {
-		if pf.Spec.Quota.Period != "" {
-			if _, err := ParseDuration(string(pf.Spec.Quota.Period)); err != nil {
+	if pf.Quota != nil {
+		if pf.Quota.Period != "" {
+			if _, err := ParseDuration(string(pf.Quota.Period)); err != nil {
 				errs = append(errs, types.ValidationError{
-					Field: "spec.quota.period", Message: err.Error(), Kind: "duration",
+					Field: "quota.period", Message: err.Error(), Kind: "duration",
 				})
 			}
 		}
 	}
 
-	if pf.Spec.KeyTTL != "" {
-		if _, err := ParseDuration(string(pf.Spec.KeyTTL)); err != nil {
+	if pf.KeyTTL != "" {
+		if _, err := ParseDuration(string(pf.KeyTTL)); err != nil {
 			errs = append(errs, types.ValidationError{
-				Field: "spec.keyTTL", Message: err.Error(), Kind: "duration",
+				Field: "keyTTL", Message: err.Error(), Kind: "duration",
 			})
 		}
 	}
 
 	// Selector constraints per access entry
-	for i, entry := range pf.Spec.Access {
+	for i, entry := range pf.Access {
 		count := selectorCount(entry)
 		if count != 1 {
 			errs = append(errs, types.ValidationError{
-				Field:   fmt.Sprintf("spec.access[%d]", i),
+				Field:   fmt.Sprintf("access[%d]", i),
 				Message: "exactly one of id, name, listenPath, or tags must be set",
 				Kind:    "selector",
 			})

@@ -9,21 +9,9 @@ import (
 
 // PolicyFile is the top-level structure users write in YAML policy files.
 type PolicyFile struct {
-	APIVersion string         `yaml:"apiVersion" json:"apiVersion"`
-	Kind       string         `yaml:"kind" json:"kind"`
-	Metadata   PolicyMetadata `yaml:"metadata" json:"metadata"`
-	Spec       PolicySpec     `yaml:"spec" json:"spec"`
-}
-
-// PolicyMetadata holds identity fields for a policy.
-type PolicyMetadata struct {
-	ID   string   `yaml:"id" json:"id"`
-	Name string   `yaml:"name" json:"name"`
-	Tags []string `yaml:"tags,omitempty" json:"tags,omitempty"`
-}
-
-// PolicySpec describes the policy's rate, quota, TTL, and API access rules.
-type PolicySpec struct {
+	ID        string        `yaml:"id" json:"id"`
+	Name      string        `yaml:"name" json:"name"`
+	Tags      []string      `yaml:"tags,omitempty" json:"tags,omitempty"`
 	RateLimit *RateLimit    `yaml:"rateLimit,omitempty" json:"rateLimit,omitempty"`
 	Quota     *Quota        `yaml:"quota,omitempty" json:"quota,omitempty"`
 	KeyTTL    Duration      `yaml:"keyTTL,omitempty" json:"keyTTL,omitempty"`

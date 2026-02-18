@@ -11,23 +11,17 @@ import (
 
 func TestPolicyFile_YAMLRoundTrip(t *testing.T) {
 	original := PolicyFile{
-		APIVersion: "tyk.tyktech/v1",
-		Kind:       "Policy",
-		Metadata: PolicyMetadata{
-			ID:   "gold",
-			Name: "Gold Plan",
-			Tags: []string{"gold", "paid"},
-		},
-		Spec: PolicySpec{
-			RateLimit: &RateLimit{Requests: 1000, Per: Duration("1m")},
-			Quota:     &Quota{Limit: 100000, Period: Duration("30d")},
-			KeyTTL:    Duration("0"),
-			Access: []AccessEntry{
-				{Name: "users-api", Versions: []string{"v1"}},
-				{ListenPath: "/orders/", Versions: []string{"v1", "v2"}},
-				{Tags: []string{"public", "v1"}, Versions: []string{"v1"}},
-				{ID: "foobar123"},
-			},
+		ID:   "gold",
+		Name: "Gold Plan",
+		Tags: []string{"gold", "paid"},
+		RateLimit: &RateLimit{Requests: 1000, Per: Duration("1m")},
+		Quota:     &Quota{Limit: 100000, Period: Duration("30d")},
+		KeyTTL:    Duration("0"),
+		Access: []AccessEntry{
+			{Name: "users-api", Versions: []string{"v1"}},
+			{ListenPath: "/orders/", Versions: []string{"v1", "v2"}},
+			{Tags: []string{"public", "v1"}, Versions: []string{"v1"}},
+			{ID: "foobar123"},
 		},
 	}
 
@@ -38,24 +32,22 @@ func TestPolicyFile_YAMLRoundTrip(t *testing.T) {
 	err = yaml.Unmarshal(yamlBytes, &restored)
 	require.NoError(t, err)
 
-	assert.Equal(t, original.APIVersion, restored.APIVersion)
-	assert.Equal(t, original.Kind, restored.Kind)
-	assert.Equal(t, original.Metadata.ID, restored.Metadata.ID)
-	assert.Equal(t, original.Metadata.Name, restored.Metadata.Name)
-	assert.Equal(t, original.Metadata.Tags, restored.Metadata.Tags)
-	assert.Equal(t, original.Spec.RateLimit.Requests, restored.Spec.RateLimit.Requests)
-	assert.Equal(t, original.Spec.RateLimit.Per, restored.Spec.RateLimit.Per)
-	assert.Equal(t, original.Spec.Quota.Limit, restored.Spec.Quota.Limit)
-	assert.Equal(t, original.Spec.Quota.Period, restored.Spec.Quota.Period)
-	assert.Equal(t, original.Spec.KeyTTL, restored.Spec.KeyTTL)
-	require.Len(t, restored.Spec.Access, 4)
-	assert.Equal(t, "users-api", restored.Spec.Access[0].Name)
-	assert.Equal(t, []string{"v1"}, restored.Spec.Access[0].Versions)
-	assert.Equal(t, "/orders/", restored.Spec.Access[1].ListenPath)
-	assert.Equal(t, []string{"v1", "v2"}, restored.Spec.Access[1].Versions)
-	assert.Equal(t, []string{"public", "v1"}, restored.Spec.Access[2].Tags)
-	assert.Equal(t, "foobar123", restored.Spec.Access[3].ID)
-	assert.Empty(t, restored.Spec.Access[3].Versions, "omitted versions should remain nil/empty")
+	assert.Equal(t, original.ID, restored.ID)
+	assert.Equal(t, original.Name, restored.Name)
+	assert.Equal(t, original.Tags, restored.Tags)
+	assert.Equal(t, original.RateLimit.Requests, restored.RateLimit.Requests)
+	assert.Equal(t, original.RateLimit.Per, restored.RateLimit.Per)
+	assert.Equal(t, original.Quota.Limit, restored.Quota.Limit)
+	assert.Equal(t, original.Quota.Period, restored.Quota.Period)
+	assert.Equal(t, original.KeyTTL, restored.KeyTTL)
+	require.Len(t, restored.Access, 4)
+	assert.Equal(t, "users-api", restored.Access[0].Name)
+	assert.Equal(t, []string{"v1"}, restored.Access[0].Versions)
+	assert.Equal(t, "/orders/", restored.Access[1].ListenPath)
+	assert.Equal(t, []string{"v1", "v2"}, restored.Access[1].Versions)
+	assert.Equal(t, []string{"public", "v1"}, restored.Access[2].Tags)
+	assert.Equal(t, "foobar123", restored.Access[3].ID)
+	assert.Empty(t, restored.Access[3].Versions, "omitted versions should remain nil/empty")
 }
 
 func TestDashboardPolicy_JSONRoundTrip(t *testing.T) {

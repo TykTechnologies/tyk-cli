@@ -459,6 +459,7 @@ func TestPolicyCommand_Registration(t *testing.T) {
 			assert.True(t, subNames["list"], "'list' should be a subcommand of 'policy'")
 			assert.True(t, subNames["get"], "'get' should be a subcommand of 'policy'")
 			assert.True(t, subNames["apply"], "'apply' should be a subcommand of 'policy'")
+			assert.True(t, subNames["delete"], "'delete' should be a subcommand of 'policy'")
 		}
 	}
 	assert.True(t, found, "'policy' should be a subcommand of root")
@@ -853,8 +854,28 @@ func TestPolicyApply_FileNotFound(t *testing.T) {
 // Milestone 3: Delete + Init
 // ===========================================================================
 
+// executePolicyDeleteCmd creates a policy delete command with config injected and executes RunE directly.
+// This bypasses root PersistentPreRunE (which loads config from disk) and tests the driving port directly.
+func executePolicyDeleteCmd(t *testing.T, serverURL string, outputFormat types.OutputFormat, policyID string, yes bool) error {
+	t.Helper()
+	deleteCmd := NewPolicyDeleteCommand()
+
+	cfg := createPolicyConfig(serverURL)
+	ctx := withConfig(context.Background(), cfg)
+	ctx = withOutputFormat(ctx, outputFormat)
+	deleteCmd.SetContext(ctx)
+
+	cmdArgs := []string{policyID}
+	if yes {
+		cmdArgs = append(cmdArgs, "--yes")
+	}
+	deleteCmd.SetArgs(cmdArgs)
+	deleteCmd.ParseFlags(cmdArgs)
+
+	return deleteCmd.RunE(deleteCmd, []string{policyID})
+}
+
 func TestPolicyDelete_WithYes(t *testing.T) {
-	t.Skip("pending: step 02-04")
 	deleteCalled := false
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -874,23 +895,24 @@ func TestPolicyDelete_WithYes(t *testing.T) {
 	}))
 	defer server.Close()
 
-	root := NewRootCommand("test", "commit", "time")
-	deleteCmd, _, err := root.Find([]string{"policy", "delete"})
-	require.NoError(t, err)
+	// Capture stderr for confirmation message
+	oldStderr := os.Stderr
+	rErr, wErr, _ := os.Pipe()
+	os.Stderr = wErr
 
-	cfg := createPolicyConfig(server.URL)
-	deleteCmd.SetContext(withConfig(context.Background(), cfg))
-	deleteCmd.SetContext(withOutputFormat(deleteCmd.Context(), types.OutputHuman))
+	err := executePolicyDeleteCmd(t, server.URL, types.OutputHuman, "free-tier", true)
 
-	deleteCmd.SetArgs([]string{"free-tier", "--yes"})
-	err = deleteCmd.Execute()
+	wErr.Close()
+	os.Stderr = oldStderr
+	stderr, _ := io.ReadAll(rErr)
 
 	require.NoError(t, err)
 	assert.True(t, deleteCalled, "DELETE should have been called")
+	assert.Contains(t, string(stderr), "Free Plan", "stderr should mention policy name")
+	assert.Contains(t, string(stderr), "deleted", "stderr should confirm deletion")
 }
 
 func TestPolicyDelete_NotFound(t *testing.T) {
-	t.Skip("pending: step 02-03 -- enable after delete subcommand is implemented")
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(map[string]interface{}{
@@ -899,25 +921,16 @@ func TestPolicyDelete_NotFound(t *testing.T) {
 	}))
 	defer server.Close()
 
-	root := NewRootCommand("test", "commit", "time")
-	deleteCmd, _, err := root.Find([]string{"policy", "delete"})
-	require.NoError(t, err)
-
-	cfg := createPolicyConfig(server.URL)
-	deleteCmd.SetContext(withConfig(context.Background(), cfg))
-	deleteCmd.SetContext(withOutputFormat(deleteCmd.Context(), types.OutputHuman))
-
-	deleteCmd.SetArgs([]string{"nonexistent", "--yes"})
-	err = deleteCmd.Execute()
+	err := executePolicyDeleteCmd(t, server.URL, types.OutputHuman, "nonexistent", true)
 
 	require.Error(t, err)
-	if exitErr, ok := err.(*ExitError); ok {
-		assert.Equal(t, 3, exitErr.Code)
-	}
+	exitErr, ok := err.(*ExitError)
+	require.True(t, ok, "should return ExitError")
+	assert.Equal(t, 3, exitErr.Code)
+	assert.Contains(t, exitErr.Message, "not found")
 }
 
 func TestPolicyDelete_WithYes_JSON(t *testing.T) {
-	t.Skip("pending: step 02-03 -- enable after delete subcommand is implemented")
 	deleteCalled := false
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -935,21 +948,12 @@ func TestPolicyDelete_WithYes_JSON(t *testing.T) {
 	}))
 	defer server.Close()
 
-	root := NewRootCommand("test", "commit", "time")
-	deleteCmd, _, err := root.Find([]string{"policy", "delete"})
-	require.NoError(t, err)
-
-	cfg := createPolicyConfig(server.URL)
-	deleteCmd.SetContext(withConfig(context.Background(), cfg))
-	deleteCmd.SetContext(withOutputFormat(deleteCmd.Context(), types.OutputJSON))
-
 	// Capture stdout for JSON output
 	oldStdout := os.Stdout
 	rOut, wOut, _ := os.Pipe()
 	os.Stdout = wOut
 
-	deleteCmd.SetArgs([]string{"free-tier", "--yes"})
-	err = deleteCmd.Execute()
+	err := executePolicyDeleteCmd(t, server.URL, types.OutputJSON, "free-tier", true)
 
 	wOut.Close()
 	os.Stdout = oldStdout

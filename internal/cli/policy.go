@@ -27,6 +27,7 @@ func NewPolicyCommand() *cobra.Command {
 	policyCmd.AddCommand(NewPolicyListCommand())
 	policyCmd.AddCommand(NewPolicyGetCommand())
 	policyCmd.AddCommand(NewPolicyApplyCommand())
+	policyCmd.AddCommand(NewPolicyDeleteCommand())
 
 	return policyCmd
 }
@@ -356,6 +357,89 @@ func runPolicyApply(cmd *cobra.Command, args []string) error {
 		fmt.Fprintf(os.Stderr, "Policy '%s' (%s) created.\n", pf.Metadata.Name, pf.Metadata.ID)
 	}
 
+	return nil
+}
+
+// NewPolicyDeleteCommand creates the 'tyk policy delete' command
+func NewPolicyDeleteCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "delete <policy-id>",
+		Short: "Delete a policy by ID",
+		Long:  "Delete a security policy by ID with confirmation prompt",
+		Args:  cobra.ExactArgs(1),
+		RunE:  runPolicyDelete,
+	}
+
+	cmd.Flags().Bool("yes", false, "Skip confirmation prompt")
+
+	return cmd
+}
+
+// runPolicyDelete implements the 'tyk policy delete' command
+func runPolicyDelete(cmd *cobra.Command, args []string) error {
+	policyID := args[0]
+	skipConfirmation, _ := cmd.Flags().GetBool("yes")
+
+	// Get configuration from context
+	config := GetConfigFromContext(cmd.Context())
+	if config == nil {
+		return fmt.Errorf("configuration not found")
+	}
+
+	// Create client
+	c, err := client.NewClient(config)
+	if err != nil {
+		return fmt.Errorf("failed to create client: %w", err)
+	}
+
+	// Create context with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Fetch policy to verify existence and get name for confirmation
+	dp, err := c.GetPolicy(ctx, policyID)
+	if err != nil {
+		if er, ok := err.(*types.ErrorResponse); ok && er.Status == 404 {
+			return &ExitError{Code: int(types.ExitNotFound), Message: fmt.Sprintf("policy '%s' not found", policyID)}
+		}
+		if strings.Contains(err.Error(), "404") || strings.Contains(strings.ToLower(err.Error()), "not found") {
+			return &ExitError{Code: int(types.ExitNotFound), Message: fmt.Sprintf("policy '%s' not found", policyID)}
+		}
+		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to get policy: %v", err)}
+	}
+
+	// Confirmation prompt unless --yes flag is provided
+	if !skipConfirmation {
+		fmt.Fprintf(os.Stderr, "Are you sure you want to delete policy '%s' (%s)? [y/N]: ", dp.Name, policyID)
+		var response string
+		fmt.Scanln(&response)
+		if strings.ToLower(response) != "y" && strings.ToLower(response) != "yes" {
+			fmt.Fprintf(os.Stderr, "Delete operation cancelled.\n")
+			return nil
+		}
+	}
+
+	// Delete the policy
+	if err := c.DeletePolicy(ctx, policyID); err != nil {
+		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to delete policy: %v", err)}
+	}
+
+	// Get output format from context
+	outputFormat := GetOutputFormatFromContext(cmd.Context())
+
+	if outputFormat == types.OutputJSON {
+		result := map[string]interface{}{
+			"policy_id": policyID,
+			"operation": "deleted",
+			"success":   true,
+		}
+		encoder := json.NewEncoder(os.Stdout)
+		encoder.SetIndent("", "  ")
+		return encoder.Encode(result)
+	}
+
+	// Human-readable confirmation to stderr
+	fmt.Fprintf(os.Stderr, "Policy '%s' (%s) deleted.\n", dp.Name, policyID)
 	return nil
 }
 

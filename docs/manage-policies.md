@@ -7,6 +7,8 @@ nav_order: 4
 
 Security policies control rate limits, quotas, and API access for your consumers. The CLI lets you author policies as human-friendly YAML files and sync them to your Tyk Dashboard.
 
+> **Requires Tyk Dashboard v5.12.0+.** The policy commands rely on the Dashboard's `id` field for direct lookups. Earlier versions only resolve the `_id` (MongoDB ObjectID) in API paths, so friendly IDs will not work.
+
 ## Quick start
 
 ```bash

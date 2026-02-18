@@ -55,7 +55,7 @@ func (d *Duration) UnmarshalYAML(value *yaml.Node) error {
 
 // DashboardPolicy represents the wire format returned by the Tyk Dashboard API.
 type DashboardPolicy struct {
-	MID              string                  `json:"_id"`
+	MID              string                  `json:"_id,omitempty"`
 	ID               string                  `json:"id"`
 	Name             string                  `json:"name"`
 	OrgID            string                  `json:"org_id,omitempty"`

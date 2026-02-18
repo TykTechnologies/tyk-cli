@@ -66,7 +66,7 @@ tyk --version
 ```bash
 git clone https://github.com/sedkis/tyk-cli.git
 cd tyk-cli
-go build -o tyk .
+go build -o tyk ./cmd/
 sudo mv tyk /usr/local/bin/
 ```
 
@@ -220,7 +220,7 @@ cd tyk-cli
 go mod download
 
 # Build the CLI
-go build -o tyk .
+go build -o tyk ./cmd/
 
 # Run tests
 go test ./...

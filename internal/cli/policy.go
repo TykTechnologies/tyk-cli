@@ -136,13 +136,13 @@ func runPolicyGet(cmd *cobra.Command, args []string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), httpTimeout)
 	defer cancel()
 
-	// Fetch the policy
-	dp, err := c.GetPolicy(ctx, policyID)
+	// Resolve friendly ID to fetch the policy (O(1) GET)
+	dp, err := resolveFriendlyID(ctx, c, policyID)
 	if err != nil {
-		if isNotFoundError(err) {
-			return &ExitError{Code: int(types.ExitNotFound), Message: fmt.Sprintf("policy '%s' not found", policyID)}
-		}
-		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to get policy: %v", err)}
+		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to resolve policy: %v", err)}
+	}
+	if dp == nil {
+		return &ExitError{Code: int(types.ExitNotFound), Message: fmt.Sprintf("policy '%s' not found", policyID)}
 	}
 
 	// Fetch API list for reverse-resolution of API IDs to names (non-fatal on error)
@@ -251,20 +251,22 @@ func runPolicyApply(cmd *cobra.Command, args []string) error {
 		return &ExitError{Code: int(types.ExitBadArgs), Message: err.Error()}
 	}
 
-	// Check if policy already exists (upsert semantics)
-	_, getErr := c.GetPolicy(ctx, pf.ID)
-	policyExists := getErr == nil
-	if getErr != nil && !isNotFoundError(getErr) {
-		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to check existing policy: %v", getErr)}
+	// Resolve friendly ID to check if policy already exists (O(1) GET)
+	existingPolicy, resolveErr := resolveFriendlyID(ctx, c, pf.ID)
+	if resolveErr != nil {
+		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to resolve policy: %v", resolveErr)}
 	}
 
 	// Create or update based on existence check
-	if policyExists {
+	if existingPolicy != nil {
+		// Update path — use the friendly ID
 		if err := c.UpdatePolicy(ctx, pf.ID, &dp); err != nil {
 			return &ExitError{Code: 1, Message: fmt.Sprintf("failed to update policy: %v", err)}
 		}
 		fmt.Fprintf(os.Stderr, "Policy '%s' (%s) updated.\n", pf.Name, pf.ID)
 	} else {
+		// Create path — omit _id, let Dashboard generate it
+		dp.MID = ""
 		if err := c.CreatePolicy(ctx, &dp); err != nil {
 			return &ExitError{Code: 1, Message: fmt.Sprintf("failed to create policy: %v", err)}
 		}
@@ -310,13 +312,13 @@ func runPolicyDelete(cmd *cobra.Command, args []string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), httpTimeout)
 	defer cancel()
 
-	// Fetch policy to verify existence and get name for confirmation
-	dp, err := c.GetPolicy(ctx, policyID)
+	// Resolve friendly ID to fetch the policy (O(1) GET)
+	dp, err := resolveFriendlyID(ctx, c, policyID)
 	if err != nil {
-		if isNotFoundError(err) {
-			return &ExitError{Code: int(types.ExitNotFound), Message: fmt.Sprintf("policy '%s' not found", policyID)}
-		}
-		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to get policy: %v", err)}
+		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to resolve policy: %v", err)}
+	}
+	if dp == nil {
+		return &ExitError{Code: int(types.ExitNotFound), Message: fmt.Sprintf("policy '%s' not found", policyID)}
 	}
 
 	// Confirmation prompt unless --yes flag is provided
@@ -330,7 +332,7 @@ func runPolicyDelete(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	// Delete the policy
+	// Delete the policy using the friendly ID
 	if err := c.DeletePolicy(ctx, policyID); err != nil {
 		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to delete policy: %v", err)}
 	}
@@ -509,6 +511,17 @@ func joinErrorMessages(errs []error) string {
 	return strings.Join(msgs, "; ")
 }
 
+func resolveFriendlyID(ctx context.Context, c *client.Client, friendlyID string) (*types.DashboardPolicy, error) {
+	dp, err := c.GetPolicy(ctx, friendlyID)
+	if err != nil {
+		if isNotFoundError(err) {
+			return nil, nil // not found — caller decides create or error
+		}
+		return nil, fmt.Errorf("failed to resolve policy %q: %w", friendlyID, err)
+	}
+	return dp, nil
+}
+
 // isNotFoundError returns true if the error indicates a 404 / not found response.
 func isNotFoundError(err error) bool {
 	if er, ok := err.(*types.ErrorResponse); ok && er.Status == 404 {
@@ -542,9 +555,13 @@ func displayPolicyPage(policies []types.DashboardPolicy, page int) {
 	fmt.Fprintf(os.Stdout, "%-26s  %-24s  %-10s  %s\n", "ID", "Name", "APIs", "Tags")
 	fmt.Fprintf(os.Stdout, "%s\n", strings.Repeat("-", 26+2+24+2+10+2+20))
 	for _, p := range policies {
+		displayID := p.ID
+		if displayID == "" {
+			displayID = p.MID // unmanaged policy — show _id
+		}
 		apiCount := len(p.AccessRights)
 		tags := strings.Join(p.Tags, ", ")
-		fmt.Fprintf(os.Stdout, "%-26s  %-24s  %-10d  %s\n", p.MID, p.Name, apiCount, tags)
+		fmt.Fprintf(os.Stdout, "%-26s  %-24s  %-10d  %s\n", displayID, p.Name, apiCount, tags)
 	}
 	fmt.Fprintf(os.Stderr, "\nUse '--page %d' for next page.\n", page+1)
 }

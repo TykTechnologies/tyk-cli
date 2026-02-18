@@ -22,8 +22,10 @@ func NewRootCommand(version, commit, buildTime string) *cobra.Command {
 	var globalFlags GlobalFlags
 	
 	rootCmd := &cobra.Command{
-		Use:   "tyk",
-		Short: "Tyk CLI - Manage Tyk OAS-native APIs",
+		Use:          "tyk",
+		Short:        "Tyk CLI - Manage Tyk OAS-native APIs",
+		SilenceUsage:  true,
+		SilenceErrors: true,
 		Long: `Tyk CLI is a command-line interface for managing Tyk OAS-native APIs.
 It provides commands to create, update, delete, and manage API versions
 with support for OpenAPI 3.0 specifications.`,

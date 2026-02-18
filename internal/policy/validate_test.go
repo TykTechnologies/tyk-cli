@@ -174,3 +174,52 @@ func TestValidatePolicy_CollectsAllErrors(t *testing.T) {
 	assert.GreaterOrEqual(t, len(errs), 4,
 		"expected at least 4 errors for multiply-broken policy, got %d: %v", len(errs), errs)
 }
+
+func TestValidatePolicy_FriendlyID_Valid(t *testing.T) {
+	validIDs := []string{"gold", "free-tier", "rate-limit-basic", "v2.0", "a", "abc_def"}
+
+	for _, id := range validIDs {
+		t.Run(id, func(t *testing.T) {
+			pf := validPolicyFile()
+			pf.ID = id
+			errs := ValidatePolicy(pf)
+			for _, e := range errs {
+				assert.NotEqual(t, "id", e.Field, "expected no id error for valid ID %q, got: %v", id, e)
+			}
+		})
+	}
+}
+
+func TestValidatePolicy_FriendlyID_Invalid(t *testing.T) {
+	tests := []struct {
+		name    string
+		id      string
+		wantMsg string
+	}{
+		{"uppercase", "Gold", "lowercase"},
+		{"starts with hyphen", "-bad", "start with"},
+		{"special chars", "gold!", "lowercase"},
+		{"too long", "aaaaaaaaaabbbbbbbbbbccccccccccddddddddddeeeeeeeeeeffffffffffggggg", "64 characters"},
+		{"ObjectID-shaped", "507f1f77bcf86cd799439011", "MongoDB ObjectID"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			pf := validPolicyFile()
+			pf.ID = tt.id
+			errs := ValidatePolicy(pf)
+			require.NotEmpty(t, errs, "expected validation error for ID %q", tt.id)
+
+			found := false
+			for _, e := range errs {
+				if e.Field == "id" && e.Kind == "schema" {
+					found = true
+					assert.Contains(t, e.Message, tt.wantMsg,
+						"error message for ID %q should contain %q", tt.id, tt.wantMsg)
+					break
+				}
+			}
+			assert.True(t, found, "expected schema error for field 'id', got: %v", errs)
+		})
+	}
+}

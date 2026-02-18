@@ -38,7 +38,7 @@ func (c *Client) ListPolicies(ctx context.Context, page int) (*types.DashboardPo
 	return &result, nil
 }
 
-// GetPolicy retrieves a single policy by ID.
+// GetPolicy retrieves a single policy by its MongoDB _id.
 // Returns *types.ErrorResponse on 404.
 func (c *Client) GetPolicy(ctx context.Context, policyID string) (*types.DashboardPolicy, error) {
 	policyPath := fmt.Sprintf(PolicyPath, url.PathEscape(policyID))

@@ -30,7 +30,8 @@ func TestCLIToWire(t *testing.T) {
 	dp, err := CLIToWire(pf, resolved, "org-123")
 	require.NoError(t, err)
 
-	assert.Equal(t, "gold", dp.MID)
+	assert.Empty(t, dp.MID, "MID should be empty — caller sets it after resolution")
+	assert.Equal(t, "gold", dp.ID, "wire id should match friendly id directly")
 	assert.Equal(t, "Gold Plan", dp.Name)
 	assert.Equal(t, "org-123", dp.OrgID)
 	assert.Equal(t, []string{"gold", "paid"}, dp.Tags)
@@ -56,7 +57,8 @@ func TestCLIToWire(t *testing.T) {
 
 func TestWireToCLI(t *testing.T) {
 	dp := types.DashboardPolicy{
-		MID:              "gold",
+		MID:              "507f1f77bcf86cd799439011",
+		ID:               "gold",
 		Name:             "Gold Plan",
 		Tags:             []string{"gold", "paid"},
 		Rate:             1000,
@@ -86,7 +88,7 @@ func TestWireToCLI(t *testing.T) {
 
 	pf := WireToCLI(dp, apis)
 
-	assert.Equal(t, "gold", pf.ID)
+	assert.Equal(t, "gold", pf.ID, "should use wire id directly")
 	assert.Equal(t, "Gold Plan", pf.Name)
 	assert.Equal(t, []string{"gold", "paid"}, pf.Tags)
 	assert.Equal(t, int64(1000), pf.RateLimit.Requests)
@@ -112,6 +114,30 @@ func TestWireToCLI(t *testing.T) {
 	ordersEntry := accessByName["orders-api"]
 	assert.Equal(t, "orders-api", ordersEntry.Name)
 	assert.Equal(t, []string{"v1", "v2"}, ordersEntry.Versions)
+}
+
+func TestWireToCLI_FallbackToMID(t *testing.T) {
+	dp := types.DashboardPolicy{
+		MID:  "507f1f77bcf86cd799439011",
+		ID:   "", // unmanaged policy — no tyk-cli: prefix
+		Name: "Legacy Policy",
+		AccessRights: map[string]*types.AccessRight{
+			"a1b2c3d4e5f6": {
+				APIID:   "a1b2c3d4e5f6",
+				APIName: "users-api",
+				Versions: []string{"v1"},
+			},
+		},
+	}
+
+	apis := []ResolverAPI{
+		{ID: "a1b2c3d4e5f6", Name: "users-api"},
+	}
+
+	pf := WireToCLI(dp, apis)
+
+	assert.Equal(t, "507f1f77bcf86cd799439011", pf.ID, "should fall back to MID when wire id is empty")
+	assert.Equal(t, "Legacy Policy", pf.Name)
 }
 
 func TestRoundTrip_CLIToWireToCLI(t *testing.T) {

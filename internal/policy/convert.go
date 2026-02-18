@@ -11,7 +11,8 @@ import (
 // The caller is responsible for resolving selectors before calling this function.
 func CLIToWire(pf types.PolicyFile, resolved []ResolvedAccess, orgID string) (types.DashboardPolicy, error) {
 	dp := types.DashboardPolicy{
-		MID:        pf.ID,
+		// MID intentionally left empty — caller sets it after resolution
+		ID:         pf.ID,
 		Name:       pf.Name,
 		OrgID:      orgID,
 		Tags:       pf.Tags,
@@ -70,8 +71,13 @@ func CLIToWire(pf types.PolicyFile, resolved []ResolvedAccess, orgID string) (ty
 // WireToCLI converts a DashboardPolicy back to the CLI PolicyFile format.
 // It uses the provided API list for best-effort reverse resolution of API IDs to names.
 func WireToCLI(dp types.DashboardPolicy, apis []ResolverAPI) types.PolicyFile {
+	friendlyID := dp.ID
+	if friendlyID == "" {
+		friendlyID = dp.MID // fallback for unmanaged policies
+	}
+
 	pf := types.PolicyFile{
-		ID:   dp.MID,
+		ID:   friendlyID,
 		Name: dp.Name,
 		Tags: dp.Tags,
 	}

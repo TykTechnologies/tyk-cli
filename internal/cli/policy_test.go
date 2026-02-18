@@ -23,10 +23,11 @@ import (
 
 // mockDashboardPolicy returns a DashboardPolicy JSON-encodable map
 // matching the wire format from data-models.md.
-func mockDashboardPolicy(id, name string, rate, per, quotaMax, quotaRenewalRate int64, tags []string, accessRights map[string]interface{}) map[string]interface{} {
+// mid is the MongoDB ObjectID (_id), wireID is the managed wire id field (e.g., "gold").
+func mockDashboardPolicy(mid, wireID, name string, rate, per, quotaMax, quotaRenewalRate int64, tags []string, accessRights map[string]interface{}) map[string]interface{} {
 	return map[string]interface{}{
-		"_id":                  id,
-		"id":                   "",
+		"_id":                  mid,
+		"id":                   wireID,
 		"name":                 name,
 		"org_id":               "org",
 		"rate":                 rate,
@@ -210,9 +211,9 @@ func TestPolicyList_Empty(t *testing.T) {
 // Walking skeleton scenario 1b.
 func TestPolicyList_WithPolicies(t *testing.T) {
 	policies := []map[string]interface{}{
-		mockDashboardPolicy("gold", "Gold Plan", 1000, 60, 100000, 2592000,
+		mockDashboardPolicy("507f1f77bcf86cd799439011", "gold", "Gold Plan", 1000, 60, 100000, 2592000,
 			[]string{"gold", "paid"}, goldPolicyAccessRights()),
-		mockDashboardPolicy("silver", "Silver Plan", 500, 60, 50000, 2592000,
+		mockDashboardPolicy("507f1f77bcf86cd799439012", "silver", "Silver Plan", 500, 60, 50000, 2592000,
 			[]string{"silver"}, map[string]interface{}{
 				"a1b2c3d4e5f6": map[string]interface{}{
 					"api_id": "a1b2c3d4e5f6", "api_name": "users-api",
@@ -243,6 +244,7 @@ func TestPolicyList_WithPolicies(t *testing.T) {
 
 	require.NoError(t, err)
 	output := string(stdout)
+	// displayPolicyPage extracts friendly IDs from wire id field
 	assert.Contains(t, output, "gold")
 	assert.Contains(t, output, "Gold Plan")
 	assert.Contains(t, output, "silver")
@@ -278,19 +280,17 @@ func TestPolicyApply_Create_NameSelector(t *testing.T) {
 		case r.Method == http.MethodGet && r.URL.Path == "/api/apis":
 			json.NewEncoder(w).Encode(mockAPIListResponse())
 
-		// Check if policy exists (GET returns 404 -> create path)
-		case r.Method == http.MethodGet && strings.Contains(r.URL.Path, "/api/portal/policies/platinum"):
+		// Resolve policy by ID — not found -> create path
+		case r.Method == http.MethodGet && r.URL.Path == "/api/portal/policies/platinum":
 			w.WriteHeader(http.StatusNotFound)
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"status": 404, "message": "policy not found",
-			})
+			json.NewEncoder(w).Encode(map[string]interface{}{"status": 404, "message": "not found"})
 
 		// Create policy
 		case r.Method == http.MethodPost && r.URL.Path == "/api/portal/policies":
 			body, _ := io.ReadAll(r.Body)
 			json.Unmarshal(body, &capturedCreateBody)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"Status": "success", "Message": "created", "Meta": "platinum",
+				"Status": "success", "Message": "created", "Meta": "507f1f77bcf86cd799439099",
 			})
 
 		default:
@@ -305,7 +305,11 @@ func TestPolicyApply_Create_NameSelector(t *testing.T) {
 
 	// Verify the wire format sent to Dashboard
 	require.NotNil(t, capturedCreateBody)
-	assert.Equal(t, "platinum", capturedCreateBody["_id"])
+	// _id should be empty/absent on create — Dashboard generates it
+	mid, hasMID := capturedCreateBody["_id"]
+	assert.True(t, !hasMID || mid == "", "_id should be empty or absent on create, got: %v", mid)
+	// wire id should be the managed ID
+	assert.Equal(t, "platinum", capturedCreateBody["id"])
 	assert.Equal(t, "Platinum Plan", capturedCreateBody["name"])
 	// Duration conversion: "1m" -> 60 seconds
 	assert.EqualValues(t, 5000, capturedCreateBody["rate"])
@@ -334,19 +338,19 @@ func TestPolicyApply_Update_Idempotent(t *testing.T) {
 		case r.Method == http.MethodGet && r.URL.Path == "/api/apis":
 			json.NewEncoder(w).Encode(mockAPIListResponse())
 
-		// Check if policy exists (GET returns 200 -> update path)
-		case r.Method == http.MethodGet && strings.Contains(r.URL.Path, "/api/portal/policies/platinum"):
-			existing := mockDashboardPolicy("platinum", "Platinum Plan", 5000, 60, 500000, 2592000,
+		// Resolve policy by ID — found -> update path
+		case r.Method == http.MethodGet && r.URL.Path == "/api/portal/policies/platinum":
+			existing := mockDashboardPolicy("507f1f77bcf86cd799439013", "platinum", "Platinum Plan", 5000, 60, 500000, 2592000,
 				[]string{"platinum", "paid"}, map[string]interface{}{})
 			json.NewEncoder(w).Encode(existing)
 
-		// Update policy
-		case r.Method == http.MethodPut && strings.Contains(r.URL.Path, "/api/portal/policies/platinum"):
+		// Update policy — PUT by id
+		case r.Method == http.MethodPut && r.URL.Path == "/api/portal/policies/platinum":
 			updateCalled = true
 			body, _ := io.ReadAll(r.Body)
 			json.Unmarshal(body, &capturedUpdateBody)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"Status": "success", "Message": "updated", "Meta": "platinum",
+				"Status": "success", "Message": "updated", "Meta": "507f1f77bcf86cd799439013",
 			})
 
 		default:
@@ -373,7 +377,7 @@ func TestPolicyApply_Update_Idempotent(t *testing.T) {
 
 func TestPolicyList_JSONOutput(t *testing.T) {
 	policies := []map[string]interface{}{
-		mockDashboardPolicy("gold", "Gold Plan", 1000, 60, 100000, 2592000,
+		mockDashboardPolicy("507f1f77bcf86cd799439011", "gold", "Gold Plan", 1000, 60, 100000, 2592000,
 			[]string{"gold", "paid"}, goldPolicyAccessRights()),
 	}
 
@@ -478,12 +482,12 @@ func executePolicyGetCmd(t *testing.T, serverURL string, outputFormat types.Outp
 }
 
 func TestPolicyGet_Human(t *testing.T) {
-	goldPolicy := mockDashboardPolicy("gold", "Gold Plan", 1000, 60, 100000, 2592000,
+	goldPolicy := mockDashboardPolicy("507f1f77bcf86cd799439011", "gold", "Gold Plan", 1000, 60, 100000, 2592000,
 		[]string{"gold", "paid"}, goldPolicyAccessRights())
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
-		case r.Method == http.MethodGet && strings.Contains(r.URL.Path, "/api/portal/policies/gold"):
+		case r.Method == http.MethodGet && r.URL.Path == "/api/portal/policies/gold":
 			json.NewEncoder(w).Encode(goldPolicy)
 		case r.Method == http.MethodGet && r.URL.Path == "/api/apis":
 			json.NewEncoder(w).Encode(mockAPIListResponse())
@@ -524,12 +528,12 @@ func TestPolicyGet_Human(t *testing.T) {
 }
 
 func TestPolicyGet_JSON(t *testing.T) {
-	goldPolicy := mockDashboardPolicy("gold", "Gold Plan", 1000, 60, 100000, 2592000,
+	goldPolicy := mockDashboardPolicy("507f1f77bcf86cd799439011", "gold", "Gold Plan", 1000, 60, 100000, 2592000,
 		[]string{"gold", "paid"}, goldPolicyAccessRights())
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
-		case r.Method == http.MethodGet && strings.Contains(r.URL.Path, "/api/portal/policies/gold"):
+		case r.Method == http.MethodGet && r.URL.Path == "/api/portal/policies/gold":
 			json.NewEncoder(w).Encode(goldPolicy)
 		case r.Method == http.MethodGet && r.URL.Path == "/api/apis":
 			json.NewEncoder(w).Encode(mockAPIListResponse())
@@ -561,10 +565,13 @@ func TestPolicyGet_JSON(t *testing.T) {
 
 func TestPolicyGet_NotFound(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(map[string]interface{}{
-			"status": 404, "message": "policy not found",
-		})
+		switch {
+		case r.Method == http.MethodGet && r.URL.Path == "/api/portal/policies/nonexistent":
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(map[string]interface{}{"status": 404, "message": "not found"})
+		default:
+			http.NotFound(w, r)
+		}
 	}))
 	defer server.Close()
 
@@ -589,7 +596,7 @@ func TestPolicyApply_ListenPathSelector(t *testing.T) {
 		switch {
 		case r.Method == http.MethodGet && r.URL.Path == "/api/apis":
 			json.NewEncoder(w).Encode(mockAPIListResponse())
-		case r.Method == http.MethodGet && strings.Contains(r.URL.Path, "/api/portal/policies/path-test"):
+		case r.Method == http.MethodGet && r.URL.Path == "/api/portal/policies/path-test":
 			w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": 404, "message": "not found"})
 		case r.Method == http.MethodPost && r.URL.Path == "/api/portal/policies":
@@ -635,7 +642,7 @@ func TestPolicyApply_DurationConversion(t *testing.T) {
 		switch {
 		case r.Method == http.MethodGet && r.URL.Path == "/api/apis":
 			json.NewEncoder(w).Encode(mockAPIListResponse())
-		case r.Method == http.MethodGet && strings.Contains(r.URL.Path, "/api/portal/policies/"):
+		case r.Method == http.MethodGet && r.URL.Path == "/api/portal/policies/dur-test":
 			w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(w).Encode(map[string]interface{}{"status": 404, "message": "not found"})
 		case r.Method == http.MethodPost && r.URL.Path == "/api/portal/policies":
@@ -846,13 +853,13 @@ func TestPolicyDelete_WithYes(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
-		case r.Method == http.MethodGet && strings.Contains(r.URL.Path, "/api/portal/policies/free-tier"):
-			policy := mockDashboardPolicy("free-tier", "Free Plan", 100, 60, 10000, 86400,
+		case r.Method == http.MethodGet && r.URL.Path == "/api/portal/policies/free-tier":
+			p := mockDashboardPolicy("507f1f77bcf86cd799439020", "free-tier", "Free Plan", 100, 60, 10000, 86400,
 				[]string{"free"}, map[string]interface{}{
 					"a1b2c3d4e5f6": map[string]interface{}{"api_id": "a1b2c3d4e5f6"},
 				})
-			json.NewEncoder(w).Encode(policy)
-		case r.Method == http.MethodDelete && strings.Contains(r.URL.Path, "/api/portal/policies/free-tier"):
+			json.NewEncoder(w).Encode(p)
+		case r.Method == http.MethodDelete && r.URL.Path == "/api/portal/policies/free-tier":
 			deleteCalled = true
 			json.NewEncoder(w).Encode(map[string]interface{}{"Status": "success", "Message": "deleted"})
 		default:
@@ -880,10 +887,13 @@ func TestPolicyDelete_WithYes(t *testing.T) {
 
 func TestPolicyDelete_NotFound(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(map[string]interface{}{
-			"status": 404, "message": "policy not found",
-		})
+		switch {
+		case r.Method == http.MethodGet && r.URL.Path == "/api/portal/policies/nonexistent":
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(map[string]interface{}{"status": 404, "message": "not found"})
+		default:
+			http.NotFound(w, r)
+		}
 	}))
 	defer server.Close()
 
@@ -901,11 +911,11 @@ func TestPolicyDelete_WithYes_JSON(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
-		case r.Method == http.MethodGet && strings.Contains(r.URL.Path, "/api/portal/policies/free-tier"):
-			policy := mockDashboardPolicy("free-tier", "Free Plan", 100, 60, 10000, 86400,
+		case r.Method == http.MethodGet && r.URL.Path == "/api/portal/policies/free-tier":
+			p := mockDashboardPolicy("507f1f77bcf86cd799439020", "free-tier", "Free Plan", 100, 60, 10000, 86400,
 				[]string{"free"}, map[string]interface{}{})
-			json.NewEncoder(w).Encode(policy)
-		case r.Method == http.MethodDelete && strings.Contains(r.URL.Path, "/api/portal/policies/free-tier"):
+			json.NewEncoder(w).Encode(p)
+		case r.Method == http.MethodDelete && r.URL.Path == "/api/portal/policies/free-tier":
 			deleteCalled = true
 			json.NewEncoder(w).Encode(map[string]interface{}{"Status": "success", "Message": "deleted"})
 		default:
@@ -1033,16 +1043,14 @@ func TestPolicyInit_Registration(t *testing.T) {
 
 func TestPolicyIntegration_FullLifecycle(t *testing.T) {
 	// This test exercises: list empty -> apply new -> list shows policy -> get returns CLI schema -> delete removes
-	var createdPolicy map[string]interface{}
-	policyStore := map[string]map[string]interface{}{} // in-memory store
+	// The mock Dashboard stores policies keyed by id (e.g., "platinum").
+	policyStore := map[string]map[string]interface{}{} // keyed by id (e.g., "platinum")
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
-		// List APIs (for selector resolution)
 		case r.Method == http.MethodGet && r.URL.Path == "/api/apis":
 			json.NewEncoder(w).Encode(mockAPIListResponse())
 
-		// List policies
 		case r.Method == http.MethodGet && r.URL.Path == "/api/portal/policies":
 			policies := make([]map[string]interface{}, 0)
 			for _, p := range policyStore {
@@ -1050,28 +1058,35 @@ func TestPolicyIntegration_FullLifecycle(t *testing.T) {
 			}
 			json.NewEncoder(w).Encode(mockPolicyListResponse(policies))
 
-		// Get policy by ID
 		case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/api/portal/policies/"):
-			policyID := strings.TrimPrefix(r.URL.Path, "/api/portal/policies/")
-			if p, ok := policyStore[policyID]; ok {
+			lookupID := strings.TrimPrefix(r.URL.Path, "/api/portal/policies/")
+			if p, ok := policyStore[lookupID]; ok {
 				json.NewEncoder(w).Encode(p)
 			} else {
 				w.WriteHeader(http.StatusNotFound)
 				json.NewEncoder(w).Encode(map[string]interface{}{"status": 404, "message": "not found"})
 			}
 
-		// Create policy
 		case r.Method == http.MethodPost && r.URL.Path == "/api/portal/policies":
 			body, _ := io.ReadAll(r.Body)
-			json.Unmarshal(body, &createdPolicy)
-			id, _ := createdPolicy["_id"].(string)
-			policyStore[id] = createdPolicy
-			json.NewEncoder(w).Encode(map[string]interface{}{"Status": "success", "Message": "created", "Meta": id})
+			var created map[string]interface{}
+			json.Unmarshal(body, &created)
+			created["_id"] = "507f1f77bcf86cd799439099"
+			id, _ := created["id"].(string)
+			policyStore[id] = created
+			json.NewEncoder(w).Encode(map[string]interface{}{"Status": "success", "Message": "created", "Meta": "507f1f77bcf86cd799439099"})
 
-		// Delete policy
+		case r.Method == http.MethodPut && strings.HasPrefix(r.URL.Path, "/api/portal/policies/"):
+			id := strings.TrimPrefix(r.URL.Path, "/api/portal/policies/")
+			body, _ := io.ReadAll(r.Body)
+			var updated map[string]interface{}
+			json.Unmarshal(body, &updated)
+			policyStore[id] = updated
+			json.NewEncoder(w).Encode(map[string]interface{}{"Status": "success", "Message": "updated"})
+
 		case r.Method == http.MethodDelete && strings.HasPrefix(r.URL.Path, "/api/portal/policies/"):
-			policyID := strings.TrimPrefix(r.URL.Path, "/api/portal/policies/")
-			delete(policyStore, policyID)
+			id := strings.TrimPrefix(r.URL.Path, "/api/portal/policies/")
+			delete(policyStore, id)
 			json.NewEncoder(w).Encode(map[string]interface{}{"Status": "success", "Message": "deleted"})
 
 		default:

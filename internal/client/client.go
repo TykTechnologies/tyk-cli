@@ -141,8 +141,19 @@ func (c *Client) handleResponse(resp *http.Response, result interface{}) error {
 
 		// Try to parse as JSON error response
 		if err := json.Unmarshal(body, &errorResp); err != nil {
-			// If not JSON, use status text and body as message
-			errorResp.Message = fmt.Sprintf("%s: %s", resp.Status, string(body))
+			// Dashboard errors use {"Status":"Error","Message":"...","Meta":null}
+			// where "Status" is a string (not int), causing unmarshal to fail.
+			// Try to extract just the message field.
+			type msgOnly struct {
+				Message string `json:"Message"`
+			}
+			var m msgOnly
+			if json.Unmarshal(body, &m) == nil && m.Message != "" {
+				errorResp.Message = fmt.Sprintf("%d %s: %s", resp.StatusCode, http.StatusText(resp.StatusCode), m.Message)
+			} else {
+				// If not JSON at all, use status text and body as message
+				errorResp.Message = fmt.Sprintf("%s: %s", resp.Status, string(body))
+			}
 		}
 
 		return &errorResp

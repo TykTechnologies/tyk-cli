@@ -48,6 +48,24 @@ access:
   - id: abc123def456       # Match by exact API ID
 ```
 
+### Friendly IDs
+
+The `id` field is a **human-readable identifier** that you choose. Use short, descriptive names:
+
+```yaml
+id: gold           # Good
+id: free-tier      # Good
+id: rate-limit-v2  # Good
+```
+
+**Format rules:**
+- Lowercase letters, numbers, dots, hyphens, and underscores only
+- Must start with a letter or number
+- Maximum 64 characters
+- Must not look like a MongoDB ObjectID (24-character hex strings are rejected)
+
+The CLI passes this value directly into the Dashboard's wire `id` field — no prefix, no transformation. Starting in Dashboard v5.12.0+, the `id` field is a first-class identifier used for all API lookups (GET, PUT, DELETE). The Dashboard handles the internal `_id` (MongoDB ObjectID) invisibly; you only work with the friendly name.
+
 ### Durations
 
 | Format | Meaning |
@@ -76,12 +94,21 @@ If a name or listen path matches zero APIs, the CLI suggests the 3 closest match
 
 ### `tyk policy list`
 
-List policies in a paginated table.
+List policies in a paginated table. The ID column shows the `id` field, or the internal `_id` for policies that have no `id` set (e.g. created outside the CLI).
 
 ```bash
 tyk policy list              # Table with ID, Name, APIs, Tags
 tyk policy list --page 2     # Page 2
 tyk policy list --json       # JSON to stdout
+```
+
+Example output:
+
+```
+ID                          Name                      APIs        Tags
+---                         ---                       ---         ---
+gold                        Gold Plan                 3           gold, paid
+free-tier                   Free Tier                 1           free
 ```
 
 ### `tyk policy get <policy-id>`
@@ -97,7 +124,7 @@ The CLI reverse-resolves API IDs back to name selectors where possible. If an AP
 
 ### `tyk policy apply -f <file>`
 
-Apply a policy with **idempotent upsert** semantics: creates the policy if `id` is not found on the server, updates if it exists.
+Apply a policy with **idempotent upsert** semantics: creates the policy if the friendly ID is not found on the server, updates if it exists.
 
 ```bash
 tyk policy apply -f policies/gold.yaml
@@ -105,11 +132,14 @@ tyk policy apply -f -        # Read from stdin
 ```
 
 The apply pipeline:
-1. Parse YAML and validate schema (required fields, duration format, selector format)
+1. Parse YAML and validate schema (required fields, duration format, selector format, friendly ID format)
 2. Resolve selectors against the live API list
 3. Parse durations to seconds
 4. Convert CLI schema to wire format
-5. Create or update the policy
+5. Look up the policy by friendly ID (single API call, O(1))
+6. Create (if new) or update (if existing) the policy
+
+On create, the CLI omits the internal `_id` and lets the Dashboard generate it. On update, the CLI uses the friendly `id` directly in the API call. The `_id` is handled invisibly by the Dashboard.
 
 Validation and resolution errors return **exit code 2** with all errors listed so you can fix them in one pass.
 
@@ -158,6 +188,12 @@ git add policies/gold.yaml && git commit -m "Add gold policy"
 tyk config use staging
 tyk policy apply -f policies/gold.yaml
 ```
+
+## Backward compatibility
+
+Policies created before the friendly ID feature (via the Dashboard UI or older CLI versions) may have an empty `id` field. These policies still appear in `tyk policy list` with their internal `_id` shown in the ID column.
+
+To manage an existing policy with a friendly ID, re-apply it with a policy file that has the desired `id`. This creates a new CLI-managed policy -- it does not modify the original.
 
 ## Exit codes
 

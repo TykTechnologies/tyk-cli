@@ -4,13 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/tyktech/tyk-cli/internal/client"
+	"github.com/tyktech/tyk-cli/internal/policy"
 	"github.com/tyktech/tyk-cli/pkg/types"
+	"gopkg.in/yaml.v3"
 )
 
 // NewPolicyCommand creates the 'tyk policy' command and its subcommands
@@ -22,6 +25,8 @@ func NewPolicyCommand() *cobra.Command {
 	}
 
 	policyCmd.AddCommand(NewPolicyListCommand())
+	policyCmd.AddCommand(NewPolicyGetCommand())
+	policyCmd.AddCommand(NewPolicyApplyCommand())
 
 	return policyCmd
 }
@@ -87,6 +92,270 @@ func runPolicyList(cmd *cobra.Command, args []string) error {
 
 	// Human readable output
 	displayPolicyPage(policies, page)
+	return nil
+}
+
+// NewPolicyGetCommand creates the 'tyk policy get' command
+func NewPolicyGetCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "get <policy-id>",
+		Short: "Get a policy by ID",
+		Long:  "Retrieve a security policy by ID, convert to CLI schema, and output as YAML or JSON",
+		Args:  cobra.ExactArgs(1),
+		RunE:  runPolicyGet,
+	}
+
+	return cmd
+}
+
+// runPolicyGet implements the 'tyk policy get' command
+func runPolicyGet(cmd *cobra.Command, args []string) error {
+	policyID := args[0]
+
+	// Get configuration from context
+	config := GetConfigFromContext(cmd.Context())
+	if config == nil {
+		return fmt.Errorf("configuration not found")
+	}
+
+	// Create client
+	c, err := client.NewClient(config)
+	if err != nil {
+		return fmt.Errorf("failed to create client: %w", err)
+	}
+
+	// Get output format from context
+	outputFormat := GetOutputFormatFromContext(cmd.Context())
+
+	// Create context with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Fetch the policy
+	dp, err := c.GetPolicy(ctx, policyID)
+	if err != nil {
+		if er, ok := err.(*types.ErrorResponse); ok && er.Status == 404 {
+			return &ExitError{Code: int(types.ExitNotFound), Message: fmt.Sprintf("policy '%s' not found", policyID)}
+		}
+		if strings.Contains(err.Error(), "404") || strings.Contains(strings.ToLower(err.Error()), "not found") {
+			return &ExitError{Code: int(types.ExitNotFound), Message: fmt.Sprintf("policy '%s' not found", policyID)}
+		}
+		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to get policy: %v", err)}
+	}
+
+	// Fetch API list for reverse-resolution of API IDs to names
+	apis, err := c.ListAPIsDashboard(ctx, 1)
+	if err != nil {
+		// Non-fatal: proceed without reverse resolution
+		apis = nil
+	}
+
+	// Convert OAS APIs to ResolverAPI for WireToCLI
+	resolverAPIs := make([]policy.ResolverAPI, 0, len(apis))
+	for _, api := range apis {
+		resolverAPIs = append(resolverAPIs, policy.ResolverAPI{
+			ID:         api.ID,
+			Name:       api.Name,
+			ListenPath: api.ListenPath,
+		})
+	}
+
+	// Convert wire format to CLI schema
+	pf := policy.WireToCLI(*dp, resolverAPIs)
+
+	if outputFormat == types.OutputJSON {
+		encoder := json.NewEncoder(os.Stdout)
+		encoder.SetIndent("", "  ")
+		return encoder.Encode(pf)
+	}
+
+	// Human mode: summary to stderr, YAML to stdout
+	fmt.Fprintf(os.Stderr, "Policy: %s\n", pf.Metadata.Name)
+	fmt.Fprintf(os.Stderr, "  ID:   %s\n", pf.Metadata.ID)
+	if len(pf.Metadata.Tags) > 0 {
+		fmt.Fprintf(os.Stderr, "  Tags: %s\n", strings.Join(pf.Metadata.Tags, ", "))
+	}
+	apiCount := len(pf.Spec.Access)
+	fmt.Fprintf(os.Stderr, "  APIs: %d\n", apiCount)
+
+	yamlData, err := yaml.Marshal(pf)
+	if err != nil {
+		return fmt.Errorf("failed to marshal policy as YAML: %w", err)
+	}
+	fmt.Fprint(os.Stdout, string(yamlData))
+
+	return nil
+}
+
+// NewPolicyApplyCommand creates the 'tyk policy apply' command
+func NewPolicyApplyCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "apply",
+		Short: "Apply a policy from a YAML file",
+		Long: `Apply a policy from a YAML file with idempotent upsert semantics.
+
+Creates the policy if metadata.id is not found on the server; updates if it exists.
+
+Selectors in spec.access resolve against the live API list:
+  - name: exact match on API name
+  - listenPath: exact match on listen path
+  - id: exact match on API ID
+  - tags: expand to all APIs matching all specified tags
+
+Examples:
+  tyk policy apply -f policy.yaml         # Apply from file
+  cat policy.yaml | tyk policy apply -f - # Apply from stdin`,
+		RunE: runPolicyApply,
+	}
+
+	cmd.Flags().StringP("file", "f", "", "Path to policy YAML file (use '-' for stdin) (required)")
+	cmd.MarkFlagRequired("file")
+
+	return cmd
+}
+
+// runPolicyApply implements the 'tyk policy apply' command
+func runPolicyApply(cmd *cobra.Command, args []string) error {
+	filePath, _ := cmd.Flags().GetString("file")
+
+	// Get configuration from context
+	config := GetConfigFromContext(cmd.Context())
+	if config == nil {
+		return fmt.Errorf("configuration not found")
+	}
+
+	// Step 1: Read YAML from file or stdin
+	var data []byte
+	var err error
+
+	if filePath == "-" {
+		data, err = io.ReadAll(os.Stdin)
+		if err != nil {
+			return &ExitError{Code: int(types.ExitBadArgs), Message: fmt.Sprintf("failed to read stdin: %v", err)}
+		}
+		if len(data) == 0 {
+			return &ExitError{Code: int(types.ExitBadArgs), Message: "no input provided on stdin"}
+		}
+	} else {
+		data, err = os.ReadFile(filePath)
+		if err != nil {
+			return &ExitError{Code: int(types.ExitBadArgs), Message: fmt.Sprintf("failed to read file: %v", err)}
+		}
+	}
+
+	// Step 2: Unmarshal YAML to PolicyFile
+	var pf types.PolicyFile
+	if err := yaml.Unmarshal(data, &pf); err != nil {
+		return &ExitError{Code: int(types.ExitBadArgs), Message: fmt.Sprintf("failed to parse YAML: %v", err)}
+	}
+
+	// Step 3: Validate schema
+	if validationErrs := policy.ValidatePolicy(pf); len(validationErrs) > 0 {
+		var msgs []string
+		for _, ve := range validationErrs {
+			msgs = append(msgs, ve.Error())
+		}
+		return &ExitError{Code: int(types.ExitBadArgs), Message: strings.Join(msgs, "; ")}
+	}
+
+	// Create client
+	c, err := client.NewClient(config)
+	if err != nil {
+		return fmt.Errorf("failed to create client: %w", err)
+	}
+
+	// Create context with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Step 4: Fetch API list from Dashboard
+	apis, err := c.ListAPIsDashboard(ctx, 1)
+	if err != nil {
+		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to fetch API list: %v", err)}
+	}
+
+	// Step 5: Convert to ResolverAPI slice
+	resolverAPIs := make([]policy.ResolverAPI, 0, len(apis))
+	for _, api := range apis {
+		resolverAPIs = append(resolverAPIs, policy.ResolverAPI{
+			ID:         api.ID,
+			Name:       api.Name,
+			ListenPath: api.ListenPath,
+		})
+	}
+
+	// Step 6: Build resolve requests from access entries and resolve selectors
+	requests := make([]policy.ResolveRequest, 0, len(pf.Spec.Access))
+	for _, entry := range pf.Spec.Access {
+		req := policy.ResolveRequest{Versions: entry.Versions}
+		switch {
+		case entry.ID != "":
+			req.SelectorType = "id"
+			req.Value = entry.ID
+		case entry.Name != "":
+			req.SelectorType = "name"
+			req.Value = entry.Name
+		case entry.ListenPath != "":
+			req.SelectorType = "listenPath"
+			req.Value = entry.ListenPath
+		case len(entry.Tags) > 0:
+			req.SelectorType = "tags"
+			req.TagValues = entry.Tags
+		}
+		requests = append(requests, req)
+	}
+
+	resolved, resolveErrs := policy.ResolveAccessEntries(requests, resolverAPIs)
+	if len(resolveErrs) > 0 {
+		var msgs []string
+		for _, re := range resolveErrs {
+			msgs = append(msgs, re.Error())
+		}
+		return &ExitError{Code: int(types.ExitBadArgs), Message: strings.Join(msgs, "; ")}
+	}
+
+	// Step 7: Convert CLI to wire format
+	activeEnv, err := config.GetActiveEnvironment()
+	if err != nil {
+		return fmt.Errorf("no active environment: %w", err)
+	}
+	dp, err := policy.CLIToWire(pf, resolved, activeEnv.OrgID)
+	if err != nil {
+		return &ExitError{Code: int(types.ExitBadArgs), Message: err.Error()}
+	}
+
+	// Step 8: Check if policy exists
+	_, getErr := c.GetPolicy(ctx, pf.Metadata.ID)
+
+	policyExists := false
+	if getErr == nil {
+		policyExists = true
+	} else {
+		// Check if it's a "not found" error
+		notFound := false
+		if er, ok := getErr.(*types.ErrorResponse); ok && er.Status == 404 {
+			notFound = true
+		} else if strings.Contains(getErr.Error(), "404") || strings.Contains(strings.ToLower(getErr.Error()), "not found") {
+			notFound = true
+		}
+		if !notFound {
+			return &ExitError{Code: 1, Message: fmt.Sprintf("failed to check existing policy: %v", getErr)}
+		}
+	}
+
+	// Step 9: Create or Update
+	if policyExists {
+		if err := c.UpdatePolicy(ctx, pf.Metadata.ID, &dp); err != nil {
+			return &ExitError{Code: 1, Message: fmt.Sprintf("failed to update policy: %v", err)}
+		}
+		fmt.Fprintf(os.Stderr, "Policy '%s' (%s) updated.\n", pf.Metadata.Name, pf.Metadata.ID)
+	} else {
+		if err := c.CreatePolicy(ctx, &dp); err != nil {
+			return &ExitError{Code: 1, Message: fmt.Sprintf("failed to create policy: %v", err)}
+		}
+		fmt.Fprintf(os.Stderr, "Policy '%s' (%s) created.\n", pf.Metadata.Name, pf.Metadata.ID)
+	}
+
 	return nil
 }
 

@@ -253,10 +253,26 @@ func TestPolicyList_WithPolicies(t *testing.T) {
 	assert.Contains(t, output, "Silver Plan")
 }
 
+// executePolicyApplyCmd creates a policy apply command with config injected and calls RunE directly.
+// This bypasses root PersistentPreRunE and tests the driving port directly.
+func executePolicyApplyCmd(t *testing.T, serverURL string, filePath string) error {
+	t.Helper()
+	applyCmd := NewPolicyApplyCommand()
+
+	cfg := createPolicyConfig(serverURL)
+	ctx := withConfig(context.Background(), cfg)
+	ctx = withOutputFormat(ctx, types.OutputHuman)
+	applyCmd.SetContext(ctx)
+
+	applyCmd.SetArgs([]string{"-f", filePath})
+	applyCmd.ParseFlags([]string{"-f", filePath})
+
+	return applyCmd.RunE(applyCmd, []string{})
+}
+
 // TestPolicyApply_Create_NameSelector verifies applying a new policy with name selector.
 // Walking skeleton scenario 2a.
 func TestPolicyApply_Create_NameSelector(t *testing.T) {
-	t.Skip("pending: walking skeleton -- enable after list tests pass")
 
 	var capturedCreateBody map[string]interface{}
 
@@ -288,17 +304,7 @@ func TestPolicyApply_Create_NameSelector(t *testing.T) {
 	defer server.Close()
 
 	policyFile := writeTempPolicyFile(t, validPlatinumPolicyYAML)
-
-	root := NewRootCommand("test", "commit", "time")
-	applyCmd, _, err := root.Find([]string{"policy", "apply"})
-	require.NoError(t, err)
-
-	cfg := createPolicyConfig(server.URL)
-	applyCmd.SetContext(withConfig(context.Background(), cfg))
-	applyCmd.SetContext(withOutputFormat(applyCmd.Context(), types.OutputHuman))
-
-	applyCmd.SetArgs([]string{"-f", policyFile})
-	err = applyCmd.Execute()
+	err := executePolicyApplyCmd(t, server.URL, policyFile)
 	require.NoError(t, err)
 
 	// Verify the wire format sent to Dashboard
@@ -322,7 +328,6 @@ func TestPolicyApply_Create_NameSelector(t *testing.T) {
 // TestPolicyApply_Update_Idempotent verifies updating an existing policy.
 // Walking skeleton scenario 2b.
 func TestPolicyApply_Update_Idempotent(t *testing.T) {
-	t.Skip("pending: walking skeleton -- enable after create test passes")
 
 	var capturedUpdateBody map[string]interface{}
 	updateCalled := false
@@ -358,16 +363,7 @@ func TestPolicyApply_Update_Idempotent(t *testing.T) {
 	updatedYAML := strings.Replace(validPlatinumPolicyYAML, "requests: 5000", "requests: 10000", 1)
 	policyFile := writeTempPolicyFile(t, updatedYAML)
 
-	root := NewRootCommand("test", "commit", "time")
-	applyCmd, _, err := root.Find([]string{"policy", "apply"})
-	require.NoError(t, err)
-
-	cfg := createPolicyConfig(server.URL)
-	applyCmd.SetContext(withConfig(context.Background(), cfg))
-	applyCmd.SetContext(withOutputFormat(applyCmd.Context(), types.OutputHuman))
-
-	applyCmd.SetArgs([]string{"-f", policyFile})
-	err = applyCmd.Execute()
+	err := executePolicyApplyCmd(t, server.URL, policyFile)
 	require.NoError(t, err)
 
 	assert.True(t, updateCalled, "should have called PUT for existing policy")
@@ -455,14 +451,14 @@ func TestPolicyCommand_Registration(t *testing.T) {
 	for _, cmd := range root.Commands() {
 		if cmd.Name() == "policy" {
 			found = true
-			// Verify 'list' is a subcommand of 'policy'
-			listFound := false
+			// Verify subcommands of 'policy'
+			subNames := make(map[string]bool)
 			for _, sub := range cmd.Commands() {
-				if sub.Name() == "list" {
-					listFound = true
-				}
+				subNames[sub.Name()] = true
 			}
-			assert.True(t, listFound, "'list' should be a subcommand of 'policy'")
+			assert.True(t, subNames["list"], "'list' should be a subcommand of 'policy'")
+			assert.True(t, subNames["get"], "'get' should be a subcommand of 'policy'")
+			assert.True(t, subNames["apply"], "'apply' should be a subcommand of 'policy'")
 		}
 	}
 	assert.True(t, found, "'policy' should be a subcommand of root")
@@ -595,7 +591,6 @@ func TestPolicyGet_NotFound(t *testing.T) {
 // ===========================================================================
 
 func TestPolicyApply_ListenPathSelector(t *testing.T) {
-	t.Skip("pending: enable after walking skeleton apply tests pass")
 
 	var capturedBody map[string]interface{}
 
@@ -635,16 +630,7 @@ spec:
 `
 	policyFile := writeTempPolicyFile(t, policyYAML)
 
-	root := NewRootCommand("test", "commit", "time")
-	applyCmd, _, err := root.Find([]string{"policy", "apply"})
-	require.NoError(t, err)
-
-	cfg := createPolicyConfig(server.URL)
-	applyCmd.SetContext(withConfig(context.Background(), cfg))
-	applyCmd.SetContext(withOutputFormat(applyCmd.Context(), types.OutputHuman))
-
-	applyCmd.SetArgs([]string{"-f", policyFile})
-	err = applyCmd.Execute()
+	err := executePolicyApplyCmd(t, server.URL, policyFile)
 	require.NoError(t, err)
 
 	// Verify listenPath "/orders/" resolved to "g7h8i9j0k1l2"
@@ -655,7 +641,6 @@ spec:
 }
 
 func TestPolicyApply_DurationConversion(t *testing.T) {
-	t.Skip("pending: enable after selector tests pass")
 
 	var capturedBody map[string]interface{}
 
@@ -695,16 +680,7 @@ spec:
 `
 	policyFile := writeTempPolicyFile(t, policyYAML)
 
-	root := NewRootCommand("test", "commit", "time")
-	applyCmd, _, err := root.Find([]string{"policy", "apply"})
-	require.NoError(t, err)
-
-	cfg := createPolicyConfig(server.URL)
-	applyCmd.SetContext(withConfig(context.Background(), cfg))
-	applyCmd.SetContext(withOutputFormat(applyCmd.Context(), types.OutputHuman))
-
-	applyCmd.SetArgs([]string{"-f", policyFile})
-	err = applyCmd.Execute()
+	err := executePolicyApplyCmd(t, server.URL, policyFile)
 	require.NoError(t, err)
 
 	assert.EqualValues(t, 60, capturedBody["per"], "1m should convert to 60 seconds")
@@ -713,7 +689,6 @@ spec:
 }
 
 func TestPolicyApply_NameNotFound(t *testing.T) {
-	t.Skip("pending: enable after happy-path apply tests pass")
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet && r.URL.Path == "/api/apis" {
@@ -743,26 +718,16 @@ spec:
 `
 	policyFile := writeTempPolicyFile(t, policyYAML)
 
-	root := NewRootCommand("test", "commit", "time")
-	applyCmd, _, err := root.Find([]string{"policy", "apply"})
-	require.NoError(t, err)
-
-	cfg := createPolicyConfig(server.URL)
-	applyCmd.SetContext(withConfig(context.Background(), cfg))
-	applyCmd.SetContext(withOutputFormat(applyCmd.Context(), types.OutputHuman))
-
-	applyCmd.SetArgs([]string{"-f", policyFile})
-	err = applyCmd.Execute()
+	err := executePolicyApplyCmd(t, server.URL, policyFile)
 
 	require.Error(t, err)
-	if exitErr, ok := err.(*ExitError); ok {
-		assert.Equal(t, 2, exitErr.Code)
-		assert.Contains(t, exitErr.Message, "no API found")
-	}
+	exitErr, ok := err.(*ExitError)
+	require.True(t, ok, "should return ExitError")
+	assert.Equal(t, 2, exitErr.Code)
+	assert.Contains(t, exitErr.Message, "no API found")
 }
 
 func TestPolicyApply_NameAmbiguous(t *testing.T) {
-	t.Skip("pending: enable after not-found test passes")
 
 	// Mock server with two APIs named "api-service"
 	ambiguousAPIList := map[string]interface{}{
@@ -810,26 +775,16 @@ spec:
 `
 	policyFile := writeTempPolicyFile(t, policyYAML)
 
-	root := NewRootCommand("test", "commit", "time")
-	applyCmd, _, err := root.Find([]string{"policy", "apply"})
-	require.NoError(t, err)
-
-	cfg := createPolicyConfig(server.URL)
-	applyCmd.SetContext(withConfig(context.Background(), cfg))
-	applyCmd.SetContext(withOutputFormat(applyCmd.Context(), types.OutputHuman))
-
-	applyCmd.SetArgs([]string{"-f", policyFile})
-	err = applyCmd.Execute()
+	err := executePolicyApplyCmd(t, server.URL, policyFile)
 
 	require.Error(t, err)
-	if exitErr, ok := err.(*ExitError); ok {
-		assert.Equal(t, 2, exitErr.Code)
-		assert.Contains(t, exitErr.Message, "ambiguous")
-	}
+	exitErr, ok := err.(*ExitError)
+	require.True(t, ok, "should return ExitError")
+	assert.Equal(t, 2, exitErr.Code)
+	assert.Contains(t, exitErr.Message, "ambiguous")
 }
 
 func TestPolicyApply_MissingID(t *testing.T) {
-	t.Skip("pending: enable after selector error tests pass")
 
 	policyYAML := `apiVersion: tyk.tyktech/v1
 kind: Policy
@@ -849,26 +804,16 @@ spec:
 `
 	policyFile := writeTempPolicyFile(t, policyYAML)
 
-	root := NewRootCommand("test", "commit", "time")
-	applyCmd, _, err := root.Find([]string{"policy", "apply"})
-	require.NoError(t, err)
-
-	cfg := createPolicyConfig("http://unused")
-	applyCmd.SetContext(withConfig(context.Background(), cfg))
-	applyCmd.SetContext(withOutputFormat(applyCmd.Context(), types.OutputHuman))
-
-	applyCmd.SetArgs([]string{"-f", policyFile})
-	err = applyCmd.Execute()
+	err := executePolicyApplyCmd(t, "http://unused", policyFile)
 
 	require.Error(t, err)
-	if exitErr, ok := err.(*ExitError); ok {
-		assert.Equal(t, 2, exitErr.Code)
-		assert.Contains(t, exitErr.Message, "metadata.id")
-	}
+	exitErr, ok := err.(*ExitError)
+	require.True(t, ok, "should return ExitError")
+	assert.Equal(t, 2, exitErr.Code)
+	assert.Contains(t, exitErr.Message, "metadata.id")
 }
 
 func TestPolicyApply_InvalidDuration(t *testing.T) {
-	t.Skip("pending: enable after missing field tests pass")
 
 	policyYAML := `apiVersion: tyk.tyktech/v1
 kind: Policy
@@ -889,37 +834,17 @@ spec:
 `
 	policyFile := writeTempPolicyFile(t, policyYAML)
 
-	root := NewRootCommand("test", "commit", "time")
-	applyCmd, _, err := root.Find([]string{"policy", "apply"})
-	require.NoError(t, err)
-
-	cfg := createPolicyConfig("http://unused")
-	applyCmd.SetContext(withConfig(context.Background(), cfg))
-	applyCmd.SetContext(withOutputFormat(applyCmd.Context(), types.OutputHuman))
-
-	applyCmd.SetArgs([]string{"-f", policyFile})
-	err = applyCmd.Execute()
+	err := executePolicyApplyCmd(t, "http://unused", policyFile)
 
 	require.Error(t, err)
-	if exitErr, ok := err.(*ExitError); ok {
-		assert.Equal(t, 2, exitErr.Code)
-		assert.Contains(t, exitErr.Message, "invalid duration")
-	}
+	exitErr, ok := err.(*ExitError)
+	require.True(t, ok, "should return ExitError")
+	assert.Equal(t, 2, exitErr.Code)
+	assert.Contains(t, exitErr.Message, "invalid duration")
 }
 
 func TestPolicyApply_FileNotFound(t *testing.T) {
-	t.Skip("pending: enable after validation tests pass")
-
-	root := NewRootCommand("test", "commit", "time")
-	applyCmd, _, err := root.Find([]string{"policy", "apply"})
-	require.NoError(t, err)
-
-	cfg := createPolicyConfig("http://unused")
-	applyCmd.SetContext(withConfig(context.Background(), cfg))
-	applyCmd.SetContext(withOutputFormat(applyCmd.Context(), types.OutputHuman))
-
-	applyCmd.SetArgs([]string{"-f", "/nonexistent/policy.yaml"})
-	err = applyCmd.Execute()
+	err := executePolicyApplyCmd(t, "http://unused", "/nonexistent/policy.yaml")
 
 	require.Error(t, err)
 }

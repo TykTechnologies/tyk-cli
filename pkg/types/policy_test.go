@@ -237,6 +237,30 @@ func TestAccessEntry_SelectorFields(t *testing.T) {
 	}
 }
 
+func TestAccessRight_MarshalJSON_NilHandling(t *testing.T) {
+	t.Run("nil AllowedURLs serializes as empty array", func(t *testing.T) {
+		ar := AccessRight{APIID: "a1", APIName: "test", AllowedURLs: nil, Limit: nil}
+		data, err := json.Marshal(&ar)
+		require.NoError(t, err)
+		assert.Contains(t, string(data), `"allowed_urls":[]`)
+		assert.Contains(t, string(data), `"limit":null`)
+	})
+
+	t.Run("non-nil AllowedURLs preserved", func(t *testing.T) {
+		ar := AccessRight{
+			APIID:       "a1",
+			APIName:     "test",
+			AllowedURLs: []AllowedURL{{URL: "/foo", Methods: []string{"GET"}}},
+			Limit:       &RateQuotaLimit{Rate: 10, Per: 60},
+		}
+		data, err := json.Marshal(&ar)
+		require.NoError(t, err)
+		assert.Contains(t, string(data), `"/foo"`)
+		assert.NotContains(t, string(data), `"allowed_urls":[]`)
+		assert.NotContains(t, string(data), `"limit":null`)
+	})
+}
+
 func TestDashboardPolicyListResponse_JSONUnmarshal(t *testing.T) {
 	listJSON := `{
 		"Data": [

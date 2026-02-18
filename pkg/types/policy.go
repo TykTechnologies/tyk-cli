@@ -59,19 +59,10 @@ type Duration string
 
 // UnmarshalYAML implements yaml.Unmarshaler for Duration.
 // It handles both string nodes (e.g. "30d") and integer nodes (e.g. 60).
+// All YAML tag types are stored as their raw string value.
 func (d *Duration) UnmarshalYAML(value *yaml.Node) error {
-	switch value.Tag {
-	case "!!str":
-		*d = Duration(value.Value)
-		return nil
-	case "!!int":
-		*d = Duration(value.Value)
-		return nil
-	default:
-		// Fallback: try to use the raw value
-		*d = Duration(value.Value)
-		return nil
-	}
+	*d = Duration(value.Value)
+	return nil
 }
 
 // DashboardPolicy represents the wire format returned by the Tyk Dashboard API.

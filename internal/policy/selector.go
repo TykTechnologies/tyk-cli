@@ -153,13 +153,10 @@ func FuzzySuggestions(query string, apis []ResolverAPI, n int) []FuzzySuggestion
 		return candidates[i].distance < candidates[j].distance
 	})
 
-	limit := n
-	if limit > len(candidates) {
-		limit = len(candidates)
-	}
+	n = min(n, len(candidates))
 
-	result := make([]FuzzySuggestion, limit)
-	for i := 0; i < limit; i++ {
+	result := make([]FuzzySuggestion, n)
+	for i := 0; i < n; i++ {
 		result[i] = FuzzySuggestion{
 			Name:     candidates[i].api.Name,
 			ID:       candidates[i].api.ID,
@@ -171,46 +168,33 @@ func FuzzySuggestions(query string, apis []ResolverAPI, n int) []FuzzySuggestion
 
 // levenshtein computes the Levenshtein edit distance between two strings.
 func levenshtein(a, b string) int {
-	la, lb := len(a), len(b)
-	if la == 0 {
-		return lb
+	lenA, lenB := len(a), len(b)
+	if lenA == 0 {
+		return lenB
 	}
-	if lb == 0 {
-		return la
+	if lenB == 0 {
+		return lenA
 	}
 
-	// Use single-row optimization
-	prev := make([]int, lb+1)
-	for j := 0; j <= lb; j++ {
+	// Single-row optimization: only keep the previous row in memory.
+	prev := make([]int, lenB+1)
+	for j := 0; j <= lenB; j++ {
 		prev[j] = j
 	}
 
-	for i := 1; i <= la; i++ {
-		curr := make([]int, lb+1)
+	for i := 1; i <= lenA; i++ {
+		curr := make([]int, lenB+1)
 		curr[0] = i
-		for j := 1; j <= lb; j++ {
+		for j := 1; j <= lenB; j++ {
 			cost := 1
 			if a[i-1] == b[j-1] {
 				cost = 0
 			}
-			curr[j] = min3(curr[j-1]+1, prev[j]+1, prev[j-1]+cost)
+			curr[j] = min(curr[j-1]+1, prev[j]+1, prev[j-1]+cost)
 		}
 		prev = curr
 	}
-	return prev[lb]
-}
-
-func min3(a, b, c int) int {
-	if a < b {
-		if a < c {
-			return a
-		}
-		return c
-	}
-	if b < c {
-		return b
-	}
-	return c
+	return prev[lenB]
 }
 
 // ResolveAccessEntries resolves a batch of access entry requests against an API list.

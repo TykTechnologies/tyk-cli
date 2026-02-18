@@ -17,6 +17,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+const httpTimeout = 30 * time.Second
+
 // NewPolicyCommand creates the 'tyk policy' command and its subcommands
 func NewPolicyCommand() *cobra.Command {
 	policyCmd := &cobra.Command{
@@ -71,7 +73,7 @@ func runPolicyList(cmd *cobra.Command, args []string) error {
 	outputFormat := GetOutputFormatFromContext(cmd.Context())
 
 	// Create context with timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), httpTimeout)
 	defer cancel()
 
 	// Fetch policies
@@ -131,37 +133,25 @@ func runPolicyGet(cmd *cobra.Command, args []string) error {
 	outputFormat := GetOutputFormatFromContext(cmd.Context())
 
 	// Create context with timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), httpTimeout)
 	defer cancel()
 
 	// Fetch the policy
 	dp, err := c.GetPolicy(ctx, policyID)
 	if err != nil {
-		if er, ok := err.(*types.ErrorResponse); ok && er.Status == 404 {
-			return &ExitError{Code: int(types.ExitNotFound), Message: fmt.Sprintf("policy '%s' not found", policyID)}
-		}
-		if strings.Contains(err.Error(), "404") || strings.Contains(strings.ToLower(err.Error()), "not found") {
+		if isNotFoundError(err) {
 			return &ExitError{Code: int(types.ExitNotFound), Message: fmt.Sprintf("policy '%s' not found", policyID)}
 		}
 		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to get policy: %v", err)}
 	}
 
-	// Fetch API list for reverse-resolution of API IDs to names
+	// Fetch API list for reverse-resolution of API IDs to names (non-fatal on error)
 	apis, err := c.ListAPIsDashboard(ctx, 1)
 	if err != nil {
-		// Non-fatal: proceed without reverse resolution
 		apis = nil
 	}
 
-	// Convert OAS APIs to ResolverAPI for WireToCLI
-	resolverAPIs := make([]policy.ResolverAPI, 0, len(apis))
-	for _, api := range apis {
-		resolverAPIs = append(resolverAPIs, policy.ResolverAPI{
-			ID:         api.ID,
-			Name:       api.Name,
-			ListenPath: api.ListenPath,
-		})
-	}
+	resolverAPIs := toResolverAPIs(apis)
 
 	// Convert wire format to CLI schema
 	pf := policy.WireToCLI(*dp, resolverAPIs)
@@ -221,103 +211,37 @@ Examples:
 func runPolicyApply(cmd *cobra.Command, args []string) error {
 	filePath, _ := cmd.Flags().GetString("file")
 
-	// Get configuration from context
 	config := GetConfigFromContext(cmd.Context())
 	if config == nil {
 		return fmt.Errorf("configuration not found")
 	}
 
-	// Step 1: Read YAML from file or stdin
-	var data []byte
-	var err error
-
-	if filePath == "-" {
-		data, err = io.ReadAll(os.Stdin)
-		if err != nil {
-			return &ExitError{Code: int(types.ExitBadArgs), Message: fmt.Sprintf("failed to read stdin: %v", err)}
-		}
-		if len(data) == 0 {
-			return &ExitError{Code: int(types.ExitBadArgs), Message: "no input provided on stdin"}
-		}
-	} else {
-		data, err = os.ReadFile(filePath)
-		if err != nil {
-			return &ExitError{Code: int(types.ExitBadArgs), Message: fmt.Sprintf("failed to read file: %v", err)}
-		}
+	pf, err := readPolicyFile(filePath)
+	if err != nil {
+		return err
 	}
 
-	// Step 2: Unmarshal YAML to PolicyFile
-	var pf types.PolicyFile
-	if err := yaml.Unmarshal(data, &pf); err != nil {
-		return &ExitError{Code: int(types.ExitBadArgs), Message: fmt.Sprintf("failed to parse YAML: %v", err)}
-	}
-
-	// Step 3: Validate schema
-	if validationErrs := policy.ValidatePolicy(pf); len(validationErrs) > 0 {
-		var msgs []string
-		for _, ve := range validationErrs {
-			msgs = append(msgs, ve.Error())
-		}
-		return &ExitError{Code: int(types.ExitBadArgs), Message: strings.Join(msgs, "; ")}
-	}
-
-	// Create client
 	c, err := client.NewClient(config)
 	if err != nil {
 		return fmt.Errorf("failed to create client: %w", err)
 	}
 
-	// Create context with timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), httpTimeout)
 	defer cancel()
 
-	// Step 4: Fetch API list from Dashboard
+	// Fetch API list and resolve selectors
 	apis, err := c.ListAPIsDashboard(ctx, 1)
 	if err != nil {
 		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to fetch API list: %v", err)}
 	}
 
-	// Step 5: Convert to ResolverAPI slice
-	resolverAPIs := make([]policy.ResolverAPI, 0, len(apis))
-	for _, api := range apis {
-		resolverAPIs = append(resolverAPIs, policy.ResolverAPI{
-			ID:         api.ID,
-			Name:       api.Name,
-			ListenPath: api.ListenPath,
-		})
-	}
-
-	// Step 6: Build resolve requests from access entries and resolve selectors
-	requests := make([]policy.ResolveRequest, 0, len(pf.Spec.Access))
-	for _, entry := range pf.Spec.Access {
-		req := policy.ResolveRequest{Versions: entry.Versions}
-		switch {
-		case entry.ID != "":
-			req.SelectorType = "id"
-			req.Value = entry.ID
-		case entry.Name != "":
-			req.SelectorType = "name"
-			req.Value = entry.Name
-		case entry.ListenPath != "":
-			req.SelectorType = "listenPath"
-			req.Value = entry.ListenPath
-		case len(entry.Tags) > 0:
-			req.SelectorType = "tags"
-			req.TagValues = entry.Tags
-		}
-		requests = append(requests, req)
-	}
-
-	resolved, resolveErrs := policy.ResolveAccessEntries(requests, resolverAPIs)
+	requests := buildResolveRequests(pf.Spec.Access)
+	resolved, resolveErrs := policy.ResolveAccessEntries(requests, toResolverAPIs(apis))
 	if len(resolveErrs) > 0 {
-		var msgs []string
-		for _, re := range resolveErrs {
-			msgs = append(msgs, re.Error())
-		}
-		return &ExitError{Code: int(types.ExitBadArgs), Message: strings.Join(msgs, "; ")}
+		return &ExitError{Code: int(types.ExitBadArgs), Message: joinErrorMessages(resolveErrs)}
 	}
 
-	// Step 7: Convert CLI to wire format
+	// Convert CLI to wire format
 	activeEnv, err := config.GetActiveEnvironment()
 	if err != nil {
 		return fmt.Errorf("no active environment: %w", err)
@@ -327,26 +251,14 @@ func runPolicyApply(cmd *cobra.Command, args []string) error {
 		return &ExitError{Code: int(types.ExitBadArgs), Message: err.Error()}
 	}
 
-	// Step 8: Check if policy exists
+	// Check if policy already exists (upsert semantics)
 	_, getErr := c.GetPolicy(ctx, pf.Metadata.ID)
-
-	policyExists := false
-	if getErr == nil {
-		policyExists = true
-	} else {
-		// Check if it's a "not found" error
-		notFound := false
-		if er, ok := getErr.(*types.ErrorResponse); ok && er.Status == 404 {
-			notFound = true
-		} else if strings.Contains(getErr.Error(), "404") || strings.Contains(strings.ToLower(getErr.Error()), "not found") {
-			notFound = true
-		}
-		if !notFound {
-			return &ExitError{Code: 1, Message: fmt.Sprintf("failed to check existing policy: %v", getErr)}
-		}
+	policyExists := getErr == nil
+	if getErr != nil && !isNotFoundError(getErr) {
+		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to check existing policy: %v", getErr)}
 	}
 
-	// Step 9: Create or Update
+	// Create or update based on existence check
 	if policyExists {
 		if err := c.UpdatePolicy(ctx, pf.Metadata.ID, &dp); err != nil {
 			return &ExitError{Code: 1, Message: fmt.Sprintf("failed to update policy: %v", err)}
@@ -395,16 +307,13 @@ func runPolicyDelete(cmd *cobra.Command, args []string) error {
 	}
 
 	// Create context with timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), httpTimeout)
 	defer cancel()
 
 	// Fetch policy to verify existence and get name for confirmation
 	dp, err := c.GetPolicy(ctx, policyID)
 	if err != nil {
-		if er, ok := err.(*types.ErrorResponse); ok && er.Status == 404 {
-			return &ExitError{Code: int(types.ExitNotFound), Message: fmt.Sprintf("policy '%s' not found", policyID)}
-		}
-		if strings.Contains(err.Error(), "404") || strings.Contains(strings.ToLower(err.Error()), "not found") {
+		if isNotFoundError(err) {
 			return &ExitError{Code: int(types.ExitNotFound), Message: fmt.Sprintf("policy '%s' not found", policyID)}
 		}
 		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to get policy: %v", err)}
@@ -534,6 +443,98 @@ func runPolicyInit(cmd *cobra.Command, args []string) error {
 
 	fmt.Fprintf(os.Stderr, "Policy scaffold written to %s\n", outPath)
 	return nil
+}
+
+// readPolicyFile reads a policy YAML from a file path or stdin ("-"), parses it,
+// and validates the schema. Returns the parsed PolicyFile or an error.
+func readPolicyFile(filePath string) (types.PolicyFile, error) {
+	var data []byte
+	var err error
+
+	if filePath == "-" {
+		data, err = io.ReadAll(os.Stdin)
+		if err != nil {
+			return types.PolicyFile{}, &ExitError{Code: int(types.ExitBadArgs), Message: fmt.Sprintf("failed to read stdin: %v", err)}
+		}
+		if len(data) == 0 {
+			return types.PolicyFile{}, &ExitError{Code: int(types.ExitBadArgs), Message: "no input provided on stdin"}
+		}
+	} else {
+		data, err = os.ReadFile(filePath)
+		if err != nil {
+			return types.PolicyFile{}, &ExitError{Code: int(types.ExitBadArgs), Message: fmt.Sprintf("failed to read file: %v", err)}
+		}
+	}
+
+	var pf types.PolicyFile
+	if err := yaml.Unmarshal(data, &pf); err != nil {
+		return types.PolicyFile{}, &ExitError{Code: int(types.ExitBadArgs), Message: fmt.Sprintf("failed to parse YAML: %v", err)}
+	}
+
+	if validationErrs := policy.ValidatePolicy(pf); len(validationErrs) > 0 {
+		msgs := make([]string, len(validationErrs))
+		for i := range validationErrs {
+			msgs[i] = validationErrs[i].Error()
+		}
+		return types.PolicyFile{}, &ExitError{Code: int(types.ExitBadArgs), Message: strings.Join(msgs, "; ")}
+	}
+
+	return pf, nil
+}
+
+// buildResolveRequests converts access entries from a PolicyFile into ResolveRequests.
+func buildResolveRequests(entries []types.AccessEntry) []policy.ResolveRequest {
+	requests := make([]policy.ResolveRequest, 0, len(entries))
+	for _, entry := range entries {
+		req := policy.ResolveRequest{Versions: entry.Versions}
+		switch {
+		case entry.ID != "":
+			req.SelectorType = "id"
+			req.Value = entry.ID
+		case entry.Name != "":
+			req.SelectorType = "name"
+			req.Value = entry.Name
+		case entry.ListenPath != "":
+			req.SelectorType = "listenPath"
+			req.Value = entry.ListenPath
+		case len(entry.Tags) > 0:
+			req.SelectorType = "tags"
+			req.TagValues = entry.Tags
+		}
+		requests = append(requests, req)
+	}
+	return requests
+}
+
+// joinErrorMessages concatenates error messages into a semicolon-separated string.
+func joinErrorMessages(errs []error) string {
+	msgs := make([]string, len(errs))
+	for i, e := range errs {
+		msgs[i] = e.Error()
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// isNotFoundError returns true if the error indicates a 404 / not found response.
+func isNotFoundError(err error) bool {
+	if er, ok := err.(*types.ErrorResponse); ok && er.Status == 404 {
+		return true
+	}
+	msg := err.Error()
+	return strings.Contains(msg, "404") || strings.Contains(strings.ToLower(msg), "not found")
+}
+
+// toResolverAPIs converts OAS API objects to the resolver's input type.
+func toResolverAPIs(apis []*types.OASAPI) []policy.ResolverAPI {
+	result := make([]policy.ResolverAPI, 0, len(apis))
+	for _, api := range apis {
+		result = append(result, policy.ResolverAPI{
+			ID:         api.ID,
+			Name:       api.Name,
+			ListenPath: api.ListenPath,
+		})
+	}
+	return result
 }
 
 // displayPolicyPage displays a page of policies in a formatted table

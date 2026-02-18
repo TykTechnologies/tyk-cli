@@ -6,12 +6,19 @@ import (
 	"strings"
 )
 
+// Duration unit constants in seconds.
+const (
+	secondsPerMinute = 60
+	secondsPerHour   = 3600
+	secondsPerDay    = 86400
+)
+
 // suffixMultipliers maps duration suffixes to their multiplier in seconds.
 var suffixMultipliers = map[byte]int64{
 	's': 1,
-	'm': 60,
-	'h': 3600,
-	'd': 86400,
+	'm': secondsPerMinute,
+	'h': secondsPerHour,
+	'd': secondsPerDay,
 }
 
 // ParseDuration parses a duration string into seconds.
@@ -66,14 +73,14 @@ func FormatDuration(seconds int64) string {
 	if seconds == 0 {
 		return "0"
 	}
-	if seconds%86400 == 0 {
-		return fmt.Sprintf("%dd", seconds/86400)
+	if seconds%secondsPerDay == 0 {
+		return fmt.Sprintf("%dd", seconds/secondsPerDay)
 	}
-	if seconds%3600 == 0 {
-		return fmt.Sprintf("%dh", seconds/3600)
+	if seconds%secondsPerHour == 0 {
+		return fmt.Sprintf("%dh", seconds/secondsPerHour)
 	}
-	if seconds%60 == 0 {
-		return fmt.Sprintf("%dm", seconds/60)
+	if seconds%secondsPerMinute == 0 {
+		return fmt.Sprintf("%dm", seconds/secondsPerMinute)
 	}
 	return fmt.Sprintf("%ds", seconds)
 }

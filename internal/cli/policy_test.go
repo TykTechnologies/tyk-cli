@@ -971,25 +971,218 @@ func TestPolicyDelete_WithYes_JSON(t *testing.T) {
 	assert.Equal(t, true, result["success"])
 }
 
-func TestPolicyInit_NewFile(t *testing.T) {
-	t.Skip("pending: enable after delete tests pass")
+// executePolicyInitCmd creates a policy init command and executes RunE directly.
+// Uses --id and --name flags to bypass interactive prompts.
+func executePolicyInitCmd(t *testing.T, dir string, id string, name string) error {
+	t.Helper()
+	initCmd := NewPolicyInitCommand()
 
-	// Init creates a scaffold file; this test verifies the file content.
-	// The actual prompt interaction would be tested differently;
-	// this test uses programmatic arguments if the crafter adds --id/--name flags,
-	// or verifies the scaffold template is correct.
-	//
-	// TODO: crafter decides whether init uses interactive prompts or flags for testing.
+	// No config needed -- init is offline
+	ctx := context.Background()
+	initCmd.SetContext(ctx)
+
+	args := []string{"--id", id, "--name", name, "--dir", dir}
+	initCmd.SetArgs(args)
+	if err := initCmd.ParseFlags(args); err != nil {
+		return err
+	}
+
+	return initCmd.RunE(initCmd, []string{})
+}
+
+func TestPolicyInit_NewFile(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	err := executePolicyInitCmd(t, tmpDir, "my-policy", "My Policy")
+	require.NoError(t, err)
+
+	// Verify file was created at policies/{id}.yaml inside the dir
+	outPath := filepath.Join(tmpDir, "policies", "my-policy.yaml")
+	data, err := os.ReadFile(outPath)
+	require.NoError(t, err, "scaffold file should exist at policies/{id}.yaml")
+
+	// Parse and validate the scaffold YAML
+	var pf types.PolicyFile
+	err = yaml.Unmarshal(data, &pf)
+	require.NoError(t, err, "scaffold should be valid YAML")
+
+	// Verify schema fields
+	assert.Equal(t, "tyk.tyktech/v1", pf.APIVersion)
+	assert.Equal(t, "Policy", pf.Kind)
+	assert.Equal(t, "my-policy", pf.Metadata.ID)
+	assert.Equal(t, "My Policy", pf.Metadata.Name)
+
+	// Verify sensible defaults
+	require.NotNil(t, pf.Spec.RateLimit, "scaffold should have default rateLimit")
+	assert.Equal(t, int64(1000), pf.Spec.RateLimit.Requests)
+	assert.Equal(t, types.Duration("1m"), pf.Spec.RateLimit.Per)
+	require.NotNil(t, pf.Spec.Quota, "scaffold should have default quota")
+	assert.Equal(t, int64(100000), pf.Spec.Quota.Limit)
+	assert.Equal(t, types.Duration("30d"), pf.Spec.Quota.Period)
+	assert.Equal(t, types.Duration("0"), pf.Spec.KeyTTL)
+	require.Len(t, pf.Spec.Access, 1, "scaffold should have one placeholder access entry")
+	assert.Equal(t, "your-api-name", pf.Spec.Access[0].Name)
+	assert.Equal(t, []string{"Default"}, pf.Spec.Access[0].Versions)
+}
+
+func TestPolicyInit_FileExistsNoOverwrite(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Create the file that init would write to
+	policiesDir := filepath.Join(tmpDir, "policies")
+	require.NoError(t, os.MkdirAll(policiesDir, 0755))
+	existingPath := filepath.Join(policiesDir, "existing.yaml")
+	require.NoError(t, os.WriteFile(existingPath, []byte("original content"), 0644))
+
+	err := executePolicyInitCmd(t, tmpDir, "existing", "Existing Policy")
+
+	require.Error(t, err, "init should error when file already exists")
+	exitErr, ok := err.(*ExitError)
+	require.True(t, ok, "should return ExitError")
+	assert.Contains(t, exitErr.Message, "already exists")
+
+	// Verify original content untouched
+	data, _ := os.ReadFile(existingPath)
+	assert.Equal(t, "original content", string(data))
+}
+
+func TestPolicyInit_Registration(t *testing.T) {
+	root := NewRootCommand("test", "commit", "time")
+
+	// Find init under policy
+	found := false
+	for _, cmd := range root.Commands() {
+		if cmd.Name() == "policy" {
+			for _, sub := range cmd.Commands() {
+				if sub.Name() == "init" {
+					found = true
+				}
+			}
+		}
+	}
+	assert.True(t, found, "'init' should be a subcommand of 'policy'")
 }
 
 // ===========================================================================
-// Suppressed unused import warnings -- remove these lines when implementing.
-// The imports above (yaml, strings, filepath) are used by the test functions
-// when their t.Skip() lines are removed.
+// Full Integration Walking Skeleton
 // ===========================================================================
 
-var (
-	_ = yaml.Unmarshal
-	_ = strings.Replace
-	_ = filepath.Join
-)
+func TestPolicyIntegration_FullLifecycle(t *testing.T) {
+	// This test exercises: list empty -> apply new -> list shows policy -> get returns CLI schema -> delete removes
+	var createdPolicy map[string]interface{}
+	policyStore := map[string]map[string]interface{}{} // in-memory store
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		// List APIs (for selector resolution)
+		case r.Method == http.MethodGet && r.URL.Path == "/api/apis":
+			json.NewEncoder(w).Encode(mockAPIListResponse())
+
+		// List policies
+		case r.Method == http.MethodGet && r.URL.Path == "/api/portal/policies":
+			policies := make([]map[string]interface{}, 0)
+			for _, p := range policyStore {
+				policies = append(policies, p)
+			}
+			json.NewEncoder(w).Encode(mockPolicyListResponse(policies))
+
+		// Get policy by ID
+		case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/api/portal/policies/"):
+			policyID := strings.TrimPrefix(r.URL.Path, "/api/portal/policies/")
+			if p, ok := policyStore[policyID]; ok {
+				json.NewEncoder(w).Encode(p)
+			} else {
+				w.WriteHeader(http.StatusNotFound)
+				json.NewEncoder(w).Encode(map[string]interface{}{"status": 404, "message": "not found"})
+			}
+
+		// Create policy
+		case r.Method == http.MethodPost && r.URL.Path == "/api/portal/policies":
+			body, _ := io.ReadAll(r.Body)
+			json.Unmarshal(body, &createdPolicy)
+			id, _ := createdPolicy["_id"].(string)
+			policyStore[id] = createdPolicy
+			json.NewEncoder(w).Encode(map[string]interface{}{"Status": "success", "Message": "created", "Meta": id})
+
+		// Delete policy
+		case r.Method == http.MethodDelete && strings.HasPrefix(r.URL.Path, "/api/portal/policies/"):
+			policyID := strings.TrimPrefix(r.URL.Path, "/api/portal/policies/")
+			delete(policyStore, policyID)
+			json.NewEncoder(w).Encode(map[string]interface{}{"Status": "success", "Message": "deleted"})
+
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	// Step 1: List should be empty
+	oldStderr := os.Stderr
+	rErr, wErr, _ := os.Pipe()
+	os.Stderr = wErr
+
+	err := executePolicyListCmd(t, server.URL, types.OutputHuman)
+
+	wErr.Close()
+	os.Stderr = oldStderr
+	stderr, _ := io.ReadAll(rErr)
+	require.NoError(t, err)
+	assert.Contains(t, string(stderr), "No policies found")
+
+	// Step 2: Apply a new policy
+	policyFile := writeTempPolicyFile(t, validPlatinumPolicyYAML)
+	err = executePolicyApplyCmd(t, server.URL, policyFile)
+	require.NoError(t, err, "apply should succeed")
+
+	// Step 3: List should now show the policy
+	oldStdout := os.Stdout
+	rOut, wOut, _ := os.Pipe()
+	os.Stdout = wOut
+
+	err = executePolicyListCmd(t, server.URL, types.OutputJSON)
+
+	wOut.Close()
+	os.Stdout = oldStdout
+	stdout, _ := io.ReadAll(rOut)
+	require.NoError(t, err)
+
+	var listResult map[string]interface{}
+	require.NoError(t, json.Unmarshal(stdout, &listResult))
+	assert.Equal(t, float64(1), listResult["count"], "list should show 1 policy after apply")
+
+	// Step 4: Get should return CLI schema
+	oldStdout = os.Stdout
+	rOut, wOut, _ = os.Pipe()
+	os.Stdout = wOut
+
+	err = executePolicyGetCmd(t, server.URL, types.OutputJSON, "platinum")
+
+	wOut.Close()
+	os.Stdout = oldStdout
+	stdout, _ = io.ReadAll(rOut)
+	require.NoError(t, err)
+
+	var getResult map[string]interface{}
+	require.NoError(t, json.Unmarshal(stdout, &getResult))
+	metadata, ok := getResult["metadata"].(map[string]interface{})
+	require.True(t, ok)
+	assert.Equal(t, "platinum", metadata["id"])
+	assert.Equal(t, "Platinum Plan", metadata["name"])
+
+	// Step 5: Delete the policy
+	err = executePolicyDeleteCmd(t, server.URL, types.OutputHuman, "platinum", true)
+	require.NoError(t, err, "delete should succeed")
+
+	// Step 6: List should be empty again
+	oldStderr = os.Stderr
+	rErr, wErr, _ = os.Pipe()
+	os.Stderr = wErr
+
+	err = executePolicyListCmd(t, server.URL, types.OutputHuman)
+
+	wErr.Close()
+	os.Stderr = oldStderr
+	stderr, _ = io.ReadAll(rErr)
+	require.NoError(t, err)
+	assert.Contains(t, string(stderr), "No policies found")
+}

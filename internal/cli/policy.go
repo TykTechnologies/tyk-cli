@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -28,6 +29,7 @@ func NewPolicyCommand() *cobra.Command {
 	policyCmd.AddCommand(NewPolicyGetCommand())
 	policyCmd.AddCommand(NewPolicyApplyCommand())
 	policyCmd.AddCommand(NewPolicyDeleteCommand())
+	policyCmd.AddCommand(NewPolicyInitCommand())
 
 	return policyCmd
 }
@@ -440,6 +442,97 @@ func runPolicyDelete(cmd *cobra.Command, args []string) error {
 
 	// Human-readable confirmation to stderr
 	fmt.Fprintf(os.Stderr, "Policy '%s' (%s) deleted.\n", dp.Name, policyID)
+	return nil
+}
+
+// NewPolicyInitCommand creates the 'tyk policy init' command
+func NewPolicyInitCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "init",
+		Short: "Generate a scaffold policy YAML file",
+		Long: `Generate a scaffold policy YAML file with sensible defaults.
+
+If --id and --name are provided, prompts are skipped (non-interactive mode).
+The file is written to policies/{id}.yaml relative to --dir (default: current directory).
+Refuses to overwrite an existing file.
+
+Examples:
+  tyk policy init --id my-policy --name "My Policy"
+  tyk policy init --id gold --name "Gold Plan" --dir ./project`,
+		RunE: runPolicyInit,
+	}
+
+	cmd.Flags().String("id", "", "Policy ID (required)")
+	cmd.Flags().String("name", "", "Policy name (required)")
+	cmd.Flags().String("dir", ".", "Base directory for output (policies/{id}.yaml is created inside)")
+
+	return cmd
+}
+
+// runPolicyInit implements the 'tyk policy init' command
+func runPolicyInit(cmd *cobra.Command, args []string) error {
+	id, _ := cmd.Flags().GetString("id")
+	name, _ := cmd.Flags().GetString("name")
+	dir, _ := cmd.Flags().GetString("dir")
+
+	if id == "" {
+		return &ExitError{Code: int(types.ExitBadArgs), Message: "policy ID is required (use --id)"}
+	}
+	if name == "" {
+		return &ExitError{Code: int(types.ExitBadArgs), Message: "policy name is required (use --name)"}
+	}
+
+	// Build output path
+	policiesDir := filepath.Join(dir, "policies")
+	outPath := filepath.Join(policiesDir, id+".yaml")
+
+	// Check if file already exists
+	if _, err := os.Stat(outPath); err == nil {
+		return &ExitError{Code: int(types.ExitBadArgs), Message: fmt.Sprintf("file already exists: %s", outPath)}
+	}
+
+	// Generate scaffold
+	pf := types.PolicyFile{
+		APIVersion: "tyk.tyktech/v1",
+		Kind:       "Policy",
+		Metadata: types.PolicyMetadata{
+			ID:   id,
+			Name: name,
+		},
+		Spec: types.PolicySpec{
+			RateLimit: &types.RateLimit{
+				Requests: 1000,
+				Per:      types.Duration("1m"),
+			},
+			Quota: &types.Quota{
+				Limit:  100000,
+				Period: types.Duration("30d"),
+			},
+			KeyTTL: types.Duration("0"),
+			Access: []types.AccessEntry{
+				{
+					Name:     "your-api-name",
+					Versions: []string{"Default"},
+				},
+			},
+		},
+	}
+
+	data, err := yaml.Marshal(pf)
+	if err != nil {
+		return fmt.Errorf("failed to marshal scaffold: %w", err)
+	}
+
+	// Ensure policies directory exists
+	if err := os.MkdirAll(policiesDir, 0755); err != nil {
+		return fmt.Errorf("failed to create policies directory: %w", err)
+	}
+
+	if err := os.WriteFile(outPath, data, 0644); err != nil {
+		return fmt.Errorf("failed to write scaffold file: %w", err)
+	}
+
+	fmt.Fprintf(os.Stderr, "Policy scaffold written to %s\n", outPath)
 	return nil
 }
 

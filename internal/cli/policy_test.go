@@ -468,9 +468,23 @@ func TestPolicyCommand_Registration(t *testing.T) {
 	assert.True(t, found, "'policy' should be a subcommand of root")
 }
 
-func TestPolicyGet_Human(t *testing.T) {
-	t.Skip("pending: enable after list scenarios pass")
+// executePolicyGetCmd creates a policy get command with config injected and executes RunE directly.
+// This bypasses root PersistentPreRunE (which loads config from disk) and tests the driving port directly.
+func executePolicyGetCmd(t *testing.T, serverURL string, outputFormat types.OutputFormat, policyID string) error {
+	t.Helper()
+	root := NewRootCommand("test", "commit", "time")
+	getCmd, _, err := root.Find([]string{"policy", "get"})
+	require.NoError(t, err)
 
+	cfg := createPolicyConfig(serverURL)
+	ctx := withConfig(context.Background(), cfg)
+	ctx = withOutputFormat(ctx, outputFormat)
+	getCmd.SetContext(ctx)
+
+	return getCmd.RunE(getCmd, []string{policyID})
+}
+
+func TestPolicyGet_Human(t *testing.T) {
 	goldPolicy := mockDashboardPolicy("gold", "Gold Plan", 1000, 60, 100000, 2592000,
 		[]string{"gold", "paid"}, goldPolicyAccessRights())
 
@@ -486,14 +500,6 @@ func TestPolicyGet_Human(t *testing.T) {
 	}))
 	defer server.Close()
 
-	root := NewRootCommand("test", "commit", "time")
-	getCmd, _, err := root.Find([]string{"policy", "get"})
-	require.NoError(t, err)
-
-	cfg := createPolicyConfig(server.URL)
-	getCmd.SetContext(withConfig(context.Background(), cfg))
-	getCmd.SetContext(withOutputFormat(getCmd.Context(), types.OutputHuman))
-
 	// Capture both stdout (YAML) and stderr (summary)
 	oldStdout := os.Stdout
 	oldStderr := os.Stderr
@@ -502,8 +508,7 @@ func TestPolicyGet_Human(t *testing.T) {
 	os.Stdout = wOut
 	os.Stderr = wErr
 
-	getCmd.SetArgs([]string{"gold"})
-	err = getCmd.Execute()
+	err := executePolicyGetCmd(t, server.URL, types.OutputHuman, "gold")
 
 	wOut.Close()
 	wErr.Close()
@@ -530,8 +535,6 @@ func TestPolicyGet_Human(t *testing.T) {
 }
 
 func TestPolicyGet_JSON(t *testing.T) {
-	t.Skip("pending: enable after human output test passes")
-
 	goldPolicy := mockDashboardPolicy("gold", "Gold Plan", 1000, 60, 100000, 2592000,
 		[]string{"gold", "paid"}, goldPolicyAccessRights())
 
@@ -547,20 +550,11 @@ func TestPolicyGet_JSON(t *testing.T) {
 	}))
 	defer server.Close()
 
-	root := NewRootCommand("test", "commit", "time")
-	getCmd, _, err := root.Find([]string{"policy", "get"})
-	require.NoError(t, err)
-
-	cfg := createPolicyConfig(server.URL)
-	getCmd.SetContext(withConfig(context.Background(), cfg))
-	getCmd.SetContext(withOutputFormat(getCmd.Context(), types.OutputJSON))
-
 	oldStdout := os.Stdout
 	rOut, wOut, _ := os.Pipe()
 	os.Stdout = wOut
 
-	getCmd.SetArgs([]string{"gold"})
-	err = getCmd.Execute()
+	err := executePolicyGetCmd(t, server.URL, types.OutputJSON, "gold")
 
 	wOut.Close()
 	os.Stdout = oldStdout
@@ -579,8 +573,6 @@ func TestPolicyGet_JSON(t *testing.T) {
 }
 
 func TestPolicyGet_NotFound(t *testing.T) {
-	t.Skip("pending: enable after get human/JSON tests pass")
-
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(map[string]interface{}{
@@ -589,22 +581,13 @@ func TestPolicyGet_NotFound(t *testing.T) {
 	}))
 	defer server.Close()
 
-	root := NewRootCommand("test", "commit", "time")
-	getCmd, _, err := root.Find([]string{"policy", "get"})
-	require.NoError(t, err)
-
-	cfg := createPolicyConfig(server.URL)
-	getCmd.SetContext(withConfig(context.Background(), cfg))
-	getCmd.SetContext(withOutputFormat(getCmd.Context(), types.OutputHuman))
-
-	getCmd.SetArgs([]string{"nonexistent"})
-	err = getCmd.Execute()
+	err := executePolicyGetCmd(t, server.URL, types.OutputHuman, "nonexistent")
 
 	require.Error(t, err)
-	if exitErr, ok := err.(*ExitError); ok {
-		assert.Equal(t, 3, exitErr.Code)
-		assert.Contains(t, exitErr.Message, "not found")
-	}
+	exitErr, ok := err.(*ExitError)
+	require.True(t, ok, "should return ExitError")
+	assert.Equal(t, 3, exitErr.Code)
+	assert.Contains(t, exitErr.Message, "not found")
 }
 
 // ===========================================================================
@@ -946,8 +929,7 @@ func TestPolicyApply_FileNotFound(t *testing.T) {
 // ===========================================================================
 
 func TestPolicyDelete_WithYes(t *testing.T) {
-	t.Skip("pending: enable after apply scenarios complete")
-
+	t.Skip("pending: step 02-04")
 	deleteCalled := false
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -983,8 +965,7 @@ func TestPolicyDelete_WithYes(t *testing.T) {
 }
 
 func TestPolicyDelete_NotFound(t *testing.T) {
-	t.Skip("pending: enable after delete success test passes")
-
+	t.Skip("pending: step 02-03 -- enable after delete subcommand is implemented")
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(map[string]interface{}{
@@ -1008,6 +989,57 @@ func TestPolicyDelete_NotFound(t *testing.T) {
 	if exitErr, ok := err.(*ExitError); ok {
 		assert.Equal(t, 3, exitErr.Code)
 	}
+}
+
+func TestPolicyDelete_WithYes_JSON(t *testing.T) {
+	t.Skip("pending: step 02-03 -- enable after delete subcommand is implemented")
+	deleteCalled := false
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.Method == http.MethodGet && strings.Contains(r.URL.Path, "/api/portal/policies/free-tier"):
+			policy := mockDashboardPolicy("free-tier", "Free Plan", 100, 60, 10000, 86400,
+				[]string{"free"}, map[string]interface{}{})
+			json.NewEncoder(w).Encode(policy)
+		case r.Method == http.MethodDelete && strings.Contains(r.URL.Path, "/api/portal/policies/free-tier"):
+			deleteCalled = true
+			json.NewEncoder(w).Encode(map[string]interface{}{"Status": "success", "Message": "deleted"})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	root := NewRootCommand("test", "commit", "time")
+	deleteCmd, _, err := root.Find([]string{"policy", "delete"})
+	require.NoError(t, err)
+
+	cfg := createPolicyConfig(server.URL)
+	deleteCmd.SetContext(withConfig(context.Background(), cfg))
+	deleteCmd.SetContext(withOutputFormat(deleteCmd.Context(), types.OutputJSON))
+
+	// Capture stdout for JSON output
+	oldStdout := os.Stdout
+	rOut, wOut, _ := os.Pipe()
+	os.Stdout = wOut
+
+	deleteCmd.SetArgs([]string{"free-tier", "--yes"})
+	err = deleteCmd.Execute()
+
+	wOut.Close()
+	os.Stdout = oldStdout
+	stdout, _ := io.ReadAll(rOut)
+
+	require.NoError(t, err)
+	assert.True(t, deleteCalled, "DELETE should have been called")
+
+	// Verify structured JSON output
+	var result map[string]interface{}
+	err = json.Unmarshal(stdout, &result)
+	require.NoError(t, err, "output should be valid JSON")
+	assert.Equal(t, "free-tier", result["policy_id"])
+	assert.Equal(t, "deleted", result["operation"])
+	assert.Equal(t, true, result["success"])
 }
 
 func TestPolicyInit_NewFile(t *testing.T) {

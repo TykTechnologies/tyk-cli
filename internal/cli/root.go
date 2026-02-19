@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -66,6 +67,7 @@ with support for OpenAPI 3.0 specifications.`,
 	rootCmd.AddCommand(NewAPICommand())
 	rootCmd.AddCommand(NewPolicyCommand())
 	rootCmd.AddCommand(NewConfigCommand())
+	rootCmd.AddCommand(NewApplyCommand())
 
 	return rootCmd
 }
@@ -82,6 +84,17 @@ func initConfig(cmd *cobra.Command, flags *GlobalFlags) error {
 
 	// Override with command line flags
 	configManager.SetFromFlags(flags.DashURL, flags.AuthToken, flags.OrgID)
+
+	// Environment variables always override config file values
+	if dashURL := os.Getenv("TYK_DASH_URL"); dashURL != "" {
+		configManager.SetFromFlags(dashURL, "", "")
+	}
+	if authToken := os.Getenv("TYK_AUTH_TOKEN"); authToken != "" {
+		configManager.SetFromFlags("", authToken, "")
+	}
+	if orgID := os.Getenv("TYK_ORG_ID"); orgID != "" {
+		configManager.SetFromFlags("", "", orgID)
+	}
 
 	// Validate configuration
 	config := configManager.GetConfig()

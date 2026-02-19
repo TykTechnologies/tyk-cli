@@ -505,7 +505,6 @@ version: "1.0"
 // ---------------------------------------------------------------------------
 
 func TestApply_DryRun_NoMutations(t *testing.T) {
-	t.Skip("not yet implemented")
 
 	dir := createStandardFixtureDir(t)
 	server, rlog := startMockDashboard(t, mockOpts{
@@ -522,7 +521,6 @@ func TestApply_DryRun_NoMutations(t *testing.T) {
 }
 
 func TestApply_DryRun_ShowsWouldCreateAndWouldUpdate(t *testing.T) {
-	t.Skip("not yet implemented")
 
 	dir := createStandardFixtureDir(t)
 	server, _ := startMockDashboard(t, mockOpts{
@@ -538,7 +536,6 @@ func TestApply_DryRun_ShowsWouldCreateAndWouldUpdate(t *testing.T) {
 }
 
 func TestApply_DryRun_ParseErrorReported(t *testing.T) {
-	t.Skip("not yet implemented")
 
 	dir := t.TempDir()
 	writeFixtureFile(t, dir, "apis/good.yaml",
@@ -555,7 +552,6 @@ func TestApply_DryRun_ParseErrorReported(t *testing.T) {
 }
 
 func TestApply_DryRun_Summary(t *testing.T) {
-	t.Skip("not yet implemented")
 
 	dir := createStandardFixtureDir(t)
 	server, _ := startMockDashboard(t, mockOpts{})

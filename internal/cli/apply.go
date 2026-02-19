@@ -58,6 +58,7 @@ Examples:
 	cmd.Flags().StringP("file", "f", "", "Path to file or directory (required)")
 	_ = cmd.MarkFlagRequired("file")
 	cmd.Flags().Bool("continue-on-error", true, "Continue applying remaining files after a failure (default true)")
+	cmd.Flags().Bool("dry-run", false, "Show what would be applied without making changes")
 
 	return cmd
 }
@@ -65,6 +66,7 @@ Examples:
 func runApply(cmd *cobra.Command, args []string) error {
 	filePath, _ := cmd.Flags().GetString("file")
 	continueOnError, _ := cmd.Flags().GetBool("continue-on-error")
+	dryRun, _ := cmd.Flags().GetBool("dry-run")
 
 	config := GetConfigFromContext(cmd.Context())
 	if config == nil {
@@ -149,10 +151,29 @@ func runApply(cmd *cobra.Command, args []string) error {
 			fmt.Fprintf(w, "[%d/%d] %s ... FAILED (unrecognized file type)\n", i+1, total, baseName)
 			failed++
 			if !continueOnError {
-				// Mark remaining as skipped
 				skipped = total - i - 1
 				break
 			}
+			continue
+		}
+
+		if dryRun {
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			op, dryErr := applier.dryRunFile(ctx, f)
+			cancel()
+
+			if dryErr != nil {
+				fmt.Fprintf(w, "[%d/%d] %s ... FAILED (%v)\n", i+1, total, baseName, dryErr)
+				failed++
+				if !continueOnError {
+					skipped = total - i - 1
+					break
+				}
+				continue
+			}
+
+			fmt.Fprintf(w, "[%d/%d] %s ... %s\n", i+1, total, baseName, op)
+			applied++
 			continue
 		}
 
@@ -162,7 +183,6 @@ func runApply(cmd *cobra.Command, args []string) error {
 		cancel()
 
 		if applyErr != nil {
-			// Check for auth failure
 			if applyErr == errAuthFailure {
 				fmt.Fprintf(w, "[%d/%d] %s ... FAILED (Authentication failed)\n", i+1, total, baseName)
 				failed++
@@ -186,14 +206,18 @@ func runApply(cmd *cobra.Command, args []string) error {
 	}
 
 	// Summary
-	fmt.Fprintf(w, "\nApply complete: %d/%d succeeded", applied, total)
-	if failed > 0 {
-		fmt.Fprintf(w, ", %d failed", failed)
+	if dryRun {
+		fmt.Fprintf(w, "\nDry run complete. 0 changes made.\n")
+	} else {
+		fmt.Fprintf(w, "\nApply complete: %d/%d succeeded", applied, total)
+		if failed > 0 {
+			fmt.Fprintf(w, ", %d failed", failed)
+		}
+		if skipped > 0 {
+			fmt.Fprintf(w, ", %d skipped", skipped)
+		}
+		fmt.Fprintln(w)
 	}
-	if skipped > 0 {
-		fmt.Fprintf(w, ", %d skipped", skipped)
-	}
-	fmt.Fprintln(w)
 
 	if authFailed {
 		return &ExitError{Code: 3, Message: "Authentication failed"}
@@ -321,6 +345,32 @@ type batchApplier struct {
 	authToken string
 	orgID     string
 	client    *http.Client
+}
+
+func (ba *batchApplier) dryRunFile(ctx context.Context, f discoveredFile) (string, error) {
+	switch f.Type {
+	case configFileAPI:
+		apiID, hasID := oas.ExtractAPIIDFromTykExtensions(f.Content)
+		if hasID && apiID != "" {
+			status, _ := ba.doJSON(ctx, http.MethodGet, "/api/apis/oas/"+url.PathEscape(apiID), nil)
+			if status == http.StatusOK {
+				return "would update", nil
+			}
+		}
+		return "would create", nil
+	case configFilePolicy:
+		policyID, _ := f.Content["id"].(string)
+		if policyID == "" {
+			return "", fmt.Errorf("policy file missing 'id' field")
+		}
+		status, _ := ba.doJSON(ctx, http.MethodGet, "/api/portal/policies/"+url.PathEscape(policyID), nil)
+		if status == http.StatusOK {
+			return "would update", nil
+		}
+		return "would create", nil
+	default:
+		return "", fmt.Errorf("unrecognized file type")
+	}
 }
 
 func (ba *batchApplier) applyFile(ctx context.Context, f discoveredFile) error {

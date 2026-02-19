@@ -306,7 +306,7 @@ func (ba *batchApplier) applyAPI(ctx context.Context, f discoveredFile) error {
 
 	if hasID && apiID != "" {
 		// Check if API exists
-		status, _ := ba.doJSON(ctx, http.MethodGet, "/api/apis/oas/"+url.PathEscape(apiID), nil)
+		status, respBody := ba.doJSON(ctx, http.MethodGet, "/api/apis/oas/"+url.PathEscape(apiID), nil)
 		if status == http.StatusOK {
 			// Update
 			s, body := ba.doJSON(ctx, http.MethodPut, "/api/apis/oas/"+url.PathEscape(apiID), f.Content)
@@ -314,6 +314,9 @@ func (ba *batchApplier) applyAPI(ctx context.Context, f discoveredFile) error {
 				return fmt.Errorf("update failed (%d): %s", s, body)
 			}
 			return nil
+		}
+		if status != http.StatusNotFound && status >= 400 {
+			return fmt.Errorf("check failed (%d): %s", status, respBody)
 		}
 	}
 

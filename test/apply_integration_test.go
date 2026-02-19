@@ -398,8 +398,6 @@ func TestApply_PoliciesAppliedBeforeAPIs(t *testing.T) {
 }
 
 func TestApply_AllFilesSucceed_ExitZero(t *testing.T) {
-	t.Skip("not yet implemented")
-
 	dir := createStandardFixtureDir(t)
 	server, _ := startMockDashboard(t, mockOpts{})
 
@@ -411,8 +409,6 @@ func TestApply_AllFilesSucceed_ExitZero(t *testing.T) {
 }
 
 func TestApply_PartialFailure_ContinuesAndExitOne(t *testing.T) {
-	t.Skip("not yet implemented")
-
 	dir := createStandardFixtureDir(t)
 	server, _ := startMockDashboard(t, mockOpts{
 		failAPIs: map[string]int{"payment-svc-1": http.StatusInternalServerError},
@@ -459,8 +455,6 @@ func TestApply_NonConfigFilesSkipped(t *testing.T) {
 }
 
 func TestApply_IdempotentRerun(t *testing.T) {
-	t.Skip("not yet implemented")
-
 	dir := createStandardFixtureDir(t)
 	server, _ := startMockDashboard(t, mockOpts{
 		existingAPIs:     map[string]bool{"user-svc-1": true, "payment-svc-1": true},

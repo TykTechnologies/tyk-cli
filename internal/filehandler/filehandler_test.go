@@ -56,21 +56,28 @@ func TestValidateFilePath(t *testing.T) {
 
 func TestGetFileType(t *testing.T) {
 	tests := []struct {
-		filePath string
-		expected FileType
+		filePath    string
+		expected    FileType
+		expectError bool
 	}{
-		{"test.json", FileTypeJSON},
-		{"test.yaml", FileTypeYAML},
-		{"test.yml", FileTypeYAML},
-		{"test.JSON", FileTypeJSON},
-		{"test.YAML", FileTypeYAML},
-		{"test", FileTypeJSON}, // Default fallback
+		{"test.json", FileTypeJSON, false},
+		{"test.yaml", FileTypeYAML, false},
+		{"test.yml", FileTypeYAML, false},
+		{"test.JSON", FileTypeJSON, false},
+		{"test.YAML", FileTypeYAML, false},
+		{"test.txt", 0, true},
+		{"test", 0, true},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.filePath, func(t *testing.T) {
-			result := getFileType(tt.filePath)
-			assert.Equal(t, tt.expected, result)
+			result, err := getFileType(tt.filePath)
+			if tt.expectError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expected, result)
+			}
 		})
 	}
 }

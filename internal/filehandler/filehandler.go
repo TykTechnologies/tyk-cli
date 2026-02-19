@@ -43,8 +43,11 @@ func LoadFile(filePath string) (*FileInfo, error) {
 	}
 
 	// Determine file type from extension
-	fileType := getFileType(filePath)
-	
+	fileType, err := getFileType(filePath)
+	if err != nil {
+		return nil, err
+	}
+
 	// Parse content based on file type
 	var parsedContent map[string]interface{}
 	switch fileType {
@@ -86,10 +89,12 @@ func LoadFileAsRawJSON(filePath string) (json.RawMessage, error) {
 
 // SaveFile saves content to a file in the specified format
 func SaveFile(filePath string, content map[string]interface{}) error {
-	fileType := getFileType(filePath)
-	
+	fileType, err := getFileType(filePath)
+	if err != nil {
+		return err
+	}
+
 	var data []byte
-	var err error
 
 	switch fileType {
 	case FileTypeJSON:
@@ -177,15 +182,15 @@ func GetOASTitle(content map[string]interface{}) string {
 }
 
 // getFileType determines file type from extension
-func getFileType(filePath string) FileType {
+func getFileType(filePath string) (FileType, error) {
 	ext := strings.ToLower(filepath.Ext(filePath))
 	switch ext {
 	case ".json":
-		return FileTypeJSON
+		return FileTypeJSON, nil
 	case ".yaml", ".yml":
-		return FileTypeYAML
+		return FileTypeYAML, nil
 	default:
-		return FileTypeJSON // Default fallback
+		return 0, fmt.Errorf("unsupported file extension %q (supported: %v)", ext, SupportedExtensions)
 	}
 }
 

@@ -629,7 +629,6 @@ func TestApply_FailFast_AllSucceed_SameAsDefault(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestApply_JSONOutput_ValidStructure(t *testing.T) {
-	t.Skip("not yet implemented")
 
 	dir := createStandardFixtureDir(t)
 	server, _ := startMockDashboard(t, mockOpts{})
@@ -657,7 +656,6 @@ func TestApply_JSONOutput_ValidStructure(t *testing.T) {
 }
 
 func TestApply_JSONOutput_FailedEntryHasError(t *testing.T) {
-	t.Skip("not yet implemented")
 
 	dir := createStandardFixtureDir(t)
 	server, _ := startMockDashboard(t, mockOpts{
@@ -685,7 +683,6 @@ func TestApply_JSONOutput_FailedEntryHasError(t *testing.T) {
 }
 
 func TestApply_JSONOutput_DryRun(t *testing.T) {
-	t.Skip("not yet implemented")
 
 	dir := createStandardFixtureDir(t)
 	server, _ := startMockDashboard(t, mockOpts{
@@ -718,7 +715,6 @@ func TestApply_JSONOutput_DryRun(t *testing.T) {
 }
 
 func TestApply_JSONOutput_FailFast_IncludesSkipped(t *testing.T) {
-	t.Skip("not yet implemented")
 
 	dir := createStandardFixtureDir(t)
 	server, _ := startMockDashboard(t, mockOpts{

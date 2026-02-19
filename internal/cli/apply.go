@@ -16,8 +16,27 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/tyktech/tyk-cli/internal/oas"
+	"github.com/tyktech/tyk-cli/pkg/types"
 	"gopkg.in/yaml.v3"
 )
+
+// jsonBatchResult is the JSON output structure for batch apply.
+type jsonBatchResult struct {
+	Total   int               `json:"total"`
+	Applied int               `json:"applied"`
+	Failed  int               `json:"failed"`
+	Skipped int               `json:"skipped"`
+	Results []jsonResultEntry `json:"results"`
+}
+
+// jsonResultEntry represents one file result in JSON output.
+type jsonResultEntry struct {
+	File      string `json:"file"`
+	Type      string `json:"type"`
+	Operation string `json:"operation"`
+	ID        string `json:"id,omitempty"`
+	Error     string `json:"error,omitempty"`
+}
 
 // errAuthFailure is a sentinel error for HTTP 401 responses.
 var errAuthFailure = fmt.Errorf("authentication failed")
@@ -136,6 +155,10 @@ func runApply(cmd *cobra.Command, args []string) error {
 		client:    &http.Client{Timeout: 30 * time.Second},
 	}
 
+	// Detect JSON output mode
+	outputFormat := GetOutputFormatFromContext(cmd.Context())
+	jsonMode := outputFormat == types.OutputJSON
+
 	// Apply files
 	total := len(configFiles)
 	applied := 0
@@ -143,15 +166,39 @@ func runApply(cmd *cobra.Command, args []string) error {
 	skipped := 0
 	w := cmd.ErrOrStderr()
 	authFailed := false
+	var jsonResults []jsonResultEntry
 
 	for i, f := range configFiles {
 		baseName := filepath.Base(f.Path)
+		fileType := string(f.Type)
+		fileID := extractFileID(f)
 
 		if f.Type == configFileUnrecognized {
-			fmt.Fprintf(w, "[%d/%d] %s ... FAILED (unrecognized file type)\n", i+1, total, baseName)
+			if jsonMode {
+				jsonResults = append(jsonResults, jsonResultEntry{
+					File:      baseName,
+					Type:      fileType,
+					Operation: "failed",
+					ID:        fileID,
+					Error:     "unrecognized file type",
+				})
+			} else {
+				fmt.Fprintf(w, "[%d/%d] %s ... FAILED (unrecognized file type)\n", i+1, total, baseName)
+			}
 			failed++
 			if !continueOnError {
 				skipped = total - i - 1
+				if jsonMode {
+					for j := i + 1; j < total; j++ {
+						sn := filepath.Base(configFiles[j].Path)
+						jsonResults = append(jsonResults, jsonResultEntry{
+							File:      sn,
+							Type:      string(configFiles[j].Type),
+							Operation: "skipped",
+							ID:        extractFileID(configFiles[j]),
+						})
+					}
+				}
 				break
 			}
 			continue
@@ -163,60 +210,159 @@ func runApply(cmd *cobra.Command, args []string) error {
 			cancel()
 
 			if dryErr != nil {
-				fmt.Fprintf(w, "[%d/%d] %s ... FAILED (%v)\n", i+1, total, baseName, dryErr)
+				if jsonMode {
+					jsonResults = append(jsonResults, jsonResultEntry{
+						File:      baseName,
+						Type:      fileType,
+						Operation: "failed",
+						ID:        fileID,
+						Error:     dryErr.Error(),
+					})
+				} else {
+					fmt.Fprintf(w, "[%d/%d] %s ... FAILED (%v)\n", i+1, total, baseName, dryErr)
+				}
 				failed++
 				if !continueOnError {
 					skipped = total - i - 1
+					if jsonMode {
+						for j := i + 1; j < total; j++ {
+							sn := filepath.Base(configFiles[j].Path)
+							jsonResults = append(jsonResults, jsonResultEntry{
+								File:      sn,
+								Type:      string(configFiles[j].Type),
+								Operation: "skipped",
+								ID:        extractFileID(configFiles[j]),
+							})
+						}
+					}
 					break
 				}
 				continue
 			}
 
-			fmt.Fprintf(w, "[%d/%d] %s ... %s\n", i+1, total, baseName, op)
+			if jsonMode {
+				jsonResults = append(jsonResults, jsonResultEntry{
+					File:      baseName,
+					Type:      fileType,
+					Operation: strings.ReplaceAll(op, " ", "_"),
+					ID:        fileID,
+				})
+			} else {
+				fmt.Fprintf(w, "[%d/%d] %s ... %s\n", i+1, total, baseName, op)
+			}
 			applied++
 			continue
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 
-		applyErr := applier.applyFile(ctx, f)
+		op, applyErr := applier.applyFileWithOp(ctx, f)
 		cancel()
 
 		if applyErr != nil {
 			if applyErr == errAuthFailure {
-				fmt.Fprintf(w, "[%d/%d] %s ... FAILED (Authentication failed)\n", i+1, total, baseName)
+				if jsonMode {
+					jsonResults = append(jsonResults, jsonResultEntry{
+						File:      baseName,
+						Type:      fileType,
+						Operation: "failed",
+						ID:        fileID,
+						Error:     "Authentication failed",
+					})
+				} else {
+					fmt.Fprintf(w, "[%d/%d] %s ... FAILED (Authentication failed)\n", i+1, total, baseName)
+				}
 				failed++
 				authFailed = true
 				skipped = total - i - 1
+				if jsonMode {
+					for j := i + 1; j < total; j++ {
+						sn := filepath.Base(configFiles[j].Path)
+						jsonResults = append(jsonResults, jsonResultEntry{
+							File:      sn,
+							Type:      string(configFiles[j].Type),
+							Operation: "skipped",
+							ID:        extractFileID(configFiles[j]),
+						})
+					}
+				}
 				break
 			}
 
-			fmt.Fprintf(w, "[%d/%d] %s ... FAILED (%v)\n", i+1, total, baseName, applyErr)
+			if jsonMode {
+				jsonResults = append(jsonResults, jsonResultEntry{
+					File:      baseName,
+					Type:      fileType,
+					Operation: "failed",
+					ID:        fileID,
+					Error:     applyErr.Error(),
+				})
+			} else {
+				fmt.Fprintf(w, "[%d/%d] %s ... FAILED (%v)\n", i+1, total, baseName, applyErr)
+			}
 			failed++
 
 			if !continueOnError {
 				skipped = total - i - 1
+				if jsonMode {
+					for j := i + 1; j < total; j++ {
+						sn := filepath.Base(configFiles[j].Path)
+						jsonResults = append(jsonResults, jsonResultEntry{
+							File:      sn,
+							Type:      string(configFiles[j].Type),
+							Operation: "skipped",
+							ID:        extractFileID(configFiles[j]),
+						})
+					}
+				}
 				break
 			}
 			continue
 		}
 
 		applied++
-		fmt.Fprintf(w, "[%d/%d] %s ... OK\n", i+1, total, baseName)
+		if jsonMode {
+			jsonResults = append(jsonResults, jsonResultEntry{
+				File:      baseName,
+				Type:      fileType,
+				Operation: op,
+				ID:        fileID,
+			})
+		} else {
+			fmt.Fprintf(w, "[%d/%d] %s ... OK\n", i+1, total, baseName)
+		}
 	}
 
-	// Summary
-	if dryRun {
-		fmt.Fprintf(w, "\nDry run complete. 0 changes made.\n")
+	// JSON output
+	if jsonMode {
+		jsonApplied := applied
+		if dryRun {
+			jsonApplied = 0
+		}
+		result := jsonBatchResult{
+			Total:   total,
+			Applied: jsonApplied,
+			Failed:  failed,
+			Skipped: skipped,
+			Results: jsonResults,
+		}
+		enc := json.NewEncoder(cmd.OutOrStdout())
+		enc.SetIndent("", "  ")
+		_ = enc.Encode(result)
 	} else {
-		fmt.Fprintf(w, "\nApply complete: %d/%d succeeded", applied, total)
-		if failed > 0 {
-			fmt.Fprintf(w, ", %d failed", failed)
+		// Summary
+		if dryRun {
+			fmt.Fprintf(w, "\nDry run complete. 0 changes made.\n")
+		} else {
+			fmt.Fprintf(w, "\nApply complete: %d/%d succeeded", applied, total)
+			if failed > 0 {
+				fmt.Fprintf(w, ", %d failed", failed)
+			}
+			if skipped > 0 {
+				fmt.Fprintf(w, ", %d skipped", skipped)
+			}
+			fmt.Fprintln(w)
 		}
-		if skipped > 0 {
-			fmt.Fprintf(w, ", %d skipped", skipped)
-		}
-		fmt.Fprintln(w)
 	}
 
 	if authFailed {
@@ -374,13 +520,35 @@ func (ba *batchApplier) dryRunFile(ctx context.Context, f discoveredFile) (strin
 }
 
 func (ba *batchApplier) applyFile(ctx context.Context, f discoveredFile) error {
+	_, err := ba.applyFileWithOp(ctx, f)
+	return err
+}
+
+func (ba *batchApplier) applyFileWithOp(ctx context.Context, f discoveredFile) (string, error) {
 	switch f.Type {
 	case configFileAPI:
-		return ba.applyAPI(ctx, f)
+		return ba.applyAPIWithOp(ctx, f)
 	case configFilePolicy:
-		return ba.applyPolicy(ctx, f)
+		return ba.applyPolicyWithOp(ctx, f)
 	default:
-		return fmt.Errorf("unrecognized file type")
+		return "", fmt.Errorf("unrecognized file type")
+	}
+}
+
+// extractFileID returns the resource ID from a discovered file.
+func extractFileID(f discoveredFile) string {
+	if f.Content == nil {
+		return ""
+	}
+	switch f.Type {
+	case configFileAPI:
+		id, _ := oas.ExtractAPIIDFromTykExtensions(f.Content)
+		return id
+	case configFilePolicy:
+		id, _ := f.Content["id"].(string)
+		return id
+	default:
+		return ""
 	}
 }
 
@@ -393,78 +561,82 @@ func checkAuth(status int) error {
 }
 
 func (ba *batchApplier) applyAPI(ctx context.Context, f discoveredFile) error {
+	_, err := ba.applyAPIWithOp(ctx, f)
+	return err
+}
+
+func (ba *batchApplier) applyAPIWithOp(ctx context.Context, f discoveredFile) (string, error) {
 	apiID, hasID := oas.ExtractAPIIDFromTykExtensions(f.Content)
 
 	if hasID && apiID != "" {
-		// Check if API exists
 		status, respBody := ba.doJSON(ctx, http.MethodGet, "/api/apis/oas/"+url.PathEscape(apiID), nil)
 		if err := checkAuth(status); err != nil {
-			return err
+			return "", err
 		}
 		if status == http.StatusOK {
-			// Update
 			s, body := ba.doJSON(ctx, http.MethodPut, "/api/apis/oas/"+url.PathEscape(apiID), f.Content)
 			if err := checkAuth(s); err != nil {
-				return err
+				return "", err
 			}
 			if s >= 400 {
-				return fmt.Errorf("update failed (%d): %s", s, body)
+				return "", fmt.Errorf("update failed (%d): %s", s, body)
 			}
-			return nil
+			return "updated", nil
 		}
 		if status != http.StatusNotFound && status >= 400 {
-			return fmt.Errorf("check failed (%d): %s", status, respBody)
+			return "", fmt.Errorf("check failed (%d): %s", status, respBody)
 		}
 	}
 
-	// Create
 	s, body := ba.doJSON(ctx, http.MethodPost, "/api/apis/oas", f.Content)
 	if err := checkAuth(s); err != nil {
-		return err
+		return "", err
 	}
 	if s >= 400 {
-		return fmt.Errorf("create failed (%d): %s", s, body)
+		return "", fmt.Errorf("create failed (%d): %s", s, body)
 	}
-	return nil
+	return "created", nil
 }
 
 func (ba *batchApplier) applyPolicy(ctx context.Context, f discoveredFile) error {
+	_, err := ba.applyPolicyWithOp(ctx, f)
+	return err
+}
+
+func (ba *batchApplier) applyPolicyWithOp(ctx context.Context, f discoveredFile) (string, error) {
 	policyID, _ := f.Content["id"].(string)
 	if policyID == "" {
-		return fmt.Errorf("policy file missing 'id' field")
+		return "", fmt.Errorf("policy file missing 'id' field")
 	}
 
 	f.Content["org_id"] = ba.orgID
 
-	// Check if policy exists
 	status, respBody := ba.doJSON(ctx, http.MethodGet, "/api/portal/policies/"+url.PathEscape(policyID), nil)
 	if err := checkAuth(status); err != nil {
-		return err
+		return "", err
 	}
 	if status != http.StatusOK && status != http.StatusNotFound && status >= 400 {
-		return fmt.Errorf("check failed (%d): %s", status, respBody)
+		return "", fmt.Errorf("check failed (%d): %s", status, respBody)
 	}
 	if status == http.StatusOK {
-		// Update
 		s, body := ba.doJSON(ctx, http.MethodPut, "/api/portal/policies/"+url.PathEscape(policyID), f.Content)
 		if err := checkAuth(s); err != nil {
-			return err
+			return "", err
 		}
 		if s >= 400 {
-			return fmt.Errorf("update failed (%d): %s", s, body)
+			return "", fmt.Errorf("update failed (%d): %s", s, body)
 		}
-		return nil
+		return "updated", nil
 	}
 
-	// Create
 	s, body := ba.doJSON(ctx, http.MethodPost, "/api/portal/policies", f.Content)
 	if err := checkAuth(s); err != nil {
-		return err
+		return "", err
 	}
 	if s >= 400 {
-		return fmt.Errorf("create failed (%d): %s", s, body)
+		return "", fmt.Errorf("create failed (%d): %s", s, body)
 	}
-	return nil
+	return "created", nil
 }
 
 func (ba *batchApplier) doJSON(ctx context.Context, method, path string, payload any) (int, string) {

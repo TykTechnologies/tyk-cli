@@ -19,6 +19,9 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// errAuthFailure is a sentinel error for HTTP 401 responses.
+var errAuthFailure = fmt.Errorf("authentication failed")
+
 // configFileType represents the classified type of a config file.
 type configFileType string
 
@@ -32,7 +35,7 @@ const (
 type discoveredFile struct {
 	Path    string
 	Type    configFileType
-	Content map[string]interface{}
+	Content map[string]any
 }
 
 // NewApplyCommand creates the top-level 'tyk apply' command.
@@ -54,12 +57,14 @@ Examples:
 
 	cmd.Flags().StringP("file", "f", "", "Path to file or directory (required)")
 	_ = cmd.MarkFlagRequired("file")
+	cmd.Flags().Bool("continue-on-error", true, "Continue applying remaining files after a failure (default true)")
 
 	return cmd
 }
 
 func runApply(cmd *cobra.Command, args []string) error {
 	filePath, _ := cmd.Flags().GetString("file")
+	continueOnError, _ := cmd.Flags().GetBool("continue-on-error")
 
 	config := GetConfigFromContext(cmd.Context())
 	if config == nil {
@@ -133,7 +138,9 @@ func runApply(cmd *cobra.Command, args []string) error {
 	total := len(configFiles)
 	applied := 0
 	failed := 0
+	skipped := 0
 	w := cmd.ErrOrStderr()
+	authFailed := false
 
 	for i, f := range configFiles {
 		baseName := filepath.Base(f.Path)
@@ -141,6 +148,11 @@ func runApply(cmd *cobra.Command, args []string) error {
 		if f.Type == configFileUnrecognized {
 			fmt.Fprintf(w, "[%d/%d] %s ... FAILED (unrecognized file type)\n", i+1, total, baseName)
 			failed++
+			if !continueOnError {
+				// Mark remaining as skipped
+				skipped = total - i - 1
+				break
+			}
 			continue
 		}
 
@@ -150,8 +162,22 @@ func runApply(cmd *cobra.Command, args []string) error {
 		cancel()
 
 		if applyErr != nil {
+			// Check for auth failure
+			if applyErr == errAuthFailure {
+				fmt.Fprintf(w, "[%d/%d] %s ... FAILED (Authentication failed)\n", i+1, total, baseName)
+				failed++
+				authFailed = true
+				skipped = total - i - 1
+				break
+			}
+
 			fmt.Fprintf(w, "[%d/%d] %s ... FAILED (%v)\n", i+1, total, baseName, applyErr)
 			failed++
+
+			if !continueOnError {
+				skipped = total - i - 1
+				break
+			}
 			continue
 		}
 
@@ -164,7 +190,14 @@ func runApply(cmd *cobra.Command, args []string) error {
 	if failed > 0 {
 		fmt.Fprintf(w, ", %d failed", failed)
 	}
+	if skipped > 0 {
+		fmt.Fprintf(w, ", %d skipped", skipped)
+	}
 	fmt.Fprintln(w)
+
+	if authFailed {
+		return &ExitError{Code: 3, Message: "Authentication failed"}
+	}
 
 	if failed > 0 {
 		return &ExitError{Code: 1, Message: fmt.Sprintf("%d file(s) failed", failed)}
@@ -220,7 +253,7 @@ func classifyFile(path string) (*discoveredFile, error) {
 		return nil, fmt.Errorf("failed to read file: %w", err)
 	}
 
-	var content map[string]interface{}
+	var content map[string]any
 	if ext == ".json" {
 		if err := json.Unmarshal(data, &content); err != nil {
 			return nil, fmt.Errorf("failed to parse JSON: %w", err)
@@ -241,7 +274,7 @@ func classifyFile(path string) (*discoveredFile, error) {
 }
 
 // classifyContent determines if parsed content is an API, policy, or unrecognized.
-func classifyContent(content map[string]interface{}) configFileType {
+func classifyContent(content map[string]any) configFileType {
 	// API: has x-tyk-api-gateway extension
 	if oas.HasTykExtensions(content) {
 		return configFileAPI
@@ -301,15 +334,29 @@ func (ba *batchApplier) applyFile(ctx context.Context, f discoveredFile) error {
 	}
 }
 
+// checkAuth returns errAuthFailure if status is 401.
+func checkAuth(status int) error {
+	if status == http.StatusUnauthorized {
+		return errAuthFailure
+	}
+	return nil
+}
+
 func (ba *batchApplier) applyAPI(ctx context.Context, f discoveredFile) error {
 	apiID, hasID := oas.ExtractAPIIDFromTykExtensions(f.Content)
 
 	if hasID && apiID != "" {
 		// Check if API exists
 		status, respBody := ba.doJSON(ctx, http.MethodGet, "/api/apis/oas/"+url.PathEscape(apiID), nil)
+		if err := checkAuth(status); err != nil {
+			return err
+		}
 		if status == http.StatusOK {
 			// Update
 			s, body := ba.doJSON(ctx, http.MethodPut, "/api/apis/oas/"+url.PathEscape(apiID), f.Content)
+			if err := checkAuth(s); err != nil {
+				return err
+			}
 			if s >= 400 {
 				return fmt.Errorf("update failed (%d): %s", s, body)
 			}
@@ -322,6 +369,9 @@ func (ba *batchApplier) applyAPI(ctx context.Context, f discoveredFile) error {
 
 	// Create
 	s, body := ba.doJSON(ctx, http.MethodPost, "/api/apis/oas", f.Content)
+	if err := checkAuth(s); err != nil {
+		return err
+	}
 	if s >= 400 {
 		return fmt.Errorf("create failed (%d): %s", s, body)
 	}
@@ -337,10 +387,19 @@ func (ba *batchApplier) applyPolicy(ctx context.Context, f discoveredFile) error
 	f.Content["org_id"] = ba.orgID
 
 	// Check if policy exists
-	status, _ := ba.doJSON(ctx, http.MethodGet, "/api/portal/policies/"+url.PathEscape(policyID), nil)
+	status, respBody := ba.doJSON(ctx, http.MethodGet, "/api/portal/policies/"+url.PathEscape(policyID), nil)
+	if err := checkAuth(status); err != nil {
+		return err
+	}
+	if status != http.StatusOK && status != http.StatusNotFound && status >= 400 {
+		return fmt.Errorf("check failed (%d): %s", status, respBody)
+	}
 	if status == http.StatusOK {
 		// Update
 		s, body := ba.doJSON(ctx, http.MethodPut, "/api/portal/policies/"+url.PathEscape(policyID), f.Content)
+		if err := checkAuth(s); err != nil {
+			return err
+		}
 		if s >= 400 {
 			return fmt.Errorf("update failed (%d): %s", s, body)
 		}
@@ -349,13 +408,16 @@ func (ba *batchApplier) applyPolicy(ctx context.Context, f discoveredFile) error
 
 	// Create
 	s, body := ba.doJSON(ctx, http.MethodPost, "/api/portal/policies", f.Content)
+	if err := checkAuth(s); err != nil {
+		return err
+	}
 	if s >= 400 {
 		return fmt.Errorf("create failed (%d): %s", s, body)
 	}
 	return nil
 }
 
-func (ba *batchApplier) doJSON(ctx context.Context, method, path string, payload interface{}) (int, string) {
+func (ba *batchApplier) doJSON(ctx context.Context, method, path string, payload any) (int, string) {
 	var reqBody io.Reader
 	if payload != nil {
 		data, _ := json.Marshal(payload)

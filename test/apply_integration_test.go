@@ -572,7 +572,6 @@ func TestApply_DryRun_Summary(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestApply_FailFast_StopsOnFirstError(t *testing.T) {
-	t.Skip("not yet implemented")
 
 	dir := createStandardFixtureDir(t)
 	// Fail the first policy alphabetically (gold-plan comes before silver-plan)
@@ -590,7 +589,6 @@ func TestApply_FailFast_StopsOnFirstError(t *testing.T) {
 }
 
 func TestApply_FailFast_RemainingSkipped(t *testing.T) {
-	t.Skip("not yet implemented")
 
 	dir := createStandardFixtureDir(t)
 	server, _ := startMockDashboard(t, mockOpts{
@@ -604,7 +602,6 @@ func TestApply_FailFast_RemainingSkipped(t *testing.T) {
 }
 
 func TestApply_AuthFailure_AlwaysStops_ExitThree(t *testing.T) {
-	t.Skip("not yet implemented")
 
 	dir := createStandardFixtureDir(t)
 	server, rlog := startMockDashboard(t, mockOpts{
@@ -621,7 +618,6 @@ func TestApply_AuthFailure_AlwaysStops_ExitThree(t *testing.T) {
 }
 
 func TestApply_FailFast_AllSucceed_SameAsDefault(t *testing.T) {
-	t.Skip("not yet implemented")
 
 	dir := createStandardFixtureDir(t)
 	server, _ := startMockDashboard(t, mockOpts{})

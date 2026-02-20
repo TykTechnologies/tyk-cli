@@ -136,8 +136,16 @@ func hasAllTags(apiTags, requiredTags []string) bool {
 	return true
 }
 
+// maxFuzzyInput is the maximum number of APIs to consider for fuzzy matching.
+// With very large API sets, computing Levenshtein distance is too expensive.
+const maxFuzzyInput = 100
+
 // FuzzySuggestions returns the top N closest API names by Levenshtein distance.
+// Returns nil if the input set exceeds maxFuzzyInput to avoid O(n*m) cost at scale.
 func FuzzySuggestions(query string, apis []ResolverAPI, n int) []FuzzySuggestion {
+	if len(apis) > maxFuzzyInput {
+		return nil
+	}
 	type scored struct {
 		api      ResolverAPI
 		distance int
@@ -197,16 +205,52 @@ func levenshtein(a, b string) int {
 	return prev[lenB]
 }
 
-// ResolveAccessEntries resolves a batch of access entry requests against an API list.
+// APILookup provides callback-based API resolution, allowing the caller to
+// control how APIs are fetched (targeted lookups vs full list).
+type APILookup struct {
+	ByID         func(id string) (ResolverAPI, error)
+	ByName       func(name string) ([]ResolverAPI, error)
+	ByListenPath func(path string) ([]ResolverAPI, error)
+	ByTags       func(tags []string) ([]ResolverAPI, error)
+}
+
+// ListBasedLookup creates an APILookup backed by an in-memory API list.
+// This is the legacy path used when all APIs have already been fetched.
+func ListBasedLookup(apis []ResolverAPI) *APILookup {
+	return &APILookup{
+		ByID: func(id string) (ResolverAPI, error) {
+			return ResolveByID(id, apis)
+		},
+		ByName: func(name string) ([]ResolverAPI, error) {
+			api, err := ResolveByName(name, apis)
+			if err != nil {
+				return nil, err
+			}
+			return []ResolverAPI{api}, nil
+		},
+		ByListenPath: func(path string) ([]ResolverAPI, error) {
+			api, err := ResolveByListenPath(path, apis)
+			if err != nil {
+				return nil, err
+			}
+			return []ResolverAPI{api}, nil
+		},
+		ByTags: func(tags []string) ([]ResolverAPI, error) {
+			return ResolveByTags(tags, apis)
+		},
+	}
+}
+
+// ResolveAccessEntries resolves a batch of access entry requests using the provided lookup.
 // It collects all errors before returning. Successful resolutions and errors are returned separately.
-func ResolveAccessEntries(requests []ResolveRequest, apis []ResolverAPI) ([]ResolvedAccess, []error) {
+func ResolveAccessEntries(requests []ResolveRequest, lookup *APILookup) ([]ResolvedAccess, []error) {
 	var resolved []ResolvedAccess
 	var errs []error
 
 	for _, req := range requests {
 		switch req.SelectorType {
 		case "id":
-			api, err := ResolveByID(req.Value, apis)
+			api, err := lookup.ByID(req.Value)
 			if err != nil {
 				errs = append(errs, err)
 				continue
@@ -216,27 +260,31 @@ func ResolveAccessEntries(requests []ResolveRequest, apis []ResolverAPI) ([]Reso
 			})
 
 		case "name":
-			api, err := ResolveByName(req.Value, apis)
+			matches, err := lookup.ByName(req.Value)
 			if err != nil {
 				errs = append(errs, err)
 				continue
 			}
-			resolved = append(resolved, ResolvedAccess{
-				APIID: api.ID, APIName: api.Name, Versions: req.Versions,
-			})
+			for _, api := range matches {
+				resolved = append(resolved, ResolvedAccess{
+					APIID: api.ID, APIName: api.Name, Versions: req.Versions,
+				})
+			}
 
 		case "listenPath":
-			api, err := ResolveByListenPath(req.Value, apis)
+			matches, err := lookup.ByListenPath(req.Value)
 			if err != nil {
 				errs = append(errs, err)
 				continue
 			}
-			resolved = append(resolved, ResolvedAccess{
-				APIID: api.ID, APIName: api.Name, Versions: req.Versions,
-			})
+			for _, api := range matches {
+				resolved = append(resolved, ResolvedAccess{
+					APIID: api.ID, APIName: api.Name, Versions: req.Versions,
+				})
+			}
 
 		case "tags":
-			matches, err := ResolveByTags(req.TagValues, apis)
+			matches, err := lookup.ByTags(req.TagValues)
 			if err != nil {
 				errs = append(errs, err)
 				continue

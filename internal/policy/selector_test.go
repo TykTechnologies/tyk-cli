@@ -119,7 +119,7 @@ func TestResolveAccessEntries(t *testing.T) {
 		{SelectorType: "tags", TagValues: []string{"public", "v1"}, Versions: []string{"v1"}},
 	}
 
-	resolved, errs := ResolveAccessEntries(entries, apis)
+	resolved, errs := ResolveAccessEntries(entries, ListBasedLookup(apis))
 	require.Empty(t, errs, "expected no resolution errors, got: %v", errs)
 	require.Len(t, resolved, 4)
 
@@ -138,7 +138,7 @@ func TestResolveAccessEntries_CollectsErrors(t *testing.T) {
 		{SelectorType: "listenPath", Value: "/nowhere/"},
 	}
 
-	resolved, errs := ResolveAccessEntries(entries, apis)
+	resolved, errs := ResolveAccessEntries(entries, ListBasedLookup(apis))
 	// The valid entry should still resolve
 	assert.Len(t, resolved, 1)
 	// Two errors should be collected

@@ -87,6 +87,29 @@ func mockAPIListResponse() map[string]interface{} {
 	}
 }
 
+// handleAPILookup handles /api/apis (with pagination) and /api/apis/search with the mock data.
+// It returns true if the request was handled.
+func handleAPILookup(w http.ResponseWriter, r *http.Request) bool {
+	if r.Method != http.MethodGet {
+		return false
+	}
+	switch r.URL.Path {
+	case "/api/apis":
+		// Support pagination: page > 1 returns empty list to stop ListAllAPIsDashboard
+		if p := r.URL.Query().Get("p"); p != "" && p != "1" {
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{"apis": []interface{}{}, "pages": 1})
+			return true
+		}
+		_ = json.NewEncoder(w).Encode(mockAPIListResponse())
+		return true
+	case "/api/apis/search":
+		// Return all APIs — the client-side filtering handles exact match
+		_ = json.NewEncoder(w).Encode(mockAPIListResponse())
+		return true
+	}
+	return false
+}
+
 // goldPolicyAccessRights returns the access_rights map for the Gold Plan.
 func goldPolicyAccessRights() map[string]interface{} {
 	return map[string]interface{}{
@@ -277,8 +300,8 @@ func TestPolicyApply_Create_NameSelector(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		// Selector resolution: list APIs
-		case r.Method == http.MethodGet && r.URL.Path == "/api/apis":
-			_ = json.NewEncoder(w).Encode(mockAPIListResponse())
+		case handleAPILookup(w, r):
+			// handled
 
 		// Resolve policy by ID — not found -> create path
 		case r.Method == http.MethodGet && r.URL.Path == "/api/portal/policies/platinum":
@@ -335,8 +358,8 @@ func TestPolicyApply_Update_Idempotent(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		// Selector resolution: list APIs
-		case r.Method == http.MethodGet && r.URL.Path == "/api/apis":
-			_ = json.NewEncoder(w).Encode(mockAPIListResponse())
+		case handleAPILookup(w, r):
+			// handled
 
 		// Resolve policy by ID — found -> update path
 		case r.Method == http.MethodGet && r.URL.Path == "/api/portal/policies/platinum":
@@ -489,8 +512,8 @@ func TestPolicyGet_Human(t *testing.T) {
 		switch {
 		case r.Method == http.MethodGet && r.URL.Path == "/api/portal/policies/gold":
 			_ = json.NewEncoder(w).Encode(goldPolicy)
-		case r.Method == http.MethodGet && r.URL.Path == "/api/apis":
-			_ = json.NewEncoder(w).Encode(mockAPIListResponse())
+		case handleAPILookup(w, r):
+			// handled
 		default:
 			http.NotFound(w, r)
 		}
@@ -594,8 +617,8 @@ func TestPolicyApply_ListenPathSelector(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
-		case r.Method == http.MethodGet && r.URL.Path == "/api/apis":
-			_ = json.NewEncoder(w).Encode(mockAPIListResponse())
+		case handleAPILookup(w, r):
+			// handled
 		case r.Method == http.MethodGet && r.URL.Path == "/api/portal/policies/path-test":
 			w.WriteHeader(http.StatusNotFound)
 			_ = json.NewEncoder(w).Encode(map[string]interface{}{"status": 404, "message": "not found"})
@@ -640,8 +663,8 @@ func TestPolicyApply_DurationConversion(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
-		case r.Method == http.MethodGet && r.URL.Path == "/api/apis":
-			_ = json.NewEncoder(w).Encode(mockAPIListResponse())
+		case handleAPILookup(w, r):
+			// handled
 		case r.Method == http.MethodGet && r.URL.Path == "/api/portal/policies/dur-test":
 			w.WriteHeader(http.StatusNotFound)
 			_ = json.NewEncoder(w).Encode(map[string]interface{}{"status": 404, "message": "not found"})
@@ -681,8 +704,7 @@ access:
 func TestPolicyApply_NameNotFound(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodGet && r.URL.Path == "/api/apis" {
-			_ = json.NewEncoder(w).Encode(mockAPIListResponse())
+		if handleAPILookup(w, r) {
 			return
 		}
 		http.NotFound(w, r)
@@ -734,7 +756,7 @@ func TestPolicyApply_NameAmbiguous(t *testing.T) {
 	}
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodGet && r.URL.Path == "/api/apis" {
+		if r.Method == http.MethodGet && (r.URL.Path == "/api/apis" || r.URL.Path == "/api/apis/search") {
 			_ = json.NewEncoder(w).Encode(ambiguousAPIList)
 			return
 		}
@@ -1048,8 +1070,8 @@ func TestPolicyIntegration_FullLifecycle(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
-		case r.Method == http.MethodGet && r.URL.Path == "/api/apis":
-			_ = json.NewEncoder(w).Encode(mockAPIListResponse())
+		case handleAPILookup(w, r):
+			// handled
 
 		case r.Method == http.MethodGet && r.URL.Path == "/api/portal/policies":
 			policies := make([]map[string]interface{}, 0)

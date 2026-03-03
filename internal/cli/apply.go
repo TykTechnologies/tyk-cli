@@ -34,8 +34,9 @@ type jsonResultEntry struct {
 	File      string `json:"file"`
 	Type      string `json:"type"`
 	Operation string `json:"operation"`
-	ID        string `json:"id,omitempty"`
-	Error     string `json:"error,omitempty"`
+	ID          string `json:"id,omitempty"`
+	VersionName string `json:"version_name,omitempty"`
+	Error       string `json:"error,omitempty"`
 }
 
 // errAuthFailure is a sentinel error for HTTP 401 responses.
@@ -46,6 +47,7 @@ type configFileType string
 
 const (
 	configFileAPI          configFileType = "api"
+	configFileAPIVersion   configFileType = "api_version"
 	configFilePolicy       configFileType = "policy"
 	configFileUnrecognized configFileType = "unrecognized"
 )
@@ -121,7 +123,7 @@ func runApply(cmd *cobra.Command, args []string) error {
 	// Check for empty (no config files at all)
 	hasConfig := false
 	for _, f := range configFiles {
-		if f.Type == configFileAPI || f.Type == configFilePolicy {
+		if f.Type == configFileAPI || f.Type == configFilePolicy || f.Type == configFileAPIVersion {
 			hasConfig = true
 			break
 		}
@@ -322,12 +324,17 @@ func runApply(cmd *cobra.Command, args []string) error {
 
 		applied++
 		if jsonMode {
-			jsonResults = append(jsonResults, jsonResultEntry{
+			entry := jsonResultEntry{
 				File:      baseName,
 				Type:      fileType,
 				Operation: op,
 				ID:        fileID,
-			})
+			}
+			if f.Type == configFileAPIVersion {
+				meta := oas.ExtractVersioningMetadata(f.Content)
+				entry.VersionName = meta.VersionName
+			}
+			jsonResults = append(jsonResults, entry)
 		} else {
 			fmt.Fprintf(w, "[%d/%d] %s ... OK\n", i+1, total, baseName)
 		}
@@ -447,6 +454,10 @@ func classifyFile(path string) (*discoveredFile, error) {
 func classifyContent(content map[string]any) configFileType {
 	// API: has x-tyk-api-gateway extension
 	if oas.HasTykExtensions(content) {
+		meta := oas.ExtractVersioningMetadata(content)
+		if meta.IsVersionFile {
+			return configFileAPIVersion
+		}
 		return configFileAPI
 	}
 
@@ -480,8 +491,10 @@ func typePriority(t configFileType) int {
 		return 0
 	case configFileAPI:
 		return 1
-	default:
+	case configFileAPIVersion:
 		return 2
+	default:
+		return 3
 	}
 }
 
@@ -514,6 +527,9 @@ func (ba *batchApplier) dryRunFile(ctx context.Context, f discoveredFile) (strin
 			return "would update", nil
 		}
 		return "would create", nil
+	case configFileAPIVersion:
+		meta := oas.ExtractVersioningMetadata(f.Content)
+		return fmt.Sprintf("would create version: %s of %s", meta.VersionName, meta.BaseAPIID), nil
 	default:
 		return "", fmt.Errorf("unrecognized file type")
 	}
@@ -530,6 +546,8 @@ func (ba *batchApplier) applyFileWithOp(ctx context.Context, f discoveredFile) (
 		return ba.applyAPIWithOp(ctx, f)
 	case configFilePolicy:
 		return ba.applyPolicyWithOp(ctx, f)
+	case configFileAPIVersion:
+		return ba.applyVersionFileWithOp(ctx, f)
 	default:
 		return "", fmt.Errorf("unrecognized file type")
 	}
@@ -542,6 +560,9 @@ func extractFileID(f discoveredFile) string {
 	}
 	switch f.Type {
 	case configFileAPI:
+		id, _ := oas.ExtractAPIIDFromTykExtensions(f.Content)
+		return id
+	case configFileAPIVersion:
 		id, _ := oas.ExtractAPIIDFromTykExtensions(f.Content)
 		return id
 	case configFilePolicy:
@@ -637,6 +658,26 @@ func (ba *batchApplier) applyPolicyWithOp(ctx context.Context, f discoveredFile)
 		return "", fmt.Errorf("create failed (%d): %s", s, body)
 	}
 	return "created", nil
+}
+
+func (ba *batchApplier) applyVersionFileWithOp(ctx context.Context, f discoveredFile) (string, error) {
+	meta := oas.ExtractVersioningMetadata(f.Content)
+
+	params := url.Values{}
+	params.Set("base_api_id", meta.BaseAPIID)
+	params.Set("new_version_name", meta.VersionName)
+	if meta.SetDefault {
+		params.Set("set_default", "true")
+	}
+
+	s, body := ba.doJSON(ctx, http.MethodPost, "/api/apis/oas?"+params.Encode(), f.Content)
+	if err := checkAuth(s); err != nil {
+		return "", err
+	}
+	if s >= 400 {
+		return "", fmt.Errorf("version create failed (%d): %s", s, body)
+	}
+	return "version_created", nil
 }
 
 func (ba *batchApplier) doJSON(ctx context.Context, method, path string, payload any) (int, string) {

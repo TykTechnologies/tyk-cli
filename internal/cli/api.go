@@ -159,7 +159,7 @@ func NewAPICommand() *cobra.Command {
 	apiCmd.AddCommand(NewAPIApplyCommand())
 	apiCmd.AddCommand(NewAPIUpdateOASCommand())
 	apiCmd.AddCommand(NewAPIDeleteCommand())
-	// Note: Versioning commands moved to post-v0
+	apiCmd.AddCommand(NewAPIVersionsCommand())
 
 	return apiCmd
 }
@@ -183,14 +183,64 @@ func NewAPIVersionsCommand() *cobra.Command {
 // Placeholder functions for version commands - these will be implemented in phase 3
 
 func NewAPIVersionsListCommand() *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List versions for an API",
 		Long:  "List all versions for a given API ID",
-		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Println("API versions list command will be implemented in phase 3")
-		},
+		RunE:  runAPIVersionsList,
 	}
+	cmd.Flags().String("api-id", "", "API ID to list versions for (required)")
+	_ = cmd.MarkFlagRequired("api-id")
+	return cmd
+}
+
+func runAPIVersionsList(cmd *cobra.Command, args []string) error {
+	apiID, _ := cmd.Flags().GetString("api-id")
+
+	config := GetConfigFromContext(cmd.Context())
+	if config == nil {
+		return fmt.Errorf("configuration not found")
+	}
+
+	c, err := client.NewClient(config)
+	if err != nil {
+		return fmt.Errorf("failed to create client: %w", err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	versions, defaultVersion, err := c.ListOASAPIVersions(ctx, apiID)
+	if err != nil {
+		if er, ok := err.(*types.ErrorResponse); ok && er.Status == 404 {
+			return apiNotFoundForVersionError(apiID)
+		}
+		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to list versions: %s", err)}
+	}
+
+	outputFormat := GetOutputFormatFromContext(cmd.Context())
+
+	if outputFormat == types.OutputJSON {
+		payload := map[string]interface{}{
+			"api_id":   apiID,
+			"default":  defaultVersion,
+			"versions": versions,
+		}
+		encoder := json.NewEncoder(os.Stdout)
+		encoder.SetIndent("", "  ")
+		return encoder.Encode(payload)
+	}
+
+	// Human output to stderr
+	for _, v := range versions {
+		marker := "  "
+		if v == defaultVersion {
+			marker = "* "
+		}
+		fmt.Fprintf(os.Stderr, "%s%s\n", marker, v)
+	}
+	fmt.Fprintf(os.Stderr, "\n%d version(s) found. Default: %s\n", len(versions), defaultVersion)
+	return nil
 }
 
 func NewAPIVersionsCreateCommand() *cobra.Command {

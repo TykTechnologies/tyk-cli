@@ -39,6 +39,46 @@ func ExtractAPIIDFromTykExtensions(oasDoc map[string]interface{}) (string, bool)
 	return id, true
 }
 
+// VersioningMetadata holds versioning info from x-tyk-api-gateway.info.versioning
+type VersioningMetadata struct {
+	BaseAPIID     string
+	VersionName   string
+	SetDefault    bool
+	IsVersionFile bool
+}
+
+// ExtractVersioningMetadata extracts versioning metadata from an OAS document.
+func ExtractVersioningMetadata(oasDoc map[string]interface{}) VersioningMetadata {
+	tykExt, ok := oasDoc[TykExtensionKey].(map[string]interface{})
+	if !ok {
+		return VersioningMetadata{}
+	}
+
+	info, ok := tykExt["info"].(map[string]interface{})
+	if !ok {
+		return VersioningMetadata{}
+	}
+
+	versioning, ok := info["versioning"].(map[string]interface{})
+	if !ok {
+		return VersioningMetadata{}
+	}
+
+	meta := VersioningMetadata{IsVersionFile: true}
+
+	if v, ok := versioning["base_api_id"].(string); ok {
+		meta.BaseAPIID = v
+	}
+	if v, ok := versioning["version_name"].(string); ok {
+		meta.VersionName = v
+	}
+	if v, ok := versioning["set_default"].(bool); ok {
+		meta.SetDefault = v
+	}
+
+	return meta
+}
+
 // AddTykExtensions adds minimal x-tyk-api-gateway extensions to a plain OAS document
 func AddTykExtensions(oasDoc map[string]interface{}) (map[string]interface{}, error) {
 	if HasTykExtensions(oasDoc) {

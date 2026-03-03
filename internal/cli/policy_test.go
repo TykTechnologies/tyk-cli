@@ -994,10 +994,10 @@ func TestPolicyInit_NewFile(t *testing.T) {
 	err := executePolicyInitCmd(t, tmpDir, "my-policy", "My Policy")
 	require.NoError(t, err)
 
-	// Verify file was created at policies/{id}.yaml inside the dir
-	outPath := filepath.Join(tmpDir, "policies", "my-policy.yaml")
+	// Verify file was created at {id}.yaml inside the dir
+	outPath := filepath.Join(tmpDir, "my-policy.yaml")
 	data, err := os.ReadFile(outPath)
-	require.NoError(t, err, "scaffold file should exist at policies/{id}.yaml")
+	require.NoError(t, err, "scaffold file should exist at {id}.yaml")
 
 	// Parse and validate the scaffold YAML
 	var pf types.PolicyFile
@@ -1025,9 +1025,7 @@ func TestPolicyInit_FileExistsNoOverwrite(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	// Create the file that init would write to
-	policiesDir := filepath.Join(tmpDir, "policies")
-	require.NoError(t, os.MkdirAll(policiesDir, 0755))
-	existingPath := filepath.Join(policiesDir, "existing.yaml")
+	existingPath := filepath.Join(tmpDir, "existing.yaml")
 	require.NoError(t, os.WriteFile(existingPath, []byte("original content"), 0644))
 
 	err := executePolicyInitCmd(t, tmpDir, "existing", "Existing Policy")

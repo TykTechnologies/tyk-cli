@@ -383,8 +383,7 @@ func runPolicyInit(cmd *cobra.Command, args []string) error {
 	}
 
 	// Build output path
-	policiesDir := filepath.Join(dir, "policies")
-	outPath := filepath.Join(policiesDir, id+".yaml")
+	outPath := filepath.Join(dir, id+".yaml")
 
 	// Check if file already exists
 	if _, err := os.Stat(outPath); err == nil {
@@ -417,9 +416,9 @@ func runPolicyInit(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to marshal scaffold: %w", err)
 	}
 
-	// Ensure policies directory exists
-	if err := os.MkdirAll(policiesDir, 0755); err != nil {
-		return fmt.Errorf("failed to create policies directory: %w", err)
+	// Ensure output directory exists
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return fmt.Errorf("failed to create output directory: %w", err)
 	}
 
 	if err := os.WriteFile(outPath, data, 0644); err != nil {

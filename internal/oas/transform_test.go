@@ -199,6 +199,96 @@ func TestAddTykExtensions(t *testing.T) {
 	}
 }
 
+func TestExtractVersioningMetadata(t *testing.T) {
+	tests := []struct {
+		name     string
+		oasDoc   map[string]interface{}
+		expected VersioningMetadata
+	}{
+		{
+			name: "full versioning section",
+			oasDoc: map[string]interface{}{
+				"x-tyk-api-gateway": map[string]interface{}{
+					"info": map[string]interface{}{
+						"versioning": map[string]interface{}{
+							"base_api_id":  "abc123",
+							"version_name": "v3",
+							"set_default":  false,
+						},
+					},
+				},
+			},
+			expected: VersioningMetadata{
+				BaseAPIID:     "abc123",
+				VersionName:   "v3",
+				SetDefault:    false,
+				IsVersionFile: true,
+			},
+		},
+		{
+			name: "no tyk extensions",
+			oasDoc: map[string]interface{}{
+				"openapi": "3.0.0",
+			},
+			expected: VersioningMetadata{IsVersionFile: false},
+		},
+		{
+			name: "no versioning section",
+			oasDoc: map[string]interface{}{
+				"x-tyk-api-gateway": map[string]interface{}{
+					"info": map[string]interface{}{
+						"id": "some-id",
+					},
+				},
+			},
+			expected: VersioningMetadata{IsVersionFile: false},
+		},
+		{
+			name: "partial versioning - only base_api_id",
+			oasDoc: map[string]interface{}{
+				"x-tyk-api-gateway": map[string]interface{}{
+					"info": map[string]interface{}{
+						"versioning": map[string]interface{}{
+							"base_api_id": "xyz789",
+						},
+					},
+				},
+			},
+			expected: VersioningMetadata{
+				BaseAPIID:     "xyz789",
+				IsVersionFile: true,
+			},
+		},
+		{
+			name: "versioning with set_default true",
+			oasDoc: map[string]interface{}{
+				"x-tyk-api-gateway": map[string]interface{}{
+					"info": map[string]interface{}{
+						"versioning": map[string]interface{}{
+							"base_api_id":  "def456",
+							"version_name": "v1",
+							"set_default":  true,
+						},
+					},
+				},
+			},
+			expected: VersioningMetadata{
+				BaseAPIID:     "def456",
+				VersionName:   "v1",
+				SetDefault:    true,
+				IsVersionFile: true,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := ExtractVersioningMetadata(tt.oasDoc)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
 func TestGenerateListenPath(t *testing.T) {
 	tests := []struct {
 		title    string

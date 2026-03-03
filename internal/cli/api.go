@@ -244,14 +244,90 @@ func runAPIVersionsList(cmd *cobra.Command, args []string) error {
 }
 
 func NewAPIVersionsCreateCommand() *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create a new API version",
-		Long:  "Create a new version for an existing API",
-		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Println("API versions create command will be implemented in phase 3")
-		},
+		Long:  "Create a new version for an existing API from an OAS file",
+		RunE:  runAPIVersionsCreate,
 	}
+	cmd.Flags().String("api-id", "", "Base API ID (required)")
+	cmd.Flags().StringP("file", "f", "", "Path to OAS file (required)")
+	cmd.Flags().String("version-name", "", "Name for the new version (required)")
+	cmd.Flags().Bool("set-default", false, "Set as default version")
+	_ = cmd.MarkFlagRequired("api-id")
+	_ = cmd.MarkFlagRequired("file")
+	_ = cmd.MarkFlagRequired("version-name")
+	return cmd
+}
+
+func runAPIVersionsCreate(cmd *cobra.Command, args []string) error {
+	apiID, _ := cmd.Flags().GetString("api-id")
+	filePath, _ := cmd.Flags().GetString("file")
+	versionName, _ := cmd.Flags().GetString("version-name")
+	setDefault, _ := cmd.Flags().GetBool("set-default")
+
+	config := GetConfigFromContext(cmd.Context())
+	if config == nil {
+		return fmt.Errorf("configuration not found")
+	}
+
+	// Load OAS file as JSON
+	oasJSON, err := filehandler.LoadFileAsRawJSON(filePath)
+	if err != nil {
+		return &ExitError{Code: 2, Message: fmt.Sprintf("invalid OAS document: %s", err)}
+	}
+
+	c, err := client.NewClient(config)
+	if err != nil {
+		return fmt.Errorf("failed to create client: %w", err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Pre-check: conflict detection
+	versions, _, err := c.ListOASAPIVersions(ctx, apiID)
+	if err != nil {
+		if er, ok := err.(*types.ErrorResponse); ok && er.Status == 404 {
+			return apiNotFoundForVersionError(apiID)
+		}
+		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to check versions: %s", err)}
+	}
+	for _, v := range versions {
+		if v == versionName {
+			return versionConflictError(apiID, versionName)
+		}
+	}
+
+	// Create version
+	resp, err := c.CreateOASAPIVersion(ctx, oasJSON, apiID, versionName, setDefault)
+	if err != nil {
+		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to create version: %s", err)}
+	}
+
+	outputFormat := GetOutputFormatFromContext(cmd.Context())
+	if outputFormat == types.OutputJSON {
+		payload := map[string]interface{}{
+			"action":       "created",
+			"api_id":       apiID,
+			"version_name": versionName,
+			"is_default":   setDefault,
+			"id":           resp.ID,
+		}
+		encoder := json.NewEncoder(os.Stdout)
+		encoder.SetIndent("", "  ")
+		return encoder.Encode(payload)
+	}
+
+	// Human output
+	fmt.Fprintf(os.Stderr, "✓ Version %q created for API %s\n", versionName, apiID)
+	if setDefault {
+		fmt.Fprintf(os.Stderr, "  Set as default: yes\n")
+	} else {
+		fmt.Fprintf(os.Stderr, "\nHint: To make this the default version, run:\n")
+		fmt.Fprintf(os.Stderr, "  tyk api versions switch-default --api-id %s --version-name %s\n", apiID, versionName)
+	}
+	return nil
 }
 
 func NewAPIVersionsSwitchDefaultCommand() *cobra.Command {

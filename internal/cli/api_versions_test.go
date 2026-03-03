@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -314,4 +315,156 @@ func TestAPIVersionsSwitchDefault_APINotFound(t *testing.T) {
 	require.True(t, ok, "should return ExitError")
 	assert.Equal(t, 3, exitErr.Code)
 	assert.Contains(t, exitErr.Message, "api-missing")
+}
+
+// ===========================================================================
+// Create Version tests
+// ===========================================================================
+
+// Test Budget: 4 behaviors x 2 = 8 max unit tests. Using 4.
+// Behaviors: success with hint, success with set-default, conflict, JSON output
+
+func writeTempOASFile(t *testing.T) string {
+	t.Helper()
+	tmpDir := t.TempDir()
+	path := filepath.Join(tmpDir, "api.json")
+	content := `{"openapi":"3.0.0","info":{"title":"Test","version":"1.0.0"},"paths":{}}`
+	err := os.WriteFile(path, []byte(content), 0644)
+	require.NoError(t, err)
+	return path
+}
+
+func executeVersionsCreateCmd(t *testing.T, serverURL string, outputFormat types.OutputFormat, apiID, filePath, versionName string, setDefault bool) error {
+	t.Helper()
+	cmd := NewAPIVersionsCreateCommand()
+
+	cfg := createVersionConfig(serverURL)
+	ctx := withConfig(context.Background(), cfg)
+	ctx = withOutputFormat(ctx, outputFormat)
+	cmd.SetContext(ctx)
+
+	args := []string{"--api-id", apiID, "--file", filePath, "--version-name", versionName}
+	if setDefault {
+		args = append(args, "--set-default")
+	}
+	cmd.SetArgs(args)
+	_ = cmd.ParseFlags(args)
+
+	return cmd.RunE(cmd, []string{})
+}
+
+func mockCreateServer(t *testing.T, existingVersions []string, postCalled *bool) *httptest.Server {
+	t.Helper()
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.Method == http.MethodGet && r.URL.Path == "/api/apis/oas/api-123/versions":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"versions": existingVersions,
+				"default":  "v1",
+			})
+		case r.Method == http.MethodPost && r.URL.Path == "/api/apis/oas":
+			if postCalled != nil {
+				*postCalled = true
+			}
+			w.WriteHeader(http.StatusOK)
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"Status": "OK",
+				"ID":     "new-version-id",
+			})
+		default:
+			t.Logf("unexpected request: %s %s", r.Method, r.URL.Path)
+			http.NotFound(w, r)
+		}
+	}))
+}
+
+func TestAPIVersionsCreate_Success_HumanWithHint(t *testing.T) {
+	postCalled := false
+	server := mockCreateServer(t, []string{"v1"}, &postCalled)
+	defer server.Close()
+
+	oasFile := writeTempOASFile(t)
+
+	oldStderr := os.Stderr
+	rErr, wErr, _ := os.Pipe()
+	os.Stderr = wErr
+
+	err := executeVersionsCreateCmd(t, server.URL, types.OutputHuman, "api-123", oasFile, "v2", false)
+
+	wErr.Close()
+	os.Stderr = oldStderr
+	stderr, _ := io.ReadAll(rErr)
+
+	require.NoError(t, err)
+	assert.True(t, postCalled, "POST should have been called")
+	stderrStr := string(stderr)
+	assert.Contains(t, stderrStr, "v2")
+	assert.Contains(t, stderrStr, "switch-default", "should show hint to switch default")
+}
+
+func TestAPIVersionsCreate_SetDefault(t *testing.T) {
+	postCalled := false
+	server := mockCreateServer(t, []string{"v1"}, &postCalled)
+	defer server.Close()
+
+	oasFile := writeTempOASFile(t)
+
+	oldStderr := os.Stderr
+	rErr, wErr, _ := os.Pipe()
+	os.Stderr = wErr
+
+	err := executeVersionsCreateCmd(t, server.URL, types.OutputHuman, "api-123", oasFile, "v2", true)
+
+	wErr.Close()
+	os.Stderr = oldStderr
+	stderr, _ := io.ReadAll(rErr)
+
+	require.NoError(t, err)
+	assert.True(t, postCalled)
+	stderrStr := string(stderr)
+	assert.Contains(t, stderrStr, "Set as default: yes")
+	assert.NotContains(t, stderrStr, "switch-default", "should NOT show hint when set as default")
+}
+
+func TestAPIVersionsCreate_Conflict(t *testing.T) {
+	server := mockCreateServer(t, []string{"v1", "v2"}, nil)
+	defer server.Close()
+
+	oasFile := writeTempOASFile(t)
+
+	err := executeVersionsCreateCmd(t, server.URL, types.OutputHuman, "api-123", oasFile, "v2", false)
+
+	require.Error(t, err)
+	exitErr, ok := err.(*ExitError)
+	require.True(t, ok, "should return ExitError")
+	assert.Equal(t, 4, exitErr.Code)
+	assert.Contains(t, exitErr.Message, "v2")
+}
+
+func TestAPIVersionsCreate_JSONOutput(t *testing.T) {
+	postCalled := false
+	server := mockCreateServer(t, []string{"v1"}, &postCalled)
+	defer server.Close()
+
+	oasFile := writeTempOASFile(t)
+
+	oldStdout := os.Stdout
+	rOut, wOut, _ := os.Pipe()
+	os.Stdout = wOut
+
+	err := executeVersionsCreateCmd(t, server.URL, types.OutputJSON, "api-123", oasFile, "v2", false)
+
+	wOut.Close()
+	os.Stdout = oldStdout
+	stdout, _ := io.ReadAll(rOut)
+
+	require.NoError(t, err)
+	assert.True(t, postCalled)
+
+	var result map[string]interface{}
+	require.NoError(t, json.Unmarshal(stdout, &result), "output should be valid JSON")
+	assert.Equal(t, "created", result["action"])
+	assert.Equal(t, "api-123", result["api_id"])
+	assert.Equal(t, "v2", result["version_name"])
+	assert.Equal(t, false, result["is_default"])
 }

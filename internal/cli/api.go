@@ -255,14 +255,95 @@ func NewAPIVersionsCreateCommand() *cobra.Command {
 }
 
 func NewAPIVersionsSwitchDefaultCommand() *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "switch-default",
 		Short: "Switch default version for an API",
 		Long:  "Switch the default version for a given API",
-		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Println("API versions switch-default command will be implemented in phase 3")
-		},
+		RunE:  runAPIVersionsSwitchDefault,
 	}
+	cmd.Flags().String("api-id", "", "API ID (required)")
+	cmd.Flags().String("version-name", "", "Version to set as default (required)")
+	_ = cmd.MarkFlagRequired("api-id")
+	_ = cmd.MarkFlagRequired("version-name")
+	return cmd
+}
+
+func runAPIVersionsSwitchDefault(cmd *cobra.Command, args []string) error {
+	apiID, _ := cmd.Flags().GetString("api-id")
+	versionName, _ := cmd.Flags().GetString("version-name")
+
+	config := GetConfigFromContext(cmd.Context())
+	if config == nil {
+		return fmt.Errorf("configuration not found")
+	}
+
+	c, err := client.NewClient(config)
+	if err != nil {
+		return fmt.Errorf("failed to create client: %w", err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Pre-check: list versions to validate and get current default
+	versions, currentDefault, err := c.ListOASAPIVersions(ctx, apiID)
+	if err != nil {
+		if er, ok := err.(*types.ErrorResponse); ok && er.Status == 404 {
+			return apiNotFoundForVersionError(apiID)
+		}
+		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to list versions: %s", err)}
+	}
+
+	// Check if version exists
+	found := false
+	for _, v := range versions {
+		if v == versionName {
+			found = true
+			break
+		}
+	}
+	if !found {
+		return versionNotFoundError(apiID, "", versionName, versions)
+	}
+
+	outputFormat := GetOutputFormatFromContext(cmd.Context())
+
+	// No-op if already default
+	if currentDefault == versionName {
+		if outputFormat == types.OutputJSON {
+			payload := map[string]interface{}{
+				"action":           "no_change",
+				"api_id":           apiID,
+				"previous_default": currentDefault,
+				"new_default":      versionName,
+			}
+			encoder := json.NewEncoder(os.Stdout)
+			encoder.SetIndent("", "  ")
+			return encoder.Encode(payload)
+		}
+		fmt.Fprintf(os.Stderr, "Version %q is already the default for API %s.\n", versionName, apiID)
+		return nil
+	}
+
+	// Switch
+	if err := c.SwitchDefaultVersion(ctx, apiID, versionName); err != nil {
+		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to switch default version: %s", err)}
+	}
+
+	if outputFormat == types.OutputJSON {
+		payload := map[string]interface{}{
+			"action":           "switched",
+			"api_id":           apiID,
+			"previous_default": currentDefault,
+			"new_default":      versionName,
+		}
+		encoder := json.NewEncoder(os.Stdout)
+		encoder.SetIndent("", "  ")
+		return encoder.Encode(payload)
+	}
+
+	fmt.Fprintf(os.Stderr, "Previous default: %s\nNew default: %s\n", currentDefault, versionName)
+	return nil
 }
 
 // Placeholder functions for API commands - these will be implemented in the next phases

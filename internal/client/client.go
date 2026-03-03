@@ -457,6 +457,31 @@ func (c *Client) SwitchDefaultVersion(ctx context.Context, apiID string, version
 	return c.handleResponse(resp, nil)
 }
 
+// CreateOASAPIVersion creates a new API version by POSTing an OAS document
+// with base_api_id and new_version_name query parameters.
+func (c *Client) CreateOASAPIVersion(ctx context.Context, oasDoc json.RawMessage, baseAPIID, versionName string, setDefault bool) (*types.APIResponse, error) {
+	params := url.Values{}
+	params.Set("base_api_id", baseAPIID)
+	params.Set("new_version_name", versionName)
+	if setDefault {
+		params.Set("set_default", "true")
+	}
+
+	apiPath := OASAPIsPath + "?" + params.Encode()
+
+	resp, err := c.doRequest(ctx, http.MethodPost, apiPath, []byte(oasDoc))
+	if err != nil {
+		return nil, err
+	}
+
+	var result types.APIResponse
+	if err := c.handleResponse(resp, &result); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
 // Health checks the health of the Tyk Dashboard
 func (c *Client) Health(ctx context.Context) error {
 	resp, err := c.doRequest(ctx, http.MethodGet, "/health", nil)

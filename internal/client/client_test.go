@@ -328,6 +328,59 @@ func TestClient_Health(t *testing.T) {
 	})
 }
 
+func TestClient_CreateOASAPIVersion(t *testing.T) {
+	t.Run("success posts to correct endpoint with query params and body", func(t *testing.T) {
+		oasBody := json.RawMessage(`{"openapi":"3.0.0","info":{"title":"V2","version":"2.0.0"}}`)
+
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, http.MethodPost, r.Method)
+			assert.Equal(t, "/api/apis/oas", r.URL.Path)
+			assert.Equal(t, "base-123", r.URL.Query().Get("base_api_id"))
+			assert.Equal(t, "v2", r.URL.Query().Get("new_version_name"))
+			assert.Equal(t, "true", r.URL.Query().Get("set_default"))
+
+			// Verify body is the OAS doc
+			var body map[string]interface{}
+			require.NoError(t, json.NewDecoder(r.Body).Decode(&body))
+			assert.Equal(t, "3.0.0", body["openapi"])
+
+			resp := types.APIResponse{Status: "success", Message: "created", ID: "new-version-id"}
+			_ = json.NewEncoder(w).Encode(resp)
+		}))
+		defer server.Close()
+
+		config := createTestConfig(server.URL, "test-token", "test-org")
+		client, err := NewClient(config)
+		require.NoError(t, err)
+
+		result, err := client.CreateOASAPIVersion(context.Background(), oasBody, "base-123", "v2", true)
+		require.NoError(t, err)
+		assert.Equal(t, "success", result.Status)
+		assert.Equal(t, "new-version-id", result.ID)
+	})
+
+	t.Run("passes through dashboard error", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+			resp := map[string]interface{}{"status": 400, "message": "base API not found"}
+			_ = json.NewEncoder(w).Encode(resp)
+		}))
+		defer server.Close()
+
+		config := createTestConfig(server.URL, "test-token", "test-org")
+		client, err := NewClient(config)
+		require.NoError(t, err)
+
+		result, err := client.CreateOASAPIVersion(context.Background(), json.RawMessage(`{}`), "bad-id", "v2", false)
+		assert.Error(t, err)
+		assert.Nil(t, result)
+
+		errorResp, ok := err.(*types.ErrorResponse)
+		assert.True(t, ok)
+		assert.Equal(t, 400, errorResp.Status)
+	})
+}
+
 // Integration test with live environment
 func TestLiveEnvironmentClient(t *testing.T) {
 	if testing.Short() {

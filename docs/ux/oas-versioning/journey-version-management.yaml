@@ -1,0 +1,165 @@
+journey:
+  name: oas-version-management
+  epic: oas-versioning
+  description: >
+    Managing OAS API versions through the Tyk CLI -- listing, inspecting,
+    creating, switching defaults, and integrating with declarative apply workflows.
+
+  persona:
+    name: Priya Sharma
+    role: Platform engineer managing API gateway configurations
+    context: Uses Tyk CLI in CI/CD pipelines and local development
+    motivation: Safely evolve APIs without breaking existing consumers
+
+  emotional_arc:
+    start: Uncertain -- "Which versions exist? What's the current state?"
+    middle: Productive -- "I can create and inspect versions confidently."
+    end: In control -- "Traffic is routed correctly, config is in source control."
+
+  steps:
+    - id: list-versions
+      name: List API Versions
+      command: tyk api versions list --api-id {api_id}
+      trigger: Need to understand current version landscape
+      emotion: Oriented, grounded
+      inputs:
+        - api_id (required)
+      outputs:
+        - version_list (array of version names)
+        - default_version (string)
+        - api_name (string)
+      success_criteria:
+        - Shows all versions with default clearly marked
+        - Supports --json for machine consumption
+        - Returns exit code 3 when API not found
+      error_paths:
+        - api_not_found: exit code 3, message includes API ID
+        - auth_failure: exit code 1, message "Authentication failed"
+
+    - id: get-version
+      name: Get Specific Version OAS
+      command: tyk api get --api-id {api_id} --version-name {version_name}
+      trigger: Need to inspect version content before creating or modifying
+      emotion: Informed, ready
+      inputs:
+        - api_id (required)
+        - version_name (required)
+      outputs:
+        - oas_document (full OAS JSON/YAML)
+        - version_metadata (listen_path, upstream_url)
+      success_criteria:
+        - Outputs full OAS document to stdout
+        - Human mode shows metadata header on stderr
+        - JSON mode outputs raw OAS document
+      error_paths:
+        - version_not_found: exit code 3, lists available versions
+        - api_not_found: exit code 3
+
+    - id: create-version
+      name: Create New Version
+      command: tyk api versions create --api-id {api_id} -f {oas_file} --version-name {name}
+      trigger: New OAS spec ready to publish as a version
+      emotion: Productive, building
+      inputs:
+        - api_id (required, the base API)
+        - oas_file (required, path to OAS document)
+        - version_name (required, string identifier)
+        - set_default (optional, boolean, default false)
+      outputs:
+        - version_name (string)
+        - listen_path (string)
+        - upstream_url (string)
+        - is_default (boolean)
+      success_criteria:
+        - Creates version linked to base API
+        - Optionally sets as default with --set-default
+        - Shows hint about switch-default when not set as default
+        - Supports --json output
+      error_paths:
+        - version_conflict: exit code 4, version name already exists
+        - invalid_oas: exit code 2, describes validation failure
+        - api_not_found: exit code 3
+
+    - id: switch-default
+      name: Switch Default Version
+      command: tyk api versions switch-default --api-id {api_id} --version-name {name}
+      trigger: Ready to route default traffic to a different version
+      emotion: Relieved, in control
+      inputs:
+        - api_id (required)
+        - version_name (required, must exist)
+      outputs:
+        - previous_default (string)
+        - new_default (string)
+      success_criteria:
+        - Switches default version on the API
+        - Shows previous and new default
+        - No-op with exit 0 when already default
+        - Supports --json output
+      error_paths:
+        - version_not_found: exit code 3, lists available versions
+        - api_not_found: exit code 3
+
+    - id: apply-with-versions
+      name: Declarative Apply with Version Support
+      command: tyk api apply -f {file} --version-name {name} --base-api-id {id}
+      trigger: Managing versioned APIs through GitOps/file-based workflow
+      emotion: Confident, systematic
+      inputs:
+        - file (required, OAS document path)
+        - base_api_id (optional, target API for versioning)
+        - version_name (optional, version identifier)
+        - set_default (optional, boolean)
+      outputs:
+        - operation (created/updated/version_created)
+        - api_id (string)
+        - version_name (string, if applicable)
+      success_criteria:
+        - Single file apply can create/update a version
+        - Batch apply discovers version files via x-tyk-api-gateway.info.versioning
+        - Dry-run works with version operations
+        - JSON output includes version operation details
+      error_paths:
+        - base_api_not_found: exit code 3
+        - version_conflict: exit code 4
+
+  shared_artifacts:
+    - name: api_id
+      source: Dashboard API (assigned on create)
+      consumed_by: [list-versions, get-version, create-version, switch-default, apply-with-versions]
+
+    - name: version_name
+      source: User-provided or extracted from OAS info.version
+      consumed_by: [get-version, create-version, switch-default, apply-with-versions]
+
+    - name: default_version
+      source: Dashboard API (part of OASAPI.DefaultVersion)
+      consumed_by: [list-versions, switch-default]
+
+    - name: oas_document
+      source: Local file or Dashboard API response
+      consumed_by: [get-version, create-version, apply-with-versions]
+
+  integration_checkpoints:
+    - between: [list-versions, create-version]
+      validates: "version_name does not conflict with existing versions"
+
+    - between: [create-version, switch-default]
+      validates: "newly created version_name is available for default switch"
+
+    - between: [apply-with-versions, list-versions]
+      validates: "version created via apply appears in version list"
+
+  cli_conventions:
+    exit_codes:
+      0: success
+      1: general error
+      2: validation error
+      3: not found
+      4: conflict
+    output:
+      stdout: machine-readable data (OAS docs, JSON output)
+      stderr: human messages, progress, hints
+    flags:
+      global: [--dash-url, --auth-token, --org-id, --json]
+      shared: [--api-id, --version-name]

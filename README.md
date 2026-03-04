@@ -1,5 +1,16 @@
 # Tyk CLI
 
+⚠️ BETA SOFTWARE ⚠️
+tyk cli is an alpha release project. This software is provided by Tyk Technologies, Inc. without warranty and is not recommended for production use. The CLI is under active development - interfaces, commands, and behaviors are subject to change without notice. Use at your own risk for evaluation and testing purposes only.
+
+By using this software, you acknowledge that:
+
+It may contain bugs and incomplete features
+Data loss or service disruption may occur
+No support commitments or SLAs apply
+
+----
+
 A powerful command-line interface for managing Tyk APIs and configurations. Built to streamline API lifecycle management with OpenAPI Specification (OAS) support.
 
 > 📖 **[View Complete Documentation](https://sedkis.github.io/tyk-cli/)** | 🚀 **[Get Started](https://sedkis.github.io/tyk-cli/getting-started)** | 💡 **[Examples](https://sedkis.github.io/tyk-cli/examples/)**

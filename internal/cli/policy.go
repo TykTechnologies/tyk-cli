@@ -145,16 +145,8 @@ func runPolicyGet(cmd *cobra.Command, args []string) error {
 		return &ExitError{Code: int(types.ExitNotFound), Message: fmt.Sprintf("policy '%s' not found", policyID)}
 	}
 
-	// Fetch API list for reverse-resolution of API IDs to names (non-fatal on error)
-	apis, err := c.ListAPIsDashboard(ctx, 1)
-	if err != nil {
-		apis = nil
-	}
-
-	resolverAPIs := toResolverAPIs(apis)
-
-	// Convert wire format to CLI schema
-	pf := policy.WireToCLI(*dp, resolverAPIs)
+	// Convert wire format to CLI schema (api_name is already in the wire data)
+	pf := policy.WireToCLI(*dp)
 
 	if outputFormat == types.OutputJSON {
 		encoder := json.NewEncoder(os.Stdout)
@@ -229,14 +221,11 @@ func runPolicyApply(cmd *cobra.Command, args []string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), httpTimeout)
 	defer cancel()
 
-	// Fetch API list and resolve selectors
-	apis, err := c.ListAPIsDashboard(ctx, 1)
-	if err != nil {
-		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to fetch API list: %v", err)}
-	}
+	// Build targeted API lookup to avoid fetching all APIs
+	lookup := buildAPILookup(ctx, c)
 
 	requests := buildResolveRequests(pf.Access)
-	resolved, resolveErrs := policy.ResolveAccessEntries(requests, toResolverAPIs(apis))
+	resolved, resolveErrs := policy.ResolveAccessEntries(requests, lookup)
 	if len(resolveErrs) > 0 {
 		return &ExitError{Code: int(types.ExitBadArgs), Message: joinErrorMessages(resolveErrs)}
 	}
@@ -394,8 +383,7 @@ func runPolicyInit(cmd *cobra.Command, args []string) error {
 	}
 
 	// Build output path
-	policiesDir := filepath.Join(dir, "policies")
-	outPath := filepath.Join(policiesDir, id+".yaml")
+	outPath := filepath.Join(dir, id+".yaml")
 
 	// Check if file already exists
 	if _, err := os.Stat(outPath); err == nil {
@@ -428,9 +416,9 @@ func runPolicyInit(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to marshal scaffold: %w", err)
 	}
 
-	// Ensure policies directory exists
-	if err := os.MkdirAll(policiesDir, 0755); err != nil {
-		return fmt.Errorf("failed to create policies directory: %w", err)
+	// Ensure output directory exists
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return fmt.Errorf("failed to create output directory: %w", err)
 	}
 
 	if err := os.WriteFile(outPath, data, 0644); err != nil {
@@ -509,6 +497,85 @@ func joinErrorMessages(errs []error) string {
 		msgs[i] = e.Error()
 	}
 	return strings.Join(msgs, "; ")
+}
+
+// buildAPILookup creates a callback-based APILookup that uses targeted API calls
+// instead of fetching all APIs upfront. This is critical for performance with large
+// API counts (10k+).
+func buildAPILookup(ctx context.Context, c *client.Client) *policy.APILookup {
+	return &policy.APILookup{
+		ByID: func(id string) (policy.ResolverAPI, error) {
+			api, err := c.GetOASAPI(ctx, id, "")
+			if err != nil {
+				return policy.ResolverAPI{}, fmt.Errorf("no API found for id %q: %w", id, err)
+			}
+			return policy.ResolverAPI{
+				ID:         api.ID,
+				Name:       api.Name,
+				ListenPath: api.ListenPath,
+			}, nil
+		},
+		ByName: func(name string) ([]policy.ResolverAPI, error) {
+			apis, err := c.SearchAPIs(ctx, name)
+			if err != nil {
+				return nil, fmt.Errorf("failed to search APIs by name %q: %w", name, err)
+			}
+			var matches []policy.ResolverAPI
+			for _, api := range apis {
+				if api.Name == name {
+					matches = append(matches, policy.ResolverAPI{
+						ID: api.ID, Name: api.Name, ListenPath: api.ListenPath,
+					})
+				}
+			}
+			if len(matches) == 0 {
+				return nil, fmt.Errorf("no API found for name %q", name)
+			}
+			if len(matches) > 1 {
+				ids := make([]string, len(matches))
+				for i, m := range matches {
+					ids[i] = m.ID
+				}
+				return nil, fmt.Errorf("ambiguous: name %q matches %d APIs: %s",
+					name, len(matches), strings.Join(ids, ", "))
+			}
+			return matches, nil
+		},
+		ByListenPath: func(path string) ([]policy.ResolverAPI, error) {
+			apis, err := c.SearchAPIs(ctx, path)
+			if err != nil {
+				return nil, fmt.Errorf("failed to search APIs by listenPath %q: %w", path, err)
+			}
+			var matches []policy.ResolverAPI
+			for _, api := range apis {
+				if api.ListenPath == path {
+					matches = append(matches, policy.ResolverAPI{
+						ID: api.ID, Name: api.Name, ListenPath: api.ListenPath,
+					})
+				}
+			}
+			if len(matches) == 0 {
+				return nil, fmt.Errorf("no API found for listenPath %q", path)
+			}
+			if len(matches) > 1 {
+				ids := make([]string, len(matches))
+				for i, m := range matches {
+					ids[i] = m.ID
+				}
+				return nil, fmt.Errorf("ambiguous: listenPath %q matches %d APIs: %s",
+					path, len(matches), strings.Join(ids, ", "))
+			}
+			return matches, nil
+		},
+		ByTags: func(tags []string) ([]policy.ResolverAPI, error) {
+			apis, err := c.ListAllAPIsDashboard(ctx)
+			if err != nil {
+				return nil, fmt.Errorf("failed to fetch API list for tags resolution: %w", err)
+			}
+			resolverAPIs := toResolverAPIs(apis)
+			return policy.ResolveByTags(tags, resolverAPIs)
+		},
+	}
 }
 
 func resolveFriendlyID(ctx context.Context, c *client.Client, friendlyID string) (*types.DashboardPolicy, error) {

@@ -7,3 +7,6 @@ docs/.jekyll-cache/
 docs/.jekyll-metadata
 docs/vendor/
 docs/_includes/
+echo.yaml
+.nwave/*
+tyk

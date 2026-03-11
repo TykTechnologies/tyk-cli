@@ -18,6 +18,8 @@ const (
 	OASAPIsPath        = "/api/apis/oas"
 	OASAPIPath         = "/api/apis/oas/%s"          // {apiId}
 	OASAPIVersionsPath = "/api/apis/oas/%s/versions" // {apiId}
+	DashboardAPIsPath  = "/api/apis"
+	DashboardAPISearchPath = "/api/apis/search"
 
 	// Default timeout
 	DefaultTimeout = 30 * time.Second
@@ -325,52 +327,101 @@ func (c *Client) ListAPIsDashboard(ctx context.Context, page int) ([]*types.OASA
         return nil, &errorResp
     }
 
-    var dashboardResponse map[string]interface{}
+    var dashboardResponse dashboardAPIsResponse
     if err := json.Unmarshal(body, &dashboardResponse); err != nil {
         return nil, fmt.Errorf("failed to unmarshal dashboard API response: %w", err)
     }
 
-    apisArray, ok := dashboardResponse["apis"].([]interface{})
-    if !ok {
-        return nil, fmt.Errorf("invalid response format: 'apis' field not found or not an array")
-    }
+    return parseDashboardAPIs(dashboardResponse), nil
+}
 
+// dashboardAPIsResponse is the typed response from GET /api/apis.
+type dashboardAPIsResponse struct {
+    APIs  []dashboardAPIItem `json:"apis"`
+    Pages int                `json:"pages"`
+}
+
+type dashboardAPIItem struct {
+    APIDef dashboardAPIDef `json:"api_definition"`
+}
+
+type dashboardAPIDef struct {
+    APIID string              `json:"api_id"`
+    Name  string              `json:"name"`
+    Proxy dashboardProxyField `json:"proxy"`
+}
+
+type dashboardProxyField struct {
+    ListenPath string `json:"listen_path"`
+}
+
+// parseDashboardAPIs extracts OASAPI objects from a typed dashboard response.
+func parseDashboardAPIs(resp dashboardAPIsResponse) []*types.OASAPI {
     var apis []*types.OASAPI
-    for _, apiItemInterface := range apisArray {
-        apiItem, ok := apiItemInterface.(map[string]interface{})
-        if !ok {
-            continue
-        }
-        apiDefInterface, ok := apiItem["api_definition"]
-        if !ok {
-            continue
-        }
-        apiDef, ok := apiDefInterface.(map[string]interface{})
-        if !ok {
-            continue
-        }
-
-        apiID, _ := apiDef["api_id"].(string)
-        name, _ := apiDef["name"].(string)
-        var listenPath string
-        if proxyInterface, ok := apiDef["proxy"]; ok {
-            if proxy, ok := proxyInterface.(map[string]interface{}); ok {
-                if path, ok := proxy["listen_path"].(string); ok {
-                    listenPath = path
-                }
-            }
-        }
-
-        if apiID != "" {
+    for _, item := range resp.APIs {
+        if item.APIDef.APIID != "" {
             apis = append(apis, &types.OASAPI{
-                ID:             apiID,
-                Name:           name,
-                ListenPath:     listenPath,
+                ID:             item.APIDef.APIID,
+                Name:           item.APIDef.Name,
+                ListenPath:     item.APIDef.Proxy.ListenPath,
                 DefaultVersion: "v1",
             })
         }
     }
-    return apis, nil
+    return apis
+}
+
+// ListAllAPIsDashboard paginates through all pages of GET /api/apis.
+func (c *Client) ListAllAPIsDashboard(ctx context.Context) ([]*types.OASAPI, error) {
+    var all []*types.OASAPI
+    page := 1
+    for {
+        apis, err := c.ListAPIsDashboard(ctx, page)
+        if err != nil {
+            return nil, err
+        }
+        if len(apis) == 0 {
+            break
+        }
+        all = append(all, apis...)
+        page++
+    }
+    return all, nil
+}
+
+// SearchAPIs calls GET /api/apis/search?q={query} and returns matching APIs.
+func (c *Client) SearchAPIs(ctx context.Context, query string) ([]*types.OASAPI, error) {
+    values := url.Values{}
+    values.Set("q", query)
+    searchPath := DashboardAPISearchPath + "?" + values.Encode()
+
+    resp, err := c.doRequest(ctx, http.MethodGet, searchPath, nil)
+    if err != nil {
+        return nil, err
+    }
+
+    defer resp.Body.Close()
+    body, err := io.ReadAll(resp.Body)
+    if err != nil {
+        return nil, fmt.Errorf("failed to read response body: %w", err)
+    }
+
+    if resp.StatusCode >= 400 {
+        var errorResp types.ErrorResponse
+        errorResp.Status = resp.StatusCode
+        errorResp.Message = string(body)
+        if err := json.Unmarshal(body, &errorResp); err != nil {
+            errorResp.Message = fmt.Sprintf("%s: %s", resp.Status, string(body))
+        }
+        return nil, &errorResp
+    }
+
+    var dashboardResponse dashboardAPIsResponse
+    if err := json.Unmarshal(body, &dashboardResponse); err != nil {
+        return nil, fmt.Errorf("failed to unmarshal search response: %w", err)
+    }
+
+    return parseDashboardAPIs(dashboardResponse), nil
 }
 
 // ListOASAPIVersions lists all versions for an OAS API
@@ -404,6 +455,31 @@ func (c *Client) SwitchDefaultVersion(ctx context.Context, apiID string, version
 	}
 
 	return c.handleResponse(resp, nil)
+}
+
+// CreateOASAPIVersion creates a new API version by POSTing an OAS document
+// with base_api_id and new_version_name query parameters.
+func (c *Client) CreateOASAPIVersion(ctx context.Context, oasDoc json.RawMessage, baseAPIID, versionName string, setDefault bool) (*types.APIResponse, error) {
+	params := url.Values{}
+	params.Set("base_api_id", baseAPIID)
+	params.Set("new_version_name", versionName)
+	if setDefault {
+		params.Set("set_default", "true")
+	}
+
+	apiPath := OASAPIsPath + "?" + params.Encode()
+
+	resp, err := c.doRequest(ctx, http.MethodPost, apiPath, []byte(oasDoc))
+	if err != nil {
+		return nil, err
+	}
+
+	var result types.APIResponse
+	if err := c.handleResponse(resp, &result); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
 }
 
 // Health checks the health of the Tyk Dashboard

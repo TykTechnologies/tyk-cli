@@ -87,6 +87,29 @@ func mockAPIListResponse() map[string]interface{} {
 	}
 }
 
+// handleAPILookup handles /api/apis (with pagination) and /api/apis/search with the mock data.
+// It returns true if the request was handled.
+func handleAPILookup(w http.ResponseWriter, r *http.Request) bool {
+	if r.Method != http.MethodGet {
+		return false
+	}
+	switch r.URL.Path {
+	case "/api/apis":
+		// Support pagination: page > 1 returns empty list to stop ListAllAPIsDashboard
+		if p := r.URL.Query().Get("p"); p != "" && p != "1" {
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{"apis": []interface{}{}, "pages": 1})
+			return true
+		}
+		_ = json.NewEncoder(w).Encode(mockAPIListResponse())
+		return true
+	case "/api/apis/search":
+		// Return all APIs — the client-side filtering handles exact match
+		_ = json.NewEncoder(w).Encode(mockAPIListResponse())
+		return true
+	}
+	return false
+}
+
 // goldPolicyAccessRights returns the access_rights map for the Gold Plan.
 func goldPolicyAccessRights() map[string]interface{} {
 	return map[string]interface{}{
@@ -277,8 +300,8 @@ func TestPolicyApply_Create_NameSelector(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		// Selector resolution: list APIs
-		case r.Method == http.MethodGet && r.URL.Path == "/api/apis":
-			_ = json.NewEncoder(w).Encode(mockAPIListResponse())
+		case handleAPILookup(w, r):
+			// handled
 
 		// Resolve policy by ID — not found -> create path
 		case r.Method == http.MethodGet && r.URL.Path == "/api/portal/policies/platinum":
@@ -335,8 +358,8 @@ func TestPolicyApply_Update_Idempotent(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		// Selector resolution: list APIs
-		case r.Method == http.MethodGet && r.URL.Path == "/api/apis":
-			_ = json.NewEncoder(w).Encode(mockAPIListResponse())
+		case handleAPILookup(w, r):
+			// handled
 
 		// Resolve policy by ID — found -> update path
 		case r.Method == http.MethodGet && r.URL.Path == "/api/portal/policies/platinum":
@@ -489,8 +512,8 @@ func TestPolicyGet_Human(t *testing.T) {
 		switch {
 		case r.Method == http.MethodGet && r.URL.Path == "/api/portal/policies/gold":
 			_ = json.NewEncoder(w).Encode(goldPolicy)
-		case r.Method == http.MethodGet && r.URL.Path == "/api/apis":
-			_ = json.NewEncoder(w).Encode(mockAPIListResponse())
+		case handleAPILookup(w, r):
+			// handled
 		default:
 			http.NotFound(w, r)
 		}
@@ -594,8 +617,8 @@ func TestPolicyApply_ListenPathSelector(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
-		case r.Method == http.MethodGet && r.URL.Path == "/api/apis":
-			_ = json.NewEncoder(w).Encode(mockAPIListResponse())
+		case handleAPILookup(w, r):
+			// handled
 		case r.Method == http.MethodGet && r.URL.Path == "/api/portal/policies/path-test":
 			w.WriteHeader(http.StatusNotFound)
 			_ = json.NewEncoder(w).Encode(map[string]interface{}{"status": 404, "message": "not found"})
@@ -640,8 +663,8 @@ func TestPolicyApply_DurationConversion(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
-		case r.Method == http.MethodGet && r.URL.Path == "/api/apis":
-			_ = json.NewEncoder(w).Encode(mockAPIListResponse())
+		case handleAPILookup(w, r):
+			// handled
 		case r.Method == http.MethodGet && r.URL.Path == "/api/portal/policies/dur-test":
 			w.WriteHeader(http.StatusNotFound)
 			_ = json.NewEncoder(w).Encode(map[string]interface{}{"status": 404, "message": "not found"})
@@ -681,8 +704,7 @@ access:
 func TestPolicyApply_NameNotFound(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodGet && r.URL.Path == "/api/apis" {
-			_ = json.NewEncoder(w).Encode(mockAPIListResponse())
+		if handleAPILookup(w, r) {
 			return
 		}
 		http.NotFound(w, r)
@@ -734,7 +756,7 @@ func TestPolicyApply_NameAmbiguous(t *testing.T) {
 	}
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodGet && r.URL.Path == "/api/apis" {
+		if r.Method == http.MethodGet && (r.URL.Path == "/api/apis" || r.URL.Path == "/api/apis/search") {
 			_ = json.NewEncoder(w).Encode(ambiguousAPIList)
 			return
 		}
@@ -972,10 +994,10 @@ func TestPolicyInit_NewFile(t *testing.T) {
 	err := executePolicyInitCmd(t, tmpDir, "my-policy", "My Policy")
 	require.NoError(t, err)
 
-	// Verify file was created at policies/{id}.yaml inside the dir
-	outPath := filepath.Join(tmpDir, "policies", "my-policy.yaml")
+	// Verify file was created at {id}.yaml inside the dir
+	outPath := filepath.Join(tmpDir, "my-policy.yaml")
 	data, err := os.ReadFile(outPath)
-	require.NoError(t, err, "scaffold file should exist at policies/{id}.yaml")
+	require.NoError(t, err, "scaffold file should exist at {id}.yaml")
 
 	// Parse and validate the scaffold YAML
 	var pf types.PolicyFile
@@ -1003,9 +1025,7 @@ func TestPolicyInit_FileExistsNoOverwrite(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	// Create the file that init would write to
-	policiesDir := filepath.Join(tmpDir, "policies")
-	require.NoError(t, os.MkdirAll(policiesDir, 0755))
-	existingPath := filepath.Join(policiesDir, "existing.yaml")
+	existingPath := filepath.Join(tmpDir, "existing.yaml")
 	require.NoError(t, os.WriteFile(existingPath, []byte("original content"), 0644))
 
 	err := executePolicyInitCmd(t, tmpDir, "existing", "Existing Policy")
@@ -1048,8 +1068,8 @@ func TestPolicyIntegration_FullLifecycle(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
-		case r.Method == http.MethodGet && r.URL.Path == "/api/apis":
-			_ = json.NewEncoder(w).Encode(mockAPIListResponse())
+		case handleAPILookup(w, r):
+			// handled
 
 		case r.Method == http.MethodGet && r.URL.Path == "/api/portal/policies":
 			policies := make([]map[string]interface{}, 0)

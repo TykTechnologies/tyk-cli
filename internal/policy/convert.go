@@ -70,7 +70,7 @@ func CLIToWire(pf types.PolicyFile, resolved []ResolvedAccess, orgID string) (ty
 
 // WireToCLI converts a DashboardPolicy back to the CLI PolicyFile format.
 // It uses the provided API list for best-effort reverse resolution of API IDs to names.
-func WireToCLI(dp types.DashboardPolicy, apis []ResolverAPI) types.PolicyFile {
+func WireToCLI(dp types.DashboardPolicy) types.PolicyFile {
 	friendlyID := dp.ID
 	if friendlyID == "" {
 		friendlyID = dp.MID // fallback for unmanaged policies
@@ -101,13 +101,8 @@ func WireToCLI(dp types.DashboardPolicy, apis []ResolverAPI) types.PolicyFile {
 	// Key TTL
 	pf.KeyTTL = types.Duration(FormatDuration(dp.KeyExpiresIn))
 
-	// Build API name lookup
-	apiByID := make(map[string]ResolverAPI, len(apis))
-	for _, api := range apis {
-		apiByID[api.ID] = api
-	}
-
-	// Access rights -> access entries, sorted by API ID for deterministic output
+	// Access rights -> access entries, sorted by API ID for deterministic output.
+	// The wire format already contains api_name, so no external API list lookup is needed.
 	apiIDs := make([]string, 0, len(dp.AccessRights))
 	for id := range dp.AccessRights {
 		apiIDs = append(apiIDs, id)
@@ -120,9 +115,9 @@ func WireToCLI(dp types.DashboardPolicy, apis []ResolverAPI) types.PolicyFile {
 			Versions: ar.Versions,
 		}
 
-		// Best-effort reverse resolution: use name if API is known, otherwise fall back to ID
-		if api, ok := apiByID[apiID]; ok {
-			entry.Name = api.Name
+		// Use the name from the wire format; fall back to raw ID if empty
+		if ar.APIName != "" {
+			entry.Name = ar.APIName
 		} else {
 			entry.ID = apiID
 		}

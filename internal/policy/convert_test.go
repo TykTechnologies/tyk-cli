@@ -81,12 +81,7 @@ func TestWireToCLI(t *testing.T) {
 		},
 	}
 
-	apis := []ResolverAPI{
-		{ID: "a1b2c3d4e5f6", Name: "users-api"},
-		{ID: "g7h8i9j0k1l2", Name: "orders-api"},
-	}
-
-	pf := WireToCLI(dp, apis)
+	pf := WireToCLI(dp)
 
 	assert.Equal(t, "gold", pf.ID, "should use wire id directly")
 	assert.Equal(t, "Gold Plan", pf.Name)
@@ -130,11 +125,7 @@ func TestWireToCLI_FallbackToMID(t *testing.T) {
 		},
 	}
 
-	apis := []ResolverAPI{
-		{ID: "a1b2c3d4e5f6", Name: "users-api"},
-	}
-
-	pf := WireToCLI(dp, apis)
+	pf := WireToCLI(dp)
 
 	assert.Equal(t, "507f1f77bcf86cd799439011", pf.ID, "should fall back to MID when wire id is empty")
 	assert.Equal(t, "Legacy Policy", pf.Name)
@@ -158,16 +149,12 @@ func TestRoundTrip_CLIToWireToCLI(t *testing.T) {
 		{APIID: "a1b2c3d4e5f6", APIName: "users-api", Versions: []string{"v1"}},
 	}
 
-	apis := []ResolverAPI{
-		{ID: "a1b2c3d4e5f6", Name: "users-api"},
-	}
-
 	// CLI -> Wire
 	wire, err := CLIToWire(original, resolved, "org-123")
 	require.NoError(t, err)
 
 	// Wire -> CLI
-	roundTrip := WireToCLI(wire, apis)
+	roundTrip := WireToCLI(wire)
 
 	// Semantic equivalence (duration strings may normalize)
 	assert.Equal(t, original.ID, roundTrip.ID)

@@ -159,7 +159,7 @@ func NewAPICommand() *cobra.Command {
 	apiCmd.AddCommand(NewAPIApplyCommand())
 	apiCmd.AddCommand(NewAPIUpdateOASCommand())
 	apiCmd.AddCommand(NewAPIDeleteCommand())
-	// Note: Versioning commands moved to post-v0
+	apiCmd.AddCommand(NewAPIVersionsCommand())
 
 	return apiCmd
 }
@@ -183,36 +183,243 @@ func NewAPIVersionsCommand() *cobra.Command {
 // Placeholder functions for version commands - these will be implemented in phase 3
 
 func NewAPIVersionsListCommand() *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List versions for an API",
 		Long:  "List all versions for a given API ID",
-		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Println("API versions list command will be implemented in phase 3")
-		},
+		RunE:  runAPIVersionsList,
 	}
+	cmd.Flags().String("api-id", "", "API ID to list versions for (required)")
+	_ = cmd.MarkFlagRequired("api-id")
+	return cmd
+}
+
+func runAPIVersionsList(cmd *cobra.Command, args []string) error {
+	apiID, _ := cmd.Flags().GetString("api-id")
+
+	config := GetConfigFromContext(cmd.Context())
+	if config == nil {
+		return fmt.Errorf("configuration not found")
+	}
+
+	c, err := client.NewClient(config)
+	if err != nil {
+		return fmt.Errorf("failed to create client: %w", err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	versions, defaultVersion, err := c.ListOASAPIVersions(ctx, apiID)
+	if err != nil {
+		if er, ok := err.(*types.ErrorResponse); ok && er.Status == 404 {
+			return apiNotFoundForVersionError(apiID)
+		}
+		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to list versions: %s", err)}
+	}
+
+	outputFormat := GetOutputFormatFromContext(cmd.Context())
+
+	if outputFormat == types.OutputJSON {
+		payload := map[string]interface{}{
+			"api_id":   apiID,
+			"default":  defaultVersion,
+			"versions": versions,
+		}
+		encoder := json.NewEncoder(os.Stdout)
+		encoder.SetIndent("", "  ")
+		return encoder.Encode(payload)
+	}
+
+	// Human output to stderr
+	for _, v := range versions {
+		marker := "  "
+		if v == defaultVersion {
+			marker = "* "
+		}
+		fmt.Fprintf(os.Stderr, "%s%s\n", marker, v)
+	}
+	fmt.Fprintf(os.Stderr, "\n%d version(s) found. Default: %s\n", len(versions), defaultVersion)
+	return nil
 }
 
 func NewAPIVersionsCreateCommand() *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create a new API version",
-		Long:  "Create a new version for an existing API",
-		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Println("API versions create command will be implemented in phase 3")
-		},
+		Long:  "Create a new version for an existing API from an OAS file",
+		RunE:  runAPIVersionsCreate,
 	}
+	cmd.Flags().String("api-id", "", "Base API ID (required)")
+	cmd.Flags().StringP("file", "f", "", "Path to OAS file (required)")
+	cmd.Flags().String("version-name", "", "Name for the new version (required)")
+	cmd.Flags().Bool("set-default", false, "Set as default version")
+	_ = cmd.MarkFlagRequired("api-id")
+	_ = cmd.MarkFlagRequired("file")
+	_ = cmd.MarkFlagRequired("version-name")
+	return cmd
+}
+
+func runAPIVersionsCreate(cmd *cobra.Command, args []string) error {
+	apiID, _ := cmd.Flags().GetString("api-id")
+	filePath, _ := cmd.Flags().GetString("file")
+	versionName, _ := cmd.Flags().GetString("version-name")
+	setDefault, _ := cmd.Flags().GetBool("set-default")
+
+	config := GetConfigFromContext(cmd.Context())
+	if config == nil {
+		return fmt.Errorf("configuration not found")
+	}
+
+	// Load OAS file as JSON
+	oasJSON, err := filehandler.LoadFileAsRawJSON(filePath)
+	if err != nil {
+		return &ExitError{Code: 2, Message: fmt.Sprintf("invalid OAS document: %s", err)}
+	}
+
+	c, err := client.NewClient(config)
+	if err != nil {
+		return fmt.Errorf("failed to create client: %w", err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Pre-check: conflict detection
+	versions, _, err := c.ListOASAPIVersions(ctx, apiID)
+	if err != nil {
+		if er, ok := err.(*types.ErrorResponse); ok && er.Status == 404 {
+			return apiNotFoundForVersionError(apiID)
+		}
+		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to check versions: %s", err)}
+	}
+	for _, v := range versions {
+		if v == versionName {
+			return versionConflictError(apiID, versionName)
+		}
+	}
+
+	// Create version
+	resp, err := c.CreateOASAPIVersion(ctx, oasJSON, apiID, versionName, setDefault)
+	if err != nil {
+		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to create version: %s", err)}
+	}
+
+	outputFormat := GetOutputFormatFromContext(cmd.Context())
+	if outputFormat == types.OutputJSON {
+		payload := map[string]interface{}{
+			"action":       "created",
+			"api_id":       apiID,
+			"version_name": versionName,
+			"is_default":   setDefault,
+			"id":           resp.ID,
+		}
+		encoder := json.NewEncoder(os.Stdout)
+		encoder.SetIndent("", "  ")
+		return encoder.Encode(payload)
+	}
+
+	// Human output
+	fmt.Fprintf(os.Stderr, "✓ Version %q created for API %s\n", versionName, apiID)
+	if setDefault {
+		fmt.Fprintf(os.Stderr, "  Set as default: yes\n")
+	} else {
+		fmt.Fprintf(os.Stderr, "\nHint: To make this the default version, run:\n")
+		fmt.Fprintf(os.Stderr, "  tyk api versions switch-default --api-id %s --version-name %s\n", apiID, versionName)
+	}
+	return nil
 }
 
 func NewAPIVersionsSwitchDefaultCommand() *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "switch-default",
 		Short: "Switch default version for an API",
 		Long:  "Switch the default version for a given API",
-		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Println("API versions switch-default command will be implemented in phase 3")
-		},
+		RunE:  runAPIVersionsSwitchDefault,
 	}
+	cmd.Flags().String("api-id", "", "API ID (required)")
+	cmd.Flags().String("version-name", "", "Version to set as default (required)")
+	_ = cmd.MarkFlagRequired("api-id")
+	_ = cmd.MarkFlagRequired("version-name")
+	return cmd
+}
+
+func runAPIVersionsSwitchDefault(cmd *cobra.Command, args []string) error {
+	apiID, _ := cmd.Flags().GetString("api-id")
+	versionName, _ := cmd.Flags().GetString("version-name")
+
+	config := GetConfigFromContext(cmd.Context())
+	if config == nil {
+		return fmt.Errorf("configuration not found")
+	}
+
+	c, err := client.NewClient(config)
+	if err != nil {
+		return fmt.Errorf("failed to create client: %w", err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Pre-check: list versions to validate and get current default
+	versions, currentDefault, err := c.ListOASAPIVersions(ctx, apiID)
+	if err != nil {
+		if er, ok := err.(*types.ErrorResponse); ok && er.Status == 404 {
+			return apiNotFoundForVersionError(apiID)
+		}
+		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to list versions: %s", err)}
+	}
+
+	// Check if version exists
+	found := false
+	for _, v := range versions {
+		if v == versionName {
+			found = true
+			break
+		}
+	}
+	if !found {
+		return versionNotFoundError(apiID, "", versionName, versions)
+	}
+
+	outputFormat := GetOutputFormatFromContext(cmd.Context())
+
+	// No-op if already default
+	if currentDefault == versionName {
+		if outputFormat == types.OutputJSON {
+			payload := map[string]interface{}{
+				"action":           "no_change",
+				"api_id":           apiID,
+				"previous_default": currentDefault,
+				"new_default":      versionName,
+			}
+			encoder := json.NewEncoder(os.Stdout)
+			encoder.SetIndent("", "  ")
+			return encoder.Encode(payload)
+		}
+		fmt.Fprintf(os.Stderr, "Version %q is already the default for API %s.\n", versionName, apiID)
+		return nil
+	}
+
+	// Switch
+	if err := c.SwitchDefaultVersion(ctx, apiID, versionName); err != nil {
+		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to switch default version: %s", err)}
+	}
+
+	if outputFormat == types.OutputJSON {
+		payload := map[string]interface{}{
+			"action":           "switched",
+			"api_id":           apiID,
+			"previous_default": currentDefault,
+			"new_default":      versionName,
+		}
+		encoder := json.NewEncoder(os.Stdout)
+		encoder.SetIndent("", "  ")
+		return encoder.Encode(payload)
+	}
+
+	fmt.Fprintf(os.Stderr, "Previous default: %s\nNew default: %s\n", currentDefault, versionName)
+	return nil
 }
 
 // Placeholder functions for API commands - these will be implemented in the next phases

@@ -1,0 +1,75 @@
+name: ReqProof Audit
+
+on:
+  push:
+    branches:
+      - main
+      - release-**
+  pull_request:
+    paths:
+      - '.github/workflows/reqproof.yml'
+      - 'cmd/**'
+      - 'internal/**'
+      - 'pkg/**'
+      - 'specs/**'
+      - 'proof.yaml'
+      - 'proof.waivers.yaml'
+      - '.proof/known-issues/**'
+      - '.proof/risks/**'
+      - 'docs/superpowers/specs/**'
+      - 'go.mod'
+      - 'go.sum'
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+
+      - name: Install Z3 solver
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq z3
+
+      - name: Cache ReqProof solvers
+        uses: actions/cache@v4
+        with:
+          path: ~/.proof/solvers
+          key: proof-solvers-${{ runner.os }}
+
+      - name: Install ReqProof CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="${RUNNER_TEMP}/proof_linux_amd64.tar.gz"
+          install_dir="${RUNNER_TEMP}/proof-bin"
+          mkdir -p "${install_dir}"
+          curl -fsSL "https://downloads.reqproof.com/releases/latest/proof_linux_amd64.tar.gz" -o "${archive}"
+          tar -xzf "${archive}" -C "${install_dir}"
+          echo "${install_dir}" >> "${GITHUB_PATH}"
+          "${install_dir}/proof" version
+
+      - name: Refresh ReqProof trace links
+        shell: bash
+        run: |
+          rm -f .proof/index.db .proof/index.db-shm .proof/index.db-wal .proof/audit-cache.json
+          proof trace autolink
+          proof trace coverage
+
+      - name: Run ReqProof audit
+        shell: bash
+        run: |
+          set +e
+          proof audit --scope full --fail-level warn --format markdown --markdown-file "${RUNNER_TEMP}/reqproof-audit.md"
+          status=$?
+          set -e
+
+          if [[ -f "${RUNNER_TEMP}/reqproof-audit.md" ]]; then
+            cat "${RUNNER_TEMP}/reqproof-audit.md" >> "${GITHUB_STEP_SUMMARY}"
+          fi
+
+          exit "${status}"

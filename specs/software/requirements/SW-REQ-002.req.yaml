@@ -1,0 +1,55 @@
+id: SW-REQ-002
+version: 1
+status: review
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when fuzzy_invoked the policy shall immediately satisfy fuzzy_result_sorted_ascending
+description: FuzzySuggestions returns candidates sorted ascending by Levenshtein distance to the query
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+parent: REQ-POL-011
+component: policy
+rationale: ""
+tags: []
+variables: []
+traces:
+    satisfies:
+        - REQ-POL-011
+    reviewed_at: "2026-06-01T12:52:29.64289Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:0d51577d1394359cb507f5d4901c331338e47c974ff9e68e89c6b69cf12adc48
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: approved
+        reviewer: tomas@tyk.io
+        reviewed_at: "2026-06-01T13:01:57Z"
+        ai_generated: false
+    impact_reviews:
+        - requirement: SW-REQ-002
+          artifact: internal/policy/selector.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Re-annotated existing production functions to declare implementation linkage for previously-unlinked requirements: FuzzySuggestions → SW-REQ-001/002/003; ParseDuration → SW-REQ-004/005/006; GenerateListenPath → SW-REQ-007/008/009; NewClient → REQ-CFG-007 (env timeout); classifyDashboardError → REQ-API-027/POL-022/POL-027; ExitCode enum → REQ-API-020/021, REQ-CFG-020/021, REQ-POL-020/021. No behavioural change — purely trace metadata.'
+          base: origin/main
+          requirement_fingerprint: sha256:0d51577d1394359cb507f5d4901c331338e47c974ff9e68e89c6b69cf12adc48
+          approval_fingerprint: sha256:6e50238cfa3e1e02796c26c2112c3e6849efd7acac6f4f696f7e52d718389ed7
+          artifact_fingerprint: sha256:ea1495e9964fc046f46118eb828ec63d5a99ada901ce0d37ea1ec66050640af9
+          reviewed_at: "2026-06-02T13:56:27Z"
+history:
+    created_by: human:cli
+    created_at: "2026-06-01T12:52:06Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-06-01T13:00:11Z"
+lifecycle:
+    change_history:
+        - date: "2026-06-01T13:00:11Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:cli

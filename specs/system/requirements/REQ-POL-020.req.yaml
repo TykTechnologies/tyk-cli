@@ -1,0 +1,49 @@
+id: REQ-POL-020
+version: 1
+status: draft
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when policy_operation_succeeded the policy shall immediately satisfy policy_exit_zero
+description: All policy subcommands exit 0 on success
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+component: policy
+rationale: ""
+tags: []
+variables:
+    - policy_operation_succeeded
+    - policy_exit_zero
+traces:
+    satisfies:
+        - STK-REQ-002
+    reviewed_at: "2026-06-01T09:51:08.442793Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:eb5eae4d186b991fb4c27146b3ad3da5fcab1801d57521a04474c1d131dd9989
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: pending
+        reviewer: ""
+        reviewed_at: ""
+        ai_generated: false
+    impact_reviews:
+        - requirement: REQ-POL-020
+          artifact: pkg/types/config.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Re-annotated existing production functions to declare implementation linkage for previously-unlinked requirements: FuzzySuggestions → SW-REQ-001/002/003; ParseDuration → SW-REQ-004/005/006; GenerateListenPath → SW-REQ-007/008/009; NewClient → REQ-CFG-007 (env timeout); classifyDashboardError → REQ-API-027/POL-022/POL-027; ExitCode enum → REQ-API-020/021, REQ-CFG-020/021, REQ-POL-020/021. No behavioural change — purely trace metadata.'
+          base: origin/main
+          requirement_fingerprint: sha256:eb5eae4d186b991fb4c27146b3ad3da5fcab1801d57521a04474c1d131dd9989
+          approval_fingerprint: sha256:ea9a7c7ddc9821c62db44a6b3106311b0d1bf453d24281c787842b8f2edb9007
+          artifact_fingerprint: sha256:652ce36e053bda6f7774e1acd99313fc53e057ea3f70cc170c6075d5b5ba9ac3
+          reviewed_at: "2026-06-02T13:56:27Z"
+history:
+    created_by: human:cli
+    created_at: "2026-05-29T15:42:37Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-06-01T09:50:46Z"

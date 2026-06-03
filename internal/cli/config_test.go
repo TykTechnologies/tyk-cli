@@ -11,6 +11,7 @@ import (
 	"github.com/tyktech/tyk-cli/pkg/types"
 )
 
+// reqproof:req REQ-CFG-030
 func TestGenerateTOMLConfig(t *testing.T) {
 	config := &types.Config{
 		DefaultEnvironment: "test",
@@ -32,6 +33,7 @@ func TestGenerateTOMLConfig(t *testing.T) {
 	assert.Contains(t, toml, "# Tyk CLI Configuration")
 }
 
+// reqproof:req REQ-CFG-002
 func TestMaskToken(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -52,6 +54,7 @@ func TestMaskToken(t *testing.T) {
 	}
 }
 
+// reqproof:req REQ-CFG-030
 func TestGetConfigDir(t *testing.T) {
 	configDir, err := getConfigDir()
 	require.NoError(t, err)
@@ -63,6 +66,7 @@ func TestGetConfigDir(t *testing.T) {
 	assert.True(t, filepath.IsAbs(configDir))
 }
 
+// reqproof:req REQ-CFG-010
 func TestEnvironmentStruct(t *testing.T) {
 	env := types.Environment{
 		Name:         "test",
@@ -77,6 +81,7 @@ func TestEnvironmentStruct(t *testing.T) {
 	assert.Equal(t, "org", env.OrgID)
 }
 
+// reqproof:req REQ-CFG-031
 func TestConfigFileOperations(t *testing.T) {
 	// Create temporary directory
 	tmpDir, err := os.MkdirTemp("", "tyk-cli-config-test")
@@ -116,6 +121,7 @@ func TestConfigFileOperations(t *testing.T) {
 	assert.Contains(t, savedStr, "org_id = \"test-org-456\"")
 }
 
+// reqproof:req REQ-CFG-001
 func TestNewConfigCommand(t *testing.T) {
 	cmd := NewConfigCommand()
 	
@@ -139,6 +145,7 @@ func TestNewConfigCommand(t *testing.T) {
 	assert.Contains(t, cmdNames, "remove <environment-name>")
 }
 
+// reqproof:req REQ-CFG-002
 func TestNewInitCommand(t *testing.T) {
 	cmd := NewInitCommand()
 	
@@ -156,12 +163,14 @@ func TestNewInitCommand(t *testing.T) {
 	assert.Equal(t, "bool", quickFlag.Value.Type())
 }
 
+// reqproof:req REQ-CFG-031
 func TestConfigSetPreservesEnvironmentStructure(t *testing.T) {
 	// Skip this test for now as it requires complex HOME directory manipulation
 	// The functionality is tested by integration tests with real config files
 	t.Skip("Skipping test that requires complex environment setup - functionality verified by integration tests")
 }
 
+// reqproof:req REQ-CFG-031
 func TestConfigSetWithoutEnvironments(t *testing.T) {
 	// Test behavior when no environments exist - should fail gracefully
 	tempDir := t.TempDir()
@@ -189,6 +198,7 @@ func TestConfigSetWithoutEnvironments(t *testing.T) {
 	assert.Contains(t, err.Error(), "Use 'tyk config add' to create one")
 }
 
+// reqproof:req REQ-CFG-031
 func TestConfigSetValidation(t *testing.T) {
 	cmd := NewConfigSetCommand()
 	

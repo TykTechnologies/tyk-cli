@@ -16,7 +16,7 @@ import (
 )
 
 
-// NewInitCommand creates the 'tyk init' command for guided setup
+// reqproof:req REQ-CFG-002
 func NewInitCommand() *cobra.Command {
 	cmd := &cobra.Command{
     Use:   "init",
@@ -37,6 +37,7 @@ This wizard will help you:
 	return cmd
 }
 
+// reqproof:req REQ-CFG-002
 func runInitWizard(cmd *cobra.Command, args []string) error {
     skipTest, _ := cmd.Flags().GetBool("skip-test")
     // quick flag retained for compatibility; the wizard now always bootstraps a single env
@@ -50,6 +51,7 @@ func runInitWizard(cmd *cobra.Command, args []string) error {
     return runQuickSetup(scanner, skipTest)
 }
 
+// reqproof:req REQ-CFG-002
 func printWelcome() {
     fmt.Println("🚀 Welcome to Tyk CLI Setup Wizard!")
     fmt.Println("====================================")
@@ -59,6 +61,7 @@ func printWelcome() {
     fmt.Println()
 }
 
+// reqproof:req REQ-CFG-002
 func runQuickSetup(scanner *bufio.Scanner, skipTest bool) error {
     fmt.Println("⚡ Quick Setup Mode")
     fmt.Println("------------------")
@@ -88,6 +91,7 @@ func runQuickSetup(scanner *bufio.Scanner, skipTest bool) error {
 	return nil
 }
 
+// reqproof:req REQ-CFG-002
 func gatherEnvironmentInfo(scanner *bufio.Scanner, envName string, isFirst bool) (*types.Environment, error) {
 	env := &types.Environment{Name: envName}
 
@@ -136,6 +140,7 @@ func gatherEnvironmentInfo(scanner *bufio.Scanner, envName string, isFirst bool)
 	return env, nil
 }
 
+// reqproof:req REQ-CFG-002
 func testConnection(env *types.Environment) error {
 	config := &types.Config{
 		DefaultEnvironment: "test",
@@ -155,6 +160,7 @@ func testConnection(env *types.Environment) error {
 	return client.Health(ctx)
 }
 
+// reqproof:req REQ-CFG-002
 func saveEnvironment(env *types.Environment, setAsGlobal bool) error {
 	// Get config directory
 	configDir, err := getConfigDir()
@@ -192,6 +198,7 @@ func saveEnvironment(env *types.Environment, setAsGlobal bool) error {
 	return nil
 }
 
+// reqproof:req REQ-CFG-002
 func printSuccess(activeEnv string) {
     fmt.Println("🎉 Setup Complete!")
     fmt.Println("==================")
@@ -208,6 +215,7 @@ func printSuccess(activeEnv string) {
     fmt.Println()
 }
 
+// reqproof:req REQ-CFG-002
 func askString(scanner *bufio.Scanner, prompt, defaultValue string) string {
 	if defaultValue != "" {
 		fmt.Printf("%s [%s]: ", prompt, defaultValue)
@@ -225,6 +233,7 @@ func askString(scanner *bufio.Scanner, prompt, defaultValue string) string {
 	return input
 }
 
+// reqproof:req REQ-CFG-002
 func askYesNo(scanner *bufio.Scanner, prompt string) bool {
 	fmt.Printf("%s [y/N]: ", prompt)
 	scanner.Scan()

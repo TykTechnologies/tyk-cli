@@ -1,0 +1,52 @@
+id: REQ-POL-022
+version: 1
+status: draft
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when policy_target_not_found the policy shall immediately satisfy policy_exit_not_found
+description: policy get and policy delete exit 3 when the target policy ID is not found (HTTP 404)
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+component: policy
+rationale: ""
+tags: []
+variables:
+    - policy_target_not_found
+    - policy_exit_not_found
+traces:
+    satisfies:
+        - STK-REQ-002
+    reviewed_at: "2026-06-01T09:51:08.46102Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:2d8e029122427cf8ebc403ab844d404f1403691ba96f52a6a8df68fb69357c65
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: pending
+        reviewer: ""
+        reviewed_at: ""
+        ai_generated: false
+    gaps_reviewed_at: "2026-06-02T08:37:02.702664Z"
+    gaps_reviewed_by: tombuchaillot
+    impact_reviews:
+        - requirement: REQ-POL-022
+          artifact: internal/cli/errors.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Re-annotated existing production functions to declare implementation linkage for previously-unlinked requirements: FuzzySuggestions → SW-REQ-001/002/003; ParseDuration → SW-REQ-004/005/006; GenerateListenPath → SW-REQ-007/008/009; NewClient → REQ-CFG-007 (env timeout); classifyDashboardError → REQ-API-027/POL-022/POL-027; ExitCode enum → REQ-API-020/021, REQ-CFG-020/021, REQ-POL-020/021. No behavioural change — purely trace metadata.'
+          base: origin/main
+          requirement_fingerprint: sha256:2d8e029122427cf8ebc403ab844d404f1403691ba96f52a6a8df68fb69357c65
+          approval_fingerprint: sha256:9e622487adaf727362be7ccd8d8de5c4970900aae16c942a95e8a5d9227bfafe
+          artifact_fingerprint: sha256:4b9268161414a9876b3b330312fdc696f08dd159589de50f81b1739c04f32372
+          reviewed_at: "2026-06-02T13:56:27Z"
+history:
+    created_by: human:cli
+    created_at: "2026-05-29T15:42:37Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-06-01T09:50:46Z"
+obligation_class: boundary

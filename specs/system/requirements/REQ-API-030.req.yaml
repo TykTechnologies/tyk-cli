@@ -1,0 +1,50 @@
+id: REQ-API-030
+version: 1
+status: draft
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when dashboard_request_sent the api shall immediately satisfy (authorization_header_set & org_id_header_set)
+description: api commands communicate with the Tyk Dashboard via an authenticated HTTP client that sets Authorization and x-org-id headers on every request
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+component: api
+rationale: ""
+tags: []
+variables:
+    - dashboard_request_sent
+    - authorization_header_set
+    - org_id_header_set
+traces:
+    satisfies:
+        - STK-REQ-001
+    reviewed_at: "2026-06-01T12:35:57.160902Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:df8ba995f576146716bfb0922bffc98d95dd38b90f0a8dcdbf376c74fbb1be46
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: pending
+        reviewer: ""
+        reviewed_at: ""
+        ai_generated: false
+    impact_reviews:
+        - requirement: REQ-API-030
+          artifact: internal/client/client.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Re-annotated existing production functions to declare implementation linkage for previously-unlinked requirements: FuzzySuggestions → SW-REQ-001/002/003; ParseDuration → SW-REQ-004/005/006; GenerateListenPath → SW-REQ-007/008/009; NewClient → REQ-CFG-007 (env timeout); classifyDashboardError → REQ-API-027/POL-022/POL-027; ExitCode enum → REQ-API-020/021, REQ-CFG-020/021, REQ-POL-020/021. No behavioural change — purely trace metadata.'
+          base: origin/main
+          requirement_fingerprint: sha256:df8ba995f576146716bfb0922bffc98d95dd38b90f0a8dcdbf376c74fbb1be46
+          approval_fingerprint: sha256:60741a14a387dc46fc9bd73bc7c2e576a5b85b693369a9afcb1179ead9d7bca2
+          artifact_fingerprint: sha256:b8a08970248fcd70599c3d2826646101ddf67ec20033fd6fd2c15e9b4924899c
+          reviewed_at: "2026-06-02T13:56:27Z"
+history:
+    created_by: human:cli
+    created_at: "2026-05-29T16:11:34Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-06-01T12:34:35Z"

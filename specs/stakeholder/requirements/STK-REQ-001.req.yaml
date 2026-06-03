@@ -1,0 +1,68 @@
+id: STK-REQ-001
+version: 1
+status: review
+priority: shall
+category: functional
+req_type: guarantee
+fretish: ""
+description: As an API operator I can manage the full lifecycle of OAS-native APIs — list, retrieve, create, import, update, apply idempotently, and delete — without leaving the terminal
+formalization_strategy: informal
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+component: api
+rationale: Operators run automation pipelines that provision and reconcile APIs on the Tyk Dashboard. A complete CLI lifecycle reduces toil and enables GitOps-style workflows.
+tags: []
+variables: []
+traces:
+    reviewed_at: "2026-06-01T08:22:55.863236Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:af88fe2fe2be9ba7ca7694ccbbdfff4a5ec33bc9c5e3b3182e1c56a26de0e216
+verification:
+    assurance_level: E
+    formalization_status: none
+    review:
+        status: approved
+        reviewer: tomas@tyk.io
+        reviewed_at: "2026-05-29T16:07:13Z"
+        ai_generated: false
+history:
+    created_by: human:cli
+    created_at: "2026-05-29T00:00:00Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-05-29T16:07:13Z"
+obligation_checklist:
+    - boundary
+stakeholder:
+    persona: API operator
+    story: I can manage the full lifecycle of OAS-native APIs from the terminal so that I can automate provisioning in CI/CD pipelines
+    acceptance_criteria:
+        - id: AC-001
+          text: tyk api list returns a paginated list of APIs
+          testable: true
+          derived_reqs:
+            - REQ-API-001
+        - id: AC-002
+          text: tyk api get <id> returns a single API document
+          testable: true
+          derived_reqs:
+            - REQ-API-002
+        - id: AC-003
+          text: tyk api create produces a minimal OAS document and posts it
+          testable: true
+          derived_reqs:
+            - REQ-API-003
+            - REQ-API-011
+            - REQ-API-012
+        - id: AC-004
+          text: tyk api apply performs an idempotent upsert
+          testable: true
+          derived_reqs:
+            - REQ-API-005
+            - REQ-API-010
+        - id: AC-005
+          text: tyk api delete requires confirmation unless --yes is passed
+          testable: true
+          derived_reqs:
+            - REQ-API-007

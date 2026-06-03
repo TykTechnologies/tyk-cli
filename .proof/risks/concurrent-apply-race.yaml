@@ -1,0 +1,19 @@
+id: concurrent-apply-race
+title: Concurrent apply on the same resource creates a race condition
+description: internal/cli/api.go runAPIApply and internal/cli/policy.go runPolicyApply perform a GET-then-POST/PUT sequence (resolveFriendlyID -> CreatePolicy or UpdatePolicy). Two concurrent CLI invocations targeting the same friendly ID can both see 404 on the GET, both call Create, and the second Create would either fail with 409 (now mapped to exit 4 via REQ-API-023/POL-023) or — on Dashboards without conflict detection — create a duplicate. There is no client-side locking or ETag/If-Match handling.
+affected_requirements:
+    - REQ-API-005
+    - REQ-POL-003
+mitigation: Operators serialise CLI invocations in CI pipelines targeting the same friendly ID. The Dashboard's 409 response now maps to exit 4 and can be retried.
+customer_impact: Parallel CI jobs that race on the same resource ID can produce duplicates or non-deterministic create/update outcomes. The 409 mapping fixed via REQ-POL-023 mitigates duplicate creation but does not address the read-modify-write window for updates.
+owner: tomas@tyk.io
+review_date: "2026-08-31"
+release_disposition: ship_with_known_issue
+accepted_by: human:tomas
+accepted_at: "2026-06-01T13:16:07Z"
+status: active
+history:
+    - at: "2026-06-01T13:16:07Z"
+      by: human:tombuchaillot
+      action: accepted
+      detail: accepted_by=human:tomas

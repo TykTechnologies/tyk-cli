@@ -15,8 +15,7 @@ const (
 	PolicyPath   = "/api/portal/policies/%s" // {policyId}
 )
 
-// ListPolicies retrieves a paginated list of policies from the Dashboard.
-// Page numbers are 1-based.
+// reqproof:req REQ-POL-001
 func (c *Client) ListPolicies(ctx context.Context, page int) (*types.DashboardPolicyListResponse, error) {
 	listPath := PoliciesPath
 	if page > 0 {
@@ -38,8 +37,7 @@ func (c *Client) ListPolicies(ctx context.Context, page int) (*types.DashboardPo
 	return &result, nil
 }
 
-// GetPolicy retrieves a single policy by its MongoDB _id.
-// Returns *types.ErrorResponse on 404.
+// reqproof:req REQ-POL-002
 func (c *Client) GetPolicy(ctx context.Context, policyID string) (*types.DashboardPolicy, error) {
 	policyPath := fmt.Sprintf(PolicyPath, url.PathEscape(policyID))
 
@@ -56,7 +54,7 @@ func (c *Client) GetPolicy(ctx context.Context, policyID string) (*types.Dashboa
 	return &result, nil
 }
 
-// CreatePolicy sends a POST request with a DashboardPolicy JSON body.
+// reqproof:req REQ-POL-003
 func (c *Client) CreatePolicy(ctx context.Context, policy *types.DashboardPolicy) error {
 	resp, err := c.doRequest(ctx, http.MethodPost, PoliciesPath, policy)
 	if err != nil {
@@ -66,7 +64,7 @@ func (c *Client) CreatePolicy(ctx context.Context, policy *types.DashboardPolicy
 	return c.handleResponse(resp, nil)
 }
 
-// UpdatePolicy sends a PUT request to update an existing policy by ID.
+// reqproof:req REQ-POL-003
 func (c *Client) UpdatePolicy(ctx context.Context, policyID string, policy *types.DashboardPolicy) error {
 	policyPath := fmt.Sprintf(PolicyPath, url.PathEscape(policyID))
 
@@ -78,8 +76,7 @@ func (c *Client) UpdatePolicy(ctx context.Context, policyID string, policy *type
 	return c.handleResponse(resp, nil)
 }
 
-// DeletePolicy sends a DELETE request to remove a policy by ID.
-// Returns *types.ErrorResponse on 404.
+// reqproof:req REQ-POL-004
 func (c *Client) DeletePolicy(ctx context.Context, policyID string) error {
 	policyPath := fmt.Sprintf(PolicyPath, url.PathEscape(policyID))
 

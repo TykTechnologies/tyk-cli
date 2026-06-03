@@ -1,12 +1,20 @@
 package cli
 
 import (
+	"context"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tyktech/tyk-cli/pkg/types"
 )
 
+// reqproof:req REQ-API-003
 func TestGenerateOASForCreate(t *testing.T) {
 	tests := []struct {
 		name         string
@@ -113,31 +121,158 @@ func TestGenerateOASForCreate(t *testing.T) {
 	}
 }
 
+// reqproof:req REQ-API-003
 func TestNewAPICreateCommand(t *testing.T) {
 	cmd := NewAPICreateCommand()
-	
+
 	assert.Equal(t, "create", cmd.Use)
 	assert.Equal(t, "Create a new API from scratch", cmd.Short)
 	assert.Contains(t, cmd.Long, "Create a new OAS API from scratch")
-	
+
 	// Check required flags
 	nameFlag := cmd.Flags().Lookup("name")
 	require.NotNil(t, nameFlag)
-	
+
 	upstreamFlag := cmd.Flags().Lookup("upstream-url")
 	require.NotNil(t, upstreamFlag)
-	
+
 	// Check optional flags
 	listenPathFlag := cmd.Flags().Lookup("listen-path")
 	require.NotNil(t, listenPathFlag)
-	
+
 	versionFlag := cmd.Flags().Lookup("version-name")
 	require.NotNil(t, versionFlag)
 	assert.Equal(t, "v1", versionFlag.DefValue)
-	
+
 	customDomainFlag := cmd.Flags().Lookup("custom-domain")
 	require.NotNil(t, customDomainFlag)
-	
+
 	descriptionFlag := cmd.Flags().Lookup("description")
 	require.NotNil(t, descriptionFlag)
+}
+
+// ---------------------------------------------------------------------------
+// MC/DC coverage for runAPICreate branches
+// ---------------------------------------------------------------------------
+
+// reqproof:req REQ-API-003
+// executeAPICreate builds and runs a create command against a test server.
+// It returns the resulting error from RunE.
+func executeAPICreate(t *testing.T, serverURL string, format types.OutputFormat, args []string) error {
+	t.Helper()
+	cmd := NewAPICreateCommand()
+	cfg := &types.Config{
+		DefaultEnvironment: "test",
+		Environments: map[string]*types.Environment{
+			"test": {Name: "test", DashboardURL: serverURL, AuthToken: "tok", OrgID: "org"},
+		},
+	}
+	ctx := withConfig(context.Background(), cfg)
+	ctx = withOutputFormat(ctx, format)
+	cmd.SetContext(ctx)
+	cmd.SetArgs(args)
+	_ = cmd.ParseFlags(args)
+	return cmd.RunE(cmd, []string{})
+}
+
+// reqproof:req REQ-API-003
+// TestRunAPICreate_AutoListenPathAndDescription covers L1375 listenPath==""=T
+// and L1380 description==""=T branches, plus L1418 outputFormat==OutputJSON=T
+// (with JSON output).
+func TestRunAPICreate_AutoListenPathAndDescription_JSON(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost && r.URL.Path == "/api/apis/oas" {
+			_ = json.NewEncoder(w).Encode(mockCreateAPIResponse())
+			return
+		}
+		if r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/api/apis/oas/") {
+			_ = json.NewEncoder(w).Encode(mockOASAPIResponse())
+			return
+		}
+		http.NotFound(w, r)
+	}))
+	defer server.Close()
+
+	oldStdout := os.Stdout
+	_, wOut, _ := os.Pipe()
+	os.Stdout = wOut
+	err := executeAPICreate(t, server.URL, types.OutputJSON, []string{
+		"--name", "Auto API", "--upstream-url", "http://up.example.com",
+	})
+	wOut.Close()
+	os.Stdout = oldStdout
+	require.NoError(t, err)
+}
+
+// reqproof:req REQ-API-003
+// TestRunAPICreate_AllFlagsSet covers L1375 listenPath==""=F and L1380
+// description==""=F branches.
+func TestRunAPICreate_AllFlagsSet(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost && r.URL.Path == "/api/apis/oas" {
+			_ = json.NewEncoder(w).Encode(mockCreateAPIResponse())
+			return
+		}
+		if r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/api/apis/oas/") {
+			_ = json.NewEncoder(w).Encode(mockOASAPIResponse())
+			return
+		}
+		http.NotFound(w, r)
+	}))
+	defer server.Close()
+
+	err := executeAPICreate(t, server.URL, types.OutputHuman, []string{
+		"--name", "Full API",
+		"--upstream-url", "http://up.example.com",
+		"--listen-path", "/full/",
+		"--description", "Custom desc",
+		"--custom-domain", "api.example.com",
+		"--version-name", "v2",
+	})
+	require.NoError(t, err)
+}
+
+// reqproof:req REQ-API-003
+// TestRunAPICreate_NewClientFails covers L1398 err!=nil from client.NewClient.
+func TestRunAPICreate_NewClientFails(t *testing.T) {
+	cmd := NewAPICreateCommand()
+	cmd.SetContext(withConfig(context.Background(), brokenConfig()))
+	args := []string{"--name", "X", "--upstream-url", "http://up"}
+	cmd.SetArgs(args)
+	_ = cmd.ParseFlags(args)
+	err := cmd.RunE(cmd, []string{})
+	require.Error(t, err)
+}
+
+// reqproof:req REQ-API-003
+// TestRunAPICreate_ConfigNil covers L1386 config==nil=T branch.
+func TestRunAPICreate_ConfigNil(t *testing.T) {
+	cmd := NewAPICreateCommand()
+	cmd.SetContext(context.Background())
+	args := []string{"--name", "X", "--upstream-url", "http://up"}
+	cmd.SetArgs(args)
+	_ = cmd.ParseFlags(args)
+	err := cmd.RunE(cmd, []string{})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "configuration not found")
+}
+
+// reqproof:req REQ-API-003
+// TestRunAPICreate_ServerError covers L1412 fmt.Errorf wrap for non-conflict
+// dashboard errors.
+func TestRunAPICreate_ServerError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			w.WriteHeader(http.StatusInternalServerError)
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{"status": 500, "message": "boom"})
+			return
+		}
+		http.NotFound(w, r)
+	}))
+	defer server.Close()
+
+	err := executeAPICreate(t, server.URL, types.OutputHuman, []string{
+		"--name", "X", "--upstream-url", "http://up",
+	})
+	require.Error(t, err)
 }

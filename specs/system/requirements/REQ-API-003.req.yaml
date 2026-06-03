@@ -1,0 +1,60 @@
+id: REQ-API-003
+version: 1
+status: draft
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when (listen_path_flag_omitted & api_title_provided) the api shall immediately satisfy listen_path_auto_generated
+description: api create builds a minimal OAS document with x-tyk-api-gateway extensions from --name and --upstream-url, auto-generating listen path when --listen-path is omitted
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+component: api
+rationale: ""
+tags: []
+variables:
+    - listen_path_flag_omitted
+    - api_title_provided
+    - listen_path_auto_generated
+traces:
+    satisfies:
+        - STK-REQ-001
+    reviewed_at: "2026-06-01T12:35:57.05248Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:c6c071d25293a2abd9077dddc00395d61e6d4ea1422d06c38ad0aa84ba8856fb
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: pending
+        reviewer: ""
+        reviewed_at: ""
+        ai_generated: false
+    impact_reviews:
+        - requirement: REQ-API-003
+          artifact: internal/cli/api.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Closed 9 known-issues across api/policy/config and oas. New SYS-REQs (REQ-API-014/024/025/026/027/040, REQ-POL-024/025/026/027, REQ-CFG-004/005/006/007) added with FRETish. Code changes: new exit codes (5/6/7/8), classifyDashboardError + helpers in errors.go, ValidateOASStructure in oas/transform.go, TimeoutSeconds field on Environment, runner re-annotations. Tests added in transform_test.go (OAS validator), client_test.go (env timeout), config_crud_test.go (flag combinations), exit_codes_test.go (401/403/429/5xx), api_versions_test.go (placeholders), api_import_update_test.go (no-Dashboard contact).'
+          base: origin/main
+          requirement_fingerprint: sha256:c6c071d25293a2abd9077dddc00395d61e6d4ea1422d06c38ad0aa84ba8856fb
+          approval_fingerprint: sha256:db824663a9988bac83fcac77e7eef1ea30810ca9263baeb86e77ec772d6fac2d
+          artifact_fingerprint: sha256:99052ec76bfed7b34bed8475f5aa534173b3a983b1a0a172a58644ad9d3eea50
+          reviewed_at: "2026-06-02T08:37:11Z"
+        - requirement: REQ-API-003
+          artifact: internal/client/client.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Re-annotated existing production functions to declare implementation linkage for previously-unlinked requirements: FuzzySuggestions → SW-REQ-001/002/003; ParseDuration → SW-REQ-004/005/006; GenerateListenPath → SW-REQ-007/008/009; NewClient → REQ-CFG-007 (env timeout); classifyDashboardError → REQ-API-027/POL-022/POL-027; ExitCode enum → REQ-API-020/021, REQ-CFG-020/021, REQ-POL-020/021. No behavioural change — purely trace metadata.'
+          base: origin/main
+          requirement_fingerprint: sha256:c6c071d25293a2abd9077dddc00395d61e6d4ea1422d06c38ad0aa84ba8856fb
+          approval_fingerprint: sha256:db824663a9988bac83fcac77e7eef1ea30810ca9263baeb86e77ec772d6fac2d
+          artifact_fingerprint: sha256:b8a08970248fcd70599c3d2826646101ddf67ec20033fd6fd2c15e9b4924899c
+          reviewed_at: "2026-06-02T13:56:27Z"
+history:
+    created_by: human:cli
+    created_at: "2026-05-29T15:38:26Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-06-01T12:34:34Z"

@@ -1,0 +1,60 @@
+id: STK-REQ-003
+version: 1
+status: review
+priority: shall
+category: functional
+req_type: guarantee
+fretish: ""
+description: As an API operator I can configure the CLI's connection to one or more Tyk Dashboard environments — via an interactive wizard, named environments, flags, or environment variables — with clear precedence rules so that no secret is ever accidentally hardcoded
+formalization_strategy: informal
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+component: config
+rationale: Operators work across multiple environments (dev, staging, prod). A first-class configuration system prevents credential confusion and makes CI integration safe.
+tags: []
+variables: []
+traces:
+    reviewed_at: "2026-06-01T08:22:55.886234Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:a497c30c4871467ab6e8c41a818cd930dc6665abfcbcce8f9867df7591b6f2f3
+verification:
+    assurance_level: E
+    formalization_status: none
+    review:
+        status: approved
+        reviewer: tomas@tyk.io
+        reviewed_at: "2026-05-29T16:07:13Z"
+        ai_generated: false
+history:
+    created_by: human:cli
+    created_at: "2026-05-29T00:00:00Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-05-29T16:07:13Z"
+obligation_checklist:
+    - boundary
+stakeholder:
+    persona: API operator
+    story: I can configure the CLI's connection to Tyk Dashboard environments using flags, environment variables, or a config file so that credentials are never hardcoded and CI pipelines are safe
+    acceptance_criteria:
+        - id: AC-001
+          text: tyk init wizard writes ~/.config/tyk/cli.toml
+          testable: true
+          derived_reqs:
+            - REQ-CFG-002
+        - id: AC-002
+          text: tyk config use <env> switches the active environment
+          testable: true
+          derived_reqs:
+            - REQ-CFG-003
+        - id: AC-003
+          text: flags override env vars which override the config file
+          testable: true
+          derived_reqs:
+            - REQ-CFG-001
+        - id: AC-004
+          text: Validate() returns an error when dashboard URL or auth token is absent
+          testable: true
+          derived_reqs:
+            - REQ-CFG-010

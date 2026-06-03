@@ -1,0 +1,57 @@
+id: SW-REQ-009
+version: 1
+status: review
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when title_sanitises_to_empty the api shall immediately satisfy (result_uses_api_fallback & listen_path_valid)
+description: GenerateListenPath falls back to '/api/' when the title sanitises to an empty slug, ensuring listen_path_valid even for degenerate input
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+parent: REQ-API-012
+component: api
+rationale: ""
+tags: []
+variables: []
+traces:
+    satisfies:
+        - REQ-API-012
+    reviewed_at: "2026-06-01T13:00:40.567269Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:4b8b01cd9aa005358f0fc86dab6aa5241bda8f7d4e10ab7242110a0c8728cca7
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: approved
+        reviewer: tomas@tyk.io
+        reviewed_at: "2026-06-01T13:01:57Z"
+        ai_generated: false
+    gaps_reviewed_at: "2026-06-02T08:37:02.702664Z"
+    gaps_reviewed_by: tombuchaillot
+    impact_reviews:
+        - requirement: SW-REQ-009
+          artifact: internal/oas/transform.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Re-annotated existing production functions to declare implementation linkage for previously-unlinked requirements: FuzzySuggestions → SW-REQ-001/002/003; ParseDuration → SW-REQ-004/005/006; GenerateListenPath → SW-REQ-007/008/009; NewClient → REQ-CFG-007 (env timeout); classifyDashboardError → REQ-API-027/POL-022/POL-027; ExitCode enum → REQ-API-020/021, REQ-CFG-020/021, REQ-POL-020/021. No behavioural change — purely trace metadata.'
+          base: origin/main
+          requirement_fingerprint: sha256:4b8b01cd9aa005358f0fc86dab6aa5241bda8f7d4e10ab7242110a0c8728cca7
+          approval_fingerprint: sha256:c3f20173a073e09ccb305107458df85dc5e7af9c296e2d9144157937a89b9f69
+          artifact_fingerprint: sha256:da8a3f7030071fd024311ff33bb2e172e68f109d6216ee1aa34e8d9221117ce1
+          reviewed_at: "2026-06-02T13:56:27Z"
+history:
+    created_by: human:cli
+    created_at: "2026-06-01T12:53:43Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-06-01T13:00:11Z"
+lifecycle:
+    change_history:
+        - date: "2026-06-01T13:00:11Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:cli

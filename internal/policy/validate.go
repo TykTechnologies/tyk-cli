@@ -9,8 +9,7 @@ import (
 
 var friendlyIDPattern = regexp.MustCompile(`^[a-z0-9][a-z0-9._-]*$`)
 
-// ValidatePolicy validates a PolicyFile and collects all errors before returning.
-// It checks schema (required fields, types), duration formats, and selector constraints.
+// reqproof:req REQ-POL-006
 func ValidatePolicy(pf types.PolicyFile) types.ValidationErrors {
 	var errs types.ValidationErrors
 
@@ -79,7 +78,7 @@ func ValidatePolicy(pf types.PolicyFile) types.ValidationErrors {
 	return errs
 }
 
-// validateFriendlyID validates the format of a friendly policy ID.
+// reqproof:req REQ-POL-006
 func validateFriendlyID(id string) *types.ValidationError {
 	if len(id) > 64 {
 		return &types.ValidationError{Field: "id", Message: "must be 64 characters or fewer", Kind: "schema"}
@@ -101,7 +100,7 @@ func validateFriendlyID(id string) *types.ValidationError {
 	return nil
 }
 
-// isObjectIDFormat returns true if s looks like a 24-character hex MongoDB ObjectID.
+// reqproof:req REQ-POL-006
 func isObjectIDFormat(s string) bool {
 	if len(s) != 24 {
 		return false
@@ -114,7 +113,7 @@ func isObjectIDFormat(s string) bool {
 	return true
 }
 
-// selectorCount returns how many selector fields are set on an AccessEntry.
+// reqproof:req REQ-POL-006
 func selectorCount(e types.AccessEntry) int {
 	count := 0
 	if e.ID != "" {

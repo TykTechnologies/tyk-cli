@@ -1,0 +1,55 @@
+id: SW-REQ-008
+version: 1
+status: review
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when title_has_non_alphanumeric_chars the api shall immediately satisfy result_collapses_non_alphanumeric_to_hyphen
+description: GenerateListenPath collapses runs of non-alphanumeric characters in the title into a single '-' in the slug
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+parent: REQ-API-012
+component: api
+rationale: ""
+tags: []
+variables: []
+traces:
+    satisfies:
+        - REQ-API-012
+    reviewed_at: "2026-06-01T13:00:40.565337Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:ed0a23f2faf3f917443dcb004d44df799d4d611b69a062efa43369e70bc6dcc3
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: approved
+        reviewer: tomas@tyk.io
+        reviewed_at: "2026-06-01T13:01:57Z"
+        ai_generated: false
+    impact_reviews:
+        - requirement: SW-REQ-008
+          artifact: internal/oas/transform.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Re-annotated existing production functions to declare implementation linkage for previously-unlinked requirements: FuzzySuggestions → SW-REQ-001/002/003; ParseDuration → SW-REQ-004/005/006; GenerateListenPath → SW-REQ-007/008/009; NewClient → REQ-CFG-007 (env timeout); classifyDashboardError → REQ-API-027/POL-022/POL-027; ExitCode enum → REQ-API-020/021, REQ-CFG-020/021, REQ-POL-020/021. No behavioural change — purely trace metadata.'
+          base: origin/main
+          requirement_fingerprint: sha256:ed0a23f2faf3f917443dcb004d44df799d4d611b69a062efa43369e70bc6dcc3
+          approval_fingerprint: sha256:ea0dbdbeb77e5335dc1450930125afec92f62972c3d3533d72cac3d929ac3cf5
+          artifact_fingerprint: sha256:da8a3f7030071fd024311ff33bb2e172e68f109d6216ee1aa34e8d9221117ce1
+          reviewed_at: "2026-06-02T13:56:27Z"
+history:
+    created_by: human:cli
+    created_at: "2026-06-01T12:53:43Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-06-01T13:00:11Z"
+lifecycle:
+    change_history:
+        - date: "2026-06-01T13:00:11Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:cli

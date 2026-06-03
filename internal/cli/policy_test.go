@@ -3,6 +3,7 @@ package cli
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -22,8 +23,7 @@ import (
 // ---------------------------------------------------------------------------
 
 // mockDashboardPolicy returns a DashboardPolicy JSON-encodable map
-// matching the wire format from data-models.md.
-// mid is the MongoDB ObjectID (_id), wireID is the managed wire id field (e.g., "gold").
+// reqproof:req REQ-POL-001
 func mockDashboardPolicy(mid, wireID, name string, rate, per, quotaMax, quotaRenewalRate int64, tags []string, accessRights map[string]interface{}) map[string]interface{} {
 	return map[string]interface{}{
 		"_id":                  mid,
@@ -42,7 +42,7 @@ func mockDashboardPolicy(mid, wireID, name string, rate, per, quotaMax, quotaRen
 	}
 }
 
-// mockPolicyListResponse returns the Dashboard policy list response envelope.
+// reqproof:req REQ-POL-001
 func mockPolicyListResponse(policies []map[string]interface{}) map[string]interface{} {
 	return map[string]interface{}{
 		"Data":       policies,
@@ -51,8 +51,7 @@ func mockPolicyListResponse(policies []map[string]interface{}) map[string]interf
 	}
 }
 
-// mockAPIListResponse returns a Dashboard API list response used for
-// selector resolution during apply.
+// reqproof:req REQ-API-001
 func mockAPIListResponse() map[string]interface{} {
 	return map[string]interface{}{
 		"apis": []interface{}{
@@ -87,7 +86,7 @@ func mockAPIListResponse() map[string]interface{} {
 	}
 }
 
-// goldPolicyAccessRights returns the access_rights map for the Gold Plan.
+// reqproof:req REQ-POL-007
 func goldPolicyAccessRights() map[string]interface{} {
 	return map[string]interface{}{
 		"a1b2c3d4e5f6": map[string]interface{}{
@@ -114,7 +113,7 @@ func goldPolicyAccessRights() map[string]interface{} {
 	}
 }
 
-// createPolicyConfig builds a test config pointing at the mock server.
+// reqproof:req REQ-CFG-001
 func createPolicyConfig(serverURL string) *types.Config {
 	return &types.Config{
 		DefaultEnvironment: "test",
@@ -129,7 +128,7 @@ func createPolicyConfig(serverURL string) *types.Config {
 	}
 }
 
-// writeTempPolicyFile creates a temporary policy YAML file for apply tests.
+// reqproof:req REQ-POL-005
 func writeTempPolicyFile(t *testing.T, content string) string {
 	t.Helper()
 	tmpDir := t.TempDir()
@@ -159,8 +158,7 @@ access:
 // Walking Skeleton Tests (implement FIRST)
 // ===========================================================================
 
-// executePolicyListCmd creates a policy list command with config injected and executes RunE directly.
-// This bypasses root PersistentPreRunE (which loads config from disk) and tests the driving port directly.
+// reqproof:req REQ-POL-001
 func executePolicyListCmd(t *testing.T, serverURL string, outputFormat types.OutputFormat, extraArgs ...string) error {
 	t.Helper()
 	root := NewRootCommand("test", "commit", "time")
@@ -180,8 +178,7 @@ func executePolicyListCmd(t *testing.T, serverURL string, outputFormat types.Out
 	return listCmd.RunE(listCmd, []string{})
 }
 
-// TestPolicyList_Empty verifies the list command with an empty Dashboard.
-// Walking skeleton scenario 1a.
+// reqproof:req REQ-POL-001
 func TestPolicyList_Empty(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.Contains(r.URL.Path, "/api/portal/policies") {
@@ -207,8 +204,7 @@ func TestPolicyList_Empty(t *testing.T) {
 	assert.Contains(t, string(stderr), "No policies found")
 }
 
-// TestPolicyList_WithPolicies verifies the list command shows policy table.
-// Walking skeleton scenario 1b.
+// reqproof:req REQ-POL-001
 func TestPolicyList_WithPolicies(t *testing.T) {
 	policies := []map[string]interface{}{
 		mockDashboardPolicy("507f1f77bcf86cd799439011", "gold", "Gold Plan", 1000, 60, 100000, 2592000,
@@ -251,8 +247,7 @@ func TestPolicyList_WithPolicies(t *testing.T) {
 	assert.Contains(t, output, "Silver Plan")
 }
 
-// executePolicyApplyCmd creates a policy apply command with config injected and calls RunE directly.
-// This bypasses root PersistentPreRunE and tests the driving port directly.
+// reqproof:req REQ-POL-003
 func executePolicyApplyCmd(t *testing.T, serverURL string, filePath string) error {
 	t.Helper()
 	applyCmd := NewPolicyApplyCommand()
@@ -268,8 +263,7 @@ func executePolicyApplyCmd(t *testing.T, serverURL string, filePath string) erro
 	return applyCmd.RunE(applyCmd, []string{})
 }
 
-// TestPolicyApply_Create_NameSelector verifies applying a new policy with name selector.
-// Walking skeleton scenario 2a.
+// reqproof:req REQ-POL-003
 func TestPolicyApply_Create_NameSelector(t *testing.T) {
 
 	var capturedCreateBody map[string]interface{}
@@ -325,8 +319,7 @@ func TestPolicyApply_Create_NameSelector(t *testing.T) {
 	assert.True(t, hasUsersAPI, "access_rights should contain resolved API ID a1b2c3d4e5f6")
 }
 
-// TestPolicyApply_Update_Idempotent verifies updating an existing policy.
-// Walking skeleton scenario 2b.
+// reqproof:req REQ-POL-003
 func TestPolicyApply_Update_Idempotent(t *testing.T) {
 
 	var capturedUpdateBody map[string]interface{}
@@ -375,6 +368,7 @@ func TestPolicyApply_Update_Idempotent(t *testing.T) {
 // Milestone 1: List + Get (focused scenarios)
 // ===========================================================================
 
+// reqproof:req REQ-POL-001
 func TestPolicyList_JSONOutput(t *testing.T) {
 	policies := []map[string]interface{}{
 		mockDashboardPolicy("507f1f77bcf86cd799439011", "gold", "Gold Plan", 1000, 60, 100000, 2592000,
@@ -408,6 +402,7 @@ func TestPolicyList_JSONOutput(t *testing.T) {
 	assert.Equal(t, float64(1), result["count"])
 }
 
+// reqproof:req REQ-POL-001
 func TestPolicyList_Pagination_EmptyPage(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "2", r.URL.Query().Get("p"))
@@ -430,6 +425,7 @@ func TestPolicyList_Pagination_EmptyPage(t *testing.T) {
 	assert.Contains(t, string(stderr), "No policies found")
 }
 
+// reqproof:req REQ-POL-001
 func TestPolicyList_NetworkError(t *testing.T) {
 	// Use a server that is immediately closed to trigger a network error
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
@@ -443,6 +439,7 @@ func TestPolicyList_NetworkError(t *testing.T) {
 	assert.Equal(t, 1, exitErr.Code)
 }
 
+// reqproof:req REQ-POL-001
 func TestPolicyCommand_Registration(t *testing.T) {
 	root := NewRootCommand("test", "commit", "time")
 
@@ -465,8 +462,7 @@ func TestPolicyCommand_Registration(t *testing.T) {
 	assert.True(t, found, "'policy' should be a subcommand of root")
 }
 
-// executePolicyGetCmd creates a policy get command with config injected and executes RunE directly.
-// This bypasses root PersistentPreRunE (which loads config from disk) and tests the driving port directly.
+// reqproof:req REQ-POL-002
 func executePolicyGetCmd(t *testing.T, serverURL string, outputFormat types.OutputFormat, policyID string) error {
 	t.Helper()
 	root := NewRootCommand("test", "commit", "time")
@@ -481,6 +477,7 @@ func executePolicyGetCmd(t *testing.T, serverURL string, outputFormat types.Outp
 	return getCmd.RunE(getCmd, []string{policyID})
 }
 
+// reqproof:req REQ-POL-002
 func TestPolicyGet_Human(t *testing.T) {
 	goldPolicy := mockDashboardPolicy("507f1f77bcf86cd799439011", "gold", "Gold Plan", 1000, 60, 100000, 2592000,
 		[]string{"gold", "paid"}, goldPolicyAccessRights())
@@ -527,6 +524,7 @@ func TestPolicyGet_Human(t *testing.T) {
 	require.NoError(t, err, "stdout should be valid YAML")
 }
 
+// reqproof:req REQ-POL-002
 func TestPolicyGet_JSON(t *testing.T) {
 	goldPolicy := mockDashboardPolicy("507f1f77bcf86cd799439011", "gold", "Gold Plan", 1000, 60, 100000, 2592000,
 		[]string{"gold", "paid"}, goldPolicyAccessRights())
@@ -563,6 +561,7 @@ func TestPolicyGet_JSON(t *testing.T) {
 	assert.Equal(t, "Gold Plan", result["name"])
 }
 
+// reqproof:req REQ-POL-022
 func TestPolicyGet_NotFound(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
@@ -588,6 +587,7 @@ func TestPolicyGet_NotFound(t *testing.T) {
 // Milestone 2: Apply (focused scenarios)
 // ===========================================================================
 
+// reqproof:req REQ-POL-003
 func TestPolicyApply_ListenPathSelector(t *testing.T) {
 
 	var capturedBody map[string]interface{}
@@ -634,6 +634,7 @@ access:
 	assert.True(t, hasOrdersAPI, "listenPath /orders/ should resolve to g7h8i9j0k1l2")
 }
 
+// reqproof:req REQ-POL-010
 func TestPolicyApply_DurationConversion(t *testing.T) {
 
 	var capturedBody map[string]interface{}
@@ -678,6 +679,7 @@ access:
 	assert.EqualValues(t, 86400, capturedBody["key_expires_in"], "24h should convert to 86400 seconds")
 }
 
+// reqproof:req REQ-POL-011
 func TestPolicyApply_NameNotFound(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -713,6 +715,7 @@ access:
 	assert.Contains(t, exitErr.Message, "no API found")
 }
 
+// reqproof:req REQ-POL-011
 func TestPolicyApply_NameAmbiguous(t *testing.T) {
 
 	// Mock server with two APIs named "api-service"
@@ -766,6 +769,7 @@ access:
 	assert.Contains(t, exitErr.Message, "ambiguous")
 }
 
+// reqproof:req REQ-POL-021
 func TestPolicyApply_MissingID(t *testing.T) {
 
 	policyYAML := `name: No ID Policy
@@ -791,6 +795,7 @@ access:
 	assert.Contains(t, exitErr.Message, "id")
 }
 
+// reqproof:req REQ-POL-021
 func TestPolicyApply_InvalidDuration(t *testing.T) {
 
 	policyYAML := `id: bad-dur
@@ -817,6 +822,7 @@ access:
 	assert.Contains(t, exitErr.Message, "invalid duration")
 }
 
+// reqproof:req REQ-POL-021
 func TestPolicyApply_FileNotFound(t *testing.T) {
 	err := executePolicyApplyCmd(t, "http://unused", "/nonexistent/policy.yaml")
 
@@ -827,8 +833,7 @@ func TestPolicyApply_FileNotFound(t *testing.T) {
 // Milestone 3: Delete + Init
 // ===========================================================================
 
-// executePolicyDeleteCmd creates a policy delete command with config injected and executes RunE directly.
-// This bypasses root PersistentPreRunE (which loads config from disk) and tests the driving port directly.
+// reqproof:req REQ-POL-004
 func executePolicyDeleteCmd(t *testing.T, serverURL string, outputFormat types.OutputFormat, policyID string, yes bool) error {
 	t.Helper()
 	deleteCmd := NewPolicyDeleteCommand()
@@ -848,6 +853,7 @@ func executePolicyDeleteCmd(t *testing.T, serverURL string, outputFormat types.O
 	return deleteCmd.RunE(deleteCmd, []string{policyID})
 }
 
+// reqproof:req REQ-POL-004
 func TestPolicyDelete_WithYes(t *testing.T) {
 	deleteCalled := false
 
@@ -885,6 +891,7 @@ func TestPolicyDelete_WithYes(t *testing.T) {
 	assert.Contains(t, string(stderr), "deleted", "stderr should confirm deletion")
 }
 
+// reqproof:req REQ-POL-022
 func TestPolicyDelete_NotFound(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
@@ -906,6 +913,7 @@ func TestPolicyDelete_NotFound(t *testing.T) {
 	assert.Contains(t, exitErr.Message, "not found")
 }
 
+// reqproof:req REQ-POL-004
 func TestPolicyDelete_WithYes_JSON(t *testing.T) {
 	deleteCalled := false
 
@@ -947,8 +955,7 @@ func TestPolicyDelete_WithYes_JSON(t *testing.T) {
 	assert.Equal(t, true, result["success"])
 }
 
-// executePolicyInitCmd creates a policy init command and executes RunE directly.
-// Uses --id and --name flags to bypass interactive prompts.
+// reqproof:req REQ-POL-005
 func executePolicyInitCmd(t *testing.T, dir string, id string, name string) error {
 	t.Helper()
 	initCmd := NewPolicyInitCommand()
@@ -966,6 +973,7 @@ func executePolicyInitCmd(t *testing.T, dir string, id string, name string) erro
 	return initCmd.RunE(initCmd, []string{})
 }
 
+// reqproof:req REQ-POL-005
 func TestPolicyInit_NewFile(t *testing.T) {
 	tmpDir := t.TempDir()
 
@@ -999,6 +1007,7 @@ func TestPolicyInit_NewFile(t *testing.T) {
 	assert.Equal(t, []string{"Default"}, pf.Access[0].Versions)
 }
 
+// reqproof:req REQ-POL-005
 func TestPolicyInit_FileExistsNoOverwrite(t *testing.T) {
 	tmpDir := t.TempDir()
 
@@ -1020,6 +1029,7 @@ func TestPolicyInit_FileExistsNoOverwrite(t *testing.T) {
 	assert.Equal(t, "original content", string(data))
 }
 
+// reqproof:req REQ-POL-005
 func TestPolicyInit_Registration(t *testing.T) {
 	root := NewRootCommand("test", "commit", "time")
 
@@ -1041,6 +1051,713 @@ func TestPolicyInit_Registration(t *testing.T) {
 // Full Integration Walking Skeleton
 // ===========================================================================
 
+// ---------------------------------------------------------------------------
+// MC/DC coverage for runPolicyList / runPolicyGet / runPolicyApply /
+// runPolicyDelete / runPolicyInit / readPolicyFile / buildResolveRequests /
+// resolveFriendlyID / isNotFoundError / displayPolicyPage.
+// ---------------------------------------------------------------------------
+
+// reqproof:req REQ-POL-001
+// brokenPolicyConfig returns a config whose default_environment does not exist
+// so client.NewClient fails.
+func brokenPolicyConfig() *types.Config {
+	return &types.Config{
+		DefaultEnvironment: "ghost",
+		Environments: map[string]*types.Environment{
+			"other": {Name: "other", DashboardURL: "http://x:1", AuthToken: "t", OrgID: "o"},
+		},
+	}
+}
+
+// reqproof:req REQ-POL-001
+// TestRunPolicyList_NewClientFails covers L68 err!=nil from client.NewClient.
+func TestRunPolicyList_NewClientFails(t *testing.T) {
+	cmd := NewPolicyListCommand()
+	cmd.SetContext(withConfig(context.Background(), brokenPolicyConfig()))
+	cmd.SetArgs([]string{})
+	err := cmd.RunE(cmd, []string{})
+	require.Error(t, err)
+}
+
+// reqproof:req REQ-POL-002
+// TestRunPolicyGet_ListAPIsFailureNonFatal covers L156 err!=nil branch from
+// the /api/apis call. The policy get function logs and continues even when
+// API list fetch fails.
+func TestRunPolicyGet_ListAPIsFailureNonFatal(t *testing.T) {
+	pol := mockDashboardPolicy("507f1f77bcf86cd799439011", "gold", "Gold Plan", 1000, 60, 100000, 2592000,
+		[]string{}, map[string]interface{}{})
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/api/portal/policies/gold":
+			_ = json.NewEncoder(w).Encode(pol)
+		case r.URL.Path == "/api/apis":
+			// Make the API list fetch fail.
+			w.WriteHeader(http.StatusBadRequest)
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{"status": 400, "message": "bad"})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	err := executePolicyGetCmd(t, server.URL, types.OutputJSON, "gold")
+	require.NoError(t, err, "API list failure should be non-fatal in policy get")
+}
+
+// reqproof:req REQ-POL-002
+// TestRunPolicyGet_NewClientFails covers L131 err!=nil from client.NewClient.
+func TestRunPolicyGet_NewClientFails(t *testing.T) {
+	cmd := NewPolicyGetCommand()
+	cmd.SetContext(withConfig(context.Background(), brokenPolicyConfig()))
+	cmd.SetArgs([]string{"x"})
+	err := cmd.RunE(cmd, []string{"x"})
+	require.Error(t, err)
+}
+
+// reqproof:req REQ-POL-003
+// TestRunPolicyApply_FetchAPIList_NonClassified covers L241 cls!=nil=F branch
+// (404 status from /api/apis is not in {401,403,429,5xx}).
+func TestRunPolicyApply_FetchAPIList_NonClassified(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// 400 is not in the classified set.
+		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{"status": 400, "message": "bad"})
+	}))
+	defer server.Close()
+
+	tmpFile := writeTempPolicyFile(t, validPlatinumPolicyYAML)
+	err := executePolicyApplyCmd(t, server.URL, tmpFile)
+	require.Error(t, err)
+	exitErr, ok := err.(*ExitError)
+	require.True(t, ok)
+	assert.Equal(t, 1, exitErr.Code, "non-classified errors map to exit 1")
+}
+
+// reqproof:req REQ-POL-003
+// TestRunPolicyApply_UpdateNonClassified covers L276 cls!=nil=F branch.
+func TestRunPolicyApply_UpdateNonClassified(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.Method == http.MethodGet && r.URL.Path == "/api/apis":
+			_ = json.NewEncoder(w).Encode(mockAPIListResponse())
+		case r.Method == http.MethodGet && r.URL.Path == "/api/portal/policies/platinum":
+			p := mockDashboardPolicy("507f1f77bcf86cd799439013", "platinum", "Platinum Plan", 5000, 60, 500000, 2592000,
+				[]string{}, map[string]interface{}{})
+			_ = json.NewEncoder(w).Encode(p)
+		case r.Method == http.MethodPut && r.URL.Path == "/api/portal/policies/platinum":
+			// 400 is not classified
+			w.WriteHeader(http.StatusBadRequest)
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{"status": 400, "message": "bad"})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	tmpFile := writeTempPolicyFile(t, validPlatinumPolicyYAML)
+	err := executePolicyApplyCmd(t, server.URL, tmpFile)
+	require.Error(t, err)
+	exitErr, ok := err.(*ExitError)
+	require.True(t, ok)
+	assert.Equal(t, 1, exitErr.Code)
+}
+
+// reqproof:req REQ-POL-003
+// TestRunPolicyApply_CreateNonClassified covers L289 cls!=nil=F branch.
+func TestRunPolicyApply_CreateNonClassified(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.Method == http.MethodGet && r.URL.Path == "/api/apis":
+			_ = json.NewEncoder(w).Encode(mockAPIListResponse())
+		case r.Method == http.MethodGet && r.URL.Path == "/api/portal/policies/platinum":
+			w.WriteHeader(http.StatusNotFound)
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{"status": 404, "message": "not found"})
+		case r.Method == http.MethodPost && r.URL.Path == "/api/portal/policies":
+			w.WriteHeader(http.StatusBadRequest)
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{"status": 400, "message": "bad"})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	tmpFile := writeTempPolicyFile(t, validPlatinumPolicyYAML)
+	err := executePolicyApplyCmd(t, server.URL, tmpFile)
+	require.Error(t, err)
+	exitErr, ok := err.(*ExitError)
+	require.True(t, ok)
+	assert.Equal(t, 1, exitErr.Code)
+}
+
+// reqproof:req REQ-POL-003
+// TestRunPolicyApply_NewClientFails covers L231 err!=nil from client.NewClient.
+func TestRunPolicyApply_NewClientFails(t *testing.T) {
+	tmpFile := writeTempPolicyFile(t, validPlatinumPolicyYAML)
+	cmd := NewPolicyApplyCommand()
+	cmd.SetContext(withConfig(context.Background(), brokenPolicyConfig()))
+	cmd.SetArgs([]string{"-f", tmpFile})
+	_ = cmd.ParseFlags([]string{"-f", tmpFile})
+	err := cmd.RunE(cmd, []string{})
+	require.Error(t, err)
+}
+
+// reqproof:req REQ-POL-004
+// TestRunPolicyDelete_NewClientFails covers L328 err!=nil from client.NewClient.
+func TestRunPolicyDelete_NewClientFails(t *testing.T) {
+	cmd := NewPolicyDeleteCommand()
+	cmd.SetContext(withConfig(context.Background(), brokenPolicyConfig()))
+	cmd.SetArgs([]string{"x", "--yes"})
+	_ = cmd.ParseFlags([]string{"x", "--yes"})
+	err := cmd.RunE(cmd, []string{"x"})
+	require.Error(t, err)
+}
+
+// reqproof:req REQ-POL-001
+// TestRunPolicyList_ConfigNil covers L62 config==nil=T.
+func TestRunPolicyList_ConfigNil(t *testing.T) {
+	cmd := NewPolicyListCommand()
+	cmd.SetContext(context.Background())
+	cmd.SetArgs([]string{})
+	err := cmd.RunE(cmd, []string{})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "configuration not found")
+}
+
+// reqproof:req REQ-POL-001
+// TestRunPolicyList_PageZeroDefaults covers L56 page<=0=T branch.
+func TestRunPolicyList_PageZeroDefaults(t *testing.T) {
+	gotPage := ""
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotPage = r.URL.Query().Get("p")
+		_ = json.NewEncoder(w).Encode(mockPolicyListResponse(nil))
+	}))
+	defer server.Close()
+
+	cmd := NewPolicyListCommand()
+	cfg := createPolicyConfig(server.URL)
+	cmd.SetContext(withConfig(context.Background(), cfg))
+	cmd.SetContext(withOutputFormat(cmd.Context(), types.OutputHuman))
+	cmd.SetArgs([]string{"--page", "0"})
+	_ = cmd.ParseFlags([]string{"--page", "0"})
+	require.NoError(t, cmd.RunE(cmd, []string{}))
+	assert.Equal(t, "1", gotPage)
+}
+
+// reqproof:req REQ-POL-002
+// TestRunPolicyGet_ConfigNil covers L125 config==nil=T.
+func TestRunPolicyGet_ConfigNil(t *testing.T) {
+	cmd := NewPolicyGetCommand()
+	cmd.SetContext(context.Background())
+	cmd.SetArgs([]string{"x"})
+	err := cmd.RunE(cmd, []string{"x"})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "configuration not found")
+}
+
+// reqproof:req REQ-POL-002
+// TestRunPolicyGet_HumanWithTags covers L174 len(pf.Tags)>0=T branch.
+// Already covered by TestPolicyGet_Human, but include the targeted assertion.
+func TestRunPolicyGet_HumanWithTags(t *testing.T) {
+	pol := mockDashboardPolicy("507f1f77bcf86cd799439011", "gold", "Gold Plan", 1000, 60, 100000, 2592000,
+		[]string{"gold", "paid"}, goldPolicyAccessRights())
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/api/portal/policies/gold":
+			_ = json.NewEncoder(w).Encode(pol)
+		case "/api/apis":
+			_ = json.NewEncoder(w).Encode(mockAPIListResponse())
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	oldStderr := os.Stderr
+	rErr, wErr, _ := os.Pipe()
+	os.Stderr = wErr
+	_ = executePolicyGetCmd(t, server.URL, types.OutputHuman, "gold")
+	wErr.Close()
+	os.Stderr = oldStderr
+	stderr, _ := io.ReadAll(rErr)
+	assert.Contains(t, string(stderr), "Tags:")
+}
+
+// reqproof:req REQ-POL-002
+// TestRunPolicyGet_HumanNoTags covers L174 len(pf.Tags)>0=F branch.
+func TestRunPolicyGet_HumanNoTags(t *testing.T) {
+	pol := mockDashboardPolicy("507f1f77bcf86cd799439011", "no-tags", "No Tags", 100, 60, 1000, 86400,
+		[]string{}, map[string]interface{}{})
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/api/portal/policies/no-tags":
+			_ = json.NewEncoder(w).Encode(pol)
+		case "/api/apis":
+			_ = json.NewEncoder(w).Encode(mockAPIListResponse())
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	oldStderr := os.Stderr
+	rErr, wErr, _ := os.Pipe()
+	os.Stderr = wErr
+	_ = executePolicyGetCmd(t, server.URL, types.OutputHuman, "no-tags")
+	wErr.Close()
+	os.Stderr = oldStderr
+	stderr, _ := io.ReadAll(rErr)
+	assert.NotContains(t, string(stderr), "Tags:")
+}
+
+// reqproof:req REQ-POL-002
+// TestRunPolicyGet_NonClassifiedError covers L145 cls!=nil=F branch (a 400
+// from GetPolicy is not classified, so cls==nil and we fall through to wrap).
+func TestRunPolicyGet_NonClassifiedError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{"status": 400, "message": "bad input"})
+	}))
+	defer server.Close()
+
+	err := executePolicyGetCmd(t, server.URL, types.OutputHuman, "x")
+	require.Error(t, err)
+}
+
+// reqproof:req REQ-POL-002
+// TestRunPolicyGet_DashboardError covers L145 classifyDashboardError cls!=nil path.
+func TestRunPolicyGet_DashboardError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusUnauthorized)
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{"status": 401, "message": "bad token"})
+	}))
+	defer server.Close()
+
+	err := executePolicyGetCmd(t, server.URL, types.OutputHuman, "x")
+	require.Error(t, err)
+	exitErr, ok := err.(*ExitError)
+	require.True(t, ok)
+	assert.Equal(t, int(types.ExitAuthFailed), exitErr.Code)
+}
+
+// reqproof:req REQ-POL-003
+// TestRunPolicyApply_ConfigNil covers L221 config==nil=T.
+func TestRunPolicyApply_ConfigNil(t *testing.T) {
+	tmpFile := writeTempPolicyFile(t, validPlatinumPolicyYAML)
+	cmd := NewPolicyApplyCommand()
+	cmd.SetContext(context.Background())
+	cmd.SetArgs([]string{"-f", tmpFile})
+	_ = cmd.ParseFlags([]string{"-f", tmpFile})
+	err := cmd.RunE(cmd, []string{})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "configuration not found")
+}
+
+// reqproof:req REQ-POL-003
+// TestRunPolicyApply_ResolveError covers L265 resolveErr!=nil=T path (the
+// policy GET call returns a non-404, non-success error).
+func TestRunPolicyApply_ResolveErrorBubble(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/api/apis":
+			_ = json.NewEncoder(w).Encode(mockAPIListResponse())
+		case r.URL.Path == "/api/portal/policies/platinum":
+			w.WriteHeader(http.StatusInternalServerError)
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{"status": 500, "message": "boom"})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	policyFile := writeTempPolicyFile(t, validPlatinumPolicyYAML)
+	err := executePolicyApplyCmd(t, server.URL, policyFile)
+	require.Error(t, err)
+}
+
+// reqproof:req REQ-POL-003
+// TestRunPolicyApply_FetchAPIListAuthError covers L241 cls!=nil branch.
+func TestRunPolicyApply_FetchAPIListAuthError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusUnauthorized)
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{"status": 401, "message": "no auth"})
+	}))
+	defer server.Close()
+
+	policyFile := writeTempPolicyFile(t, validPlatinumPolicyYAML)
+	err := executePolicyApplyCmd(t, server.URL, policyFile)
+	require.Error(t, err)
+	exitErr, ok := err.(*ExitError)
+	require.True(t, ok)
+	assert.Equal(t, int(types.ExitAuthFailed), exitErr.Code)
+}
+
+// reqproof:req REQ-POL-003
+// TestRunPolicyApply_UpdateServerError covers L276 classifyDashboardError path
+// on update with a 500.
+func TestRunPolicyApply_UpdateServerError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.Method == http.MethodGet && r.URL.Path == "/api/apis":
+			_ = json.NewEncoder(w).Encode(mockAPIListResponse())
+		case r.Method == http.MethodGet && r.URL.Path == "/api/portal/policies/platinum":
+			p := mockDashboardPolicy("507f1f77bcf86cd799439013", "platinum", "Platinum Plan", 5000, 60, 500000, 2592000,
+				[]string{}, map[string]interface{}{})
+			_ = json.NewEncoder(w).Encode(p)
+		case r.Method == http.MethodPut && r.URL.Path == "/api/portal/policies/platinum":
+			w.WriteHeader(http.StatusInternalServerError)
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{"status": 500, "message": "boom"})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	policyFile := writeTempPolicyFile(t, validPlatinumPolicyYAML)
+	err := executePolicyApplyCmd(t, server.URL, policyFile)
+	require.Error(t, err)
+	exitErr, ok := err.(*ExitError)
+	require.True(t, ok)
+	assert.Equal(t, int(types.ExitServerError), exitErr.Code)
+}
+
+// reqproof:req REQ-POL-003
+// TestRunPolicyApply_CreateServerError covers the create-path classifyDashboardError.
+func TestRunPolicyApply_CreateServerError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.Method == http.MethodGet && r.URL.Path == "/api/apis":
+			_ = json.NewEncoder(w).Encode(mockAPIListResponse())
+		case r.Method == http.MethodGet && r.URL.Path == "/api/portal/policies/platinum":
+			w.WriteHeader(http.StatusNotFound)
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{"status": 404, "message": "not found"})
+		case r.Method == http.MethodPost && r.URL.Path == "/api/portal/policies":
+			w.WriteHeader(http.StatusInternalServerError)
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{"status": 500, "message": "boom"})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	policyFile := writeTempPolicyFile(t, validPlatinumPolicyYAML)
+	err := executePolicyApplyCmd(t, server.URL, policyFile)
+	require.Error(t, err)
+	exitErr, ok := err.(*ExitError)
+	require.True(t, ok)
+	assert.Equal(t, int(types.ExitServerError), exitErr.Code)
+}
+
+// reqproof:req REQ-POL-004
+// TestRunPolicyDelete_ConfigNil covers L322 config==nil=T.
+func TestRunPolicyDelete_ConfigNil(t *testing.T) {
+	cmd := NewPolicyDeleteCommand()
+	cmd.SetContext(context.Background())
+	cmd.SetArgs([]string{"x", "--yes"})
+	_ = cmd.ParseFlags([]string{"x", "--yes"})
+	err := cmd.RunE(cmd, []string{"x"})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "configuration not found")
+}
+
+// reqproof:req REQ-POL-004
+// TestRunPolicyDelete_PromptCancelled covers L353 strings.ToLower(response) !=
+// "y" && != "yes" decision with response="n".
+func TestRunPolicyDelete_PromptCancelled(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/api/portal/policies/free-tier" && r.Method == http.MethodGet {
+			p := mockDashboardPolicy("507f1f77bcf86cd799439020", "free-tier", "Free Plan", 100, 60, 10000, 86400,
+				[]string{}, map[string]interface{}{})
+			_ = json.NewEncoder(w).Encode(p)
+			return
+		}
+		http.NotFound(w, r)
+	}))
+	defer server.Close()
+
+	var err error
+	withStdin(t, "n\n", func() {
+		err = executePolicyDeleteCmd(t, server.URL, types.OutputHuman, "free-tier", false)
+	})
+	require.NoError(t, err)
+}
+
+// reqproof:req REQ-POL-004
+// TestRunPolicyDelete_PromptConfirmedY covers L353 response=="y" branch.
+func TestRunPolicyDelete_PromptConfirmedY(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/api/portal/policies/free-tier" && r.Method == http.MethodGet:
+			p := mockDashboardPolicy("507f1f77bcf86cd799439020", "free-tier", "Free Plan", 100, 60, 10000, 86400,
+				[]string{}, map[string]interface{}{})
+			_ = json.NewEncoder(w).Encode(p)
+		case r.URL.Path == "/api/portal/policies/free-tier" && r.Method == http.MethodDelete:
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{"Status": "success", "Message": "deleted"})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	var err error
+	withStdin(t, "y\n", func() {
+		err = executePolicyDeleteCmd(t, server.URL, types.OutputHuman, "free-tier", false)
+	})
+	require.NoError(t, err)
+}
+
+// reqproof:req REQ-POL-004
+// TestRunPolicyDelete_PromptConfirmedYes covers L353 response=="yes" branch.
+func TestRunPolicyDelete_PromptConfirmedYes(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/api/portal/policies/free-tier" && r.Method == http.MethodGet:
+			p := mockDashboardPolicy("507f1f77bcf86cd799439020", "free-tier", "Free Plan", 100, 60, 10000, 86400,
+				[]string{}, map[string]interface{}{})
+			_ = json.NewEncoder(w).Encode(p)
+		case r.URL.Path == "/api/portal/policies/free-tier" && r.Method == http.MethodDelete:
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{"Status": "success", "Message": "deleted"})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	var err error
+	withStdin(t, "yes\n", func() {
+		err = executePolicyDeleteCmd(t, server.URL, types.OutputHuman, "free-tier", false)
+	})
+	require.NoError(t, err)
+}
+
+// reqproof:req REQ-POL-004
+// TestRunPolicyDelete_ResolveNonClassifiedError covers L339 cls!=nil=F branch
+// (non-classified error during resolveFriendlyID).
+func TestRunPolicyDelete_ResolveNonClassifiedError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{"status": 400, "message": "bad"})
+	}))
+	defer server.Close()
+
+	err := executePolicyDeleteCmd(t, server.URL, types.OutputHuman, "x", true)
+	require.Error(t, err)
+}
+
+// reqproof:req REQ-POL-004
+// TestRunPolicyDelete_DeleteNonClassifiedError covers L361 cls!=nil=F branch.
+func TestRunPolicyDelete_DeleteNonClassifiedError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/api/portal/policies/free-tier" && r.Method == http.MethodGet:
+			p := mockDashboardPolicy("507f1f77bcf86cd799439020", "free-tier", "Free Plan", 100, 60, 10000, 86400,
+				[]string{}, map[string]interface{}{})
+			_ = json.NewEncoder(w).Encode(p)
+		case r.URL.Path == "/api/portal/policies/free-tier" && r.Method == http.MethodDelete:
+			w.WriteHeader(http.StatusBadRequest)
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{"status": 400, "message": "bad"})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	err := executePolicyDeleteCmd(t, server.URL, types.OutputHuman, "free-tier", true)
+	require.Error(t, err)
+}
+
+// reqproof:req REQ-POL-004
+// TestRunPolicyDelete_ResolveError covers L339 cls!=nil branch (auth failure
+// during resolveFriendlyID).
+func TestRunPolicyDelete_ResolveAuthError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusUnauthorized)
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{"status": 401, "message": "no"})
+	}))
+	defer server.Close()
+
+	err := executePolicyDeleteCmd(t, server.URL, types.OutputHuman, "x", true)
+	require.Error(t, err)
+	exitErr, ok := err.(*ExitError)
+	require.True(t, ok)
+	assert.Equal(t, int(types.ExitAuthFailed), exitErr.Code)
+}
+
+// reqproof:req REQ-POL-004
+// TestRunPolicyDelete_DeleteError covers L361 classifyDashboardError on delete.
+func TestRunPolicyDelete_DeleteServerError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/api/portal/policies/free-tier" && r.Method == http.MethodGet:
+			p := mockDashboardPolicy("507f1f77bcf86cd799439020", "free-tier", "Free Plan", 100, 60, 10000, 86400,
+				[]string{}, map[string]interface{}{})
+			_ = json.NewEncoder(w).Encode(p)
+		case r.URL.Path == "/api/portal/policies/free-tier" && r.Method == http.MethodDelete:
+			w.WriteHeader(http.StatusInternalServerError)
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{"status": 500, "message": "boom"})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	err := executePolicyDeleteCmd(t, server.URL, types.OutputHuman, "free-tier", true)
+	require.Error(t, err)
+	exitErr, ok := err.(*ExitError)
+	require.True(t, ok)
+	assert.Equal(t, int(types.ExitServerError), exitErr.Code)
+}
+
+// reqproof:req REQ-POL-005
+// TestRunPolicyInit_WriteFails covers L463 err!=nil from os.WriteFile by
+// making the target path a directory.
+func TestRunPolicyInit_WriteFails(t *testing.T) {
+	tmpDir := t.TempDir()
+	policiesDir := filepath.Join(tmpDir, "policies")
+	require.NoError(t, os.MkdirAll(policiesDir, 0o755))
+	// Pre-create a directory named "x.yaml" so WriteFile cannot write to it.
+	require.NoError(t, os.MkdirAll(filepath.Join(policiesDir, "y.yaml"), 0o755))
+
+	cmd := NewPolicyInitCommand()
+	cmd.SetArgs([]string{"--id", "y", "--name", "Y", "--dir", tmpDir})
+	_ = cmd.ParseFlags([]string{"--id", "y", "--name", "Y", "--dir", tmpDir})
+	err := cmd.RunE(cmd, []string{})
+	require.Error(t, err)
+}
+
+// reqproof:req REQ-POL-005
+// TestRunPolicyInit_UnwritableDir covers L459 err!=nil from os.MkdirAll
+// (failure to create the policies subdir because its parent is a regular file
+// rather than a directory).
+func TestRunPolicyInit_UnwritableDir(t *testing.T) {
+	tmpDir := t.TempDir()
+	// Create a regular file where the "policies" directory would normally be.
+	conflict := filepath.Join(tmpDir, "policies")
+	require.NoError(t, os.WriteFile(conflict, []byte("not a dir"), 0o600))
+
+	cmd := NewPolicyInitCommand()
+	cmd.SetArgs([]string{"--id", "x", "--name", "X", "--dir", tmpDir})
+	_ = cmd.ParseFlags([]string{"--id", "x", "--name", "X", "--dir", tmpDir})
+	err := cmd.RunE(cmd, []string{})
+	require.Error(t, err)
+}
+
+// reqproof:req REQ-POL-005
+// TestRunPolicyInit_MissingID covers L416 id==""=T.
+func TestRunPolicyInit_MissingID(t *testing.T) {
+	cmd := NewPolicyInitCommand()
+	cmd.SetArgs([]string{"--name", "x", "--dir", "."})
+	_ = cmd.ParseFlags([]string{"--name", "x", "--dir", "."})
+	err := cmd.RunE(cmd, []string{})
+	require.Error(t, err)
+	exitErr, ok := err.(*ExitError)
+	require.True(t, ok)
+	assert.Equal(t, int(types.ExitBadArgs), exitErr.Code)
+}
+
+// reqproof:req REQ-POL-005
+// TestRunPolicyInit_MissingName covers L419 name==""=T.
+func TestRunPolicyInit_MissingName(t *testing.T) {
+	cmd := NewPolicyInitCommand()
+	cmd.SetArgs([]string{"--id", "x", "--dir", "."})
+	_ = cmd.ParseFlags([]string{"--id", "x", "--dir", "."})
+	err := cmd.RunE(cmd, []string{})
+	require.Error(t, err)
+	exitErr, ok := err.(*ExitError)
+	require.True(t, ok)
+	assert.Equal(t, int(types.ExitBadArgs), exitErr.Code)
+}
+
+// reqproof:req REQ-POL-006
+// TestReadPolicyFile_StdinHappy covers L476 filePath=="-"=T branch.
+func TestReadPolicyFile_StdinHappy(t *testing.T) {
+	yamlBody := validPlatinumPolicyYAML
+	withStdin(t, yamlBody, func() {
+		pf, err := readPolicyFile("-")
+		require.NoError(t, err)
+		assert.Equal(t, "platinum", pf.ID)
+	})
+}
+
+// reqproof:req REQ-POL-006
+// TestReadPolicyFile_StdinEmpty covers L481 len(data)==0=T.
+func TestReadPolicyFile_StdinEmpty(t *testing.T) {
+	withStdin(t, "", func() {
+		_, err := readPolicyFile("-")
+		require.Error(t, err)
+		exitErr, ok := err.(*ExitError)
+		require.True(t, ok)
+		assert.Equal(t, int(types.ExitBadArgs), exitErr.Code)
+	})
+}
+
+// reqproof:req REQ-POL-006
+// TestReadPolicyFile_BadYAML covers L492 yaml.Unmarshal err!=nil branch.
+func TestReadPolicyFile_BadYAML(t *testing.T) {
+	tmpFile := writeTempPolicyFile(t, "::not valid yaml")
+	_, err := readPolicyFile(tmpFile)
+	require.Error(t, err)
+}
+
+// reqproof:req REQ-POL-011
+// TestBuildResolveRequests_AllSelectorKinds drives every branch of the switch.
+func TestBuildResolveRequests_AllSelectorKinds(t *testing.T) {
+	entries := []types.AccessEntry{
+		{ID: "abc"},
+		{Name: "users-api"},
+		{ListenPath: "/users/"},
+		{Tags: []string{"premium", "paid"}},
+		{}, // empty selector: takes default path (no match)
+	}
+	reqs := buildResolveRequests(entries)
+	require.Len(t, reqs, 5)
+	assert.Equal(t, "id", reqs[0].SelectorType)
+	assert.Equal(t, "name", reqs[1].SelectorType)
+	assert.Equal(t, "listenPath", reqs[2].SelectorType)
+	assert.Equal(t, "tags", reqs[3].SelectorType)
+	assert.Equal(t, "", reqs[4].SelectorType)
+}
+
+// reqproof:req REQ-API-022
+// TestIsNotFoundError_BothBranches covers L554 ok && er.Status==404 branch
+// and the substring fallback.
+func TestIsNotFoundError_BothBranches(t *testing.T) {
+	// Typed error with status 404 -> true.
+	er := &types.ErrorResponse{Status: 404, Message: "x"}
+	assert.True(t, isNotFoundError(er))
+
+	// Typed error with another status -> falls through, message no match -> false.
+	er2 := &types.ErrorResponse{Status: 500, Message: "boom"}
+	assert.False(t, isNotFoundError(er2))
+
+	// Untyped error with "404" -> true.
+	assert.True(t, isNotFoundError(fmt.Errorf("HTTP 404")))
+
+	// Untyped error with "not found" -> true.
+	assert.True(t, isNotFoundError(fmt.Errorf("api was Not Found")))
+
+	// Untyped error with no signal -> false.
+	assert.False(t, isNotFoundError(fmt.Errorf("something else")))
+}
+
+// reqproof:req REQ-POL-001
+// TestDisplayPolicyPage_DisplayIDEmpty covers L586 displayID==""=T branch.
+func TestDisplayPolicyPage_DisplayIDEmpty(t *testing.T) {
+	policies := []types.DashboardPolicy{
+		{ID: "", MID: "mid-fallback", Name: "Unmanaged Policy"},
+	}
+	oldStdout := os.Stdout
+	rOut, wOut, _ := os.Pipe()
+	os.Stdout = wOut
+	displayPolicyPage(policies, 1)
+	wOut.Close()
+	os.Stdout = oldStdout
+	out, _ := io.ReadAll(rOut)
+	assert.Contains(t, string(out), "mid-fallback")
+}
+
+// reqproof:req REQ-POL-001
 func TestPolicyIntegration_FullLifecycle(t *testing.T) {
 	// This test exercises: list empty -> apply new -> list shows policy -> get returns CLI schema -> delete removes
 	// The mock Dashboard stores policies keyed by id (e.g., "platinum").

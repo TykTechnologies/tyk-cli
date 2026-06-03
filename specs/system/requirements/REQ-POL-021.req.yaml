@@ -1,0 +1,51 @@
+id: REQ-POL-021
+version: 1
+status: draft
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when policy_invalid_args the policy shall immediately satisfy policy_exit_bad_args
+description: All policy subcommands exit 2 on invalid arguments or missing required flags
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+component: policy
+rationale: ""
+tags: []
+variables:
+    - policy_invalid_args
+    - policy_exit_bad_args
+traces:
+    satisfies:
+        - STK-REQ-002
+    reviewed_at: "2026-06-01T09:51:08.449442Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:dd04a339ef2b7798e6404f29cb1fd7c51fd175dca5b05fc94b2f83c6dbe9a5b6
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: pending
+        reviewer: ""
+        reviewed_at: ""
+        ai_generated: false
+    gaps_reviewed_at: "2026-06-02T08:37:02.702664Z"
+    gaps_reviewed_by: tombuchaillot
+    impact_reviews:
+        - requirement: REQ-POL-021
+          artifact: pkg/types/config.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Re-annotated existing production functions to declare implementation linkage for previously-unlinked requirements: FuzzySuggestions → SW-REQ-001/002/003; ParseDuration → SW-REQ-004/005/006; GenerateListenPath → SW-REQ-007/008/009; NewClient → REQ-CFG-007 (env timeout); classifyDashboardError → REQ-API-027/POL-022/POL-027; ExitCode enum → REQ-API-020/021, REQ-CFG-020/021, REQ-POL-020/021. No behavioural change — purely trace metadata.'
+          base: origin/main
+          requirement_fingerprint: sha256:dd04a339ef2b7798e6404f29cb1fd7c51fd175dca5b05fc94b2f83c6dbe9a5b6
+          approval_fingerprint: sha256:a95ad5333cf0a7534e91fa9ca2fc1056c4084f9e5f2ed7c7f438a0f3e0245176
+          artifact_fingerprint: sha256:652ce36e053bda6f7774e1acd99313fc53e057ea3f70cc170c6075d5b5ba9ac3
+          reviewed_at: "2026-06-02T13:56:27Z"
+history:
+    created_by: human:cli
+    created_at: "2026-05-29T15:42:37Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-06-01T09:50:46Z"

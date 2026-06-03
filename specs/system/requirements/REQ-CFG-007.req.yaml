@@ -1,0 +1,55 @@
+id: REQ-CFG-007
+version: 1
+status: review
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when timeout_seconds_set_on_environment the config shall immediately satisfy http_client_uses_environment_timeout
+description: Environments may declare a positive timeout_seconds; when set, the HTTP client uses that timeout instead of the 30s default, allowing operators to extend the deadline for slow Dashboards
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+parent: STK-REQ-003
+component: config
+rationale: ""
+tags: []
+variables: []
+traces:
+    satisfies:
+        - STK-REQ-003
+    reviewed_at: "2026-06-02T13:51:17.132184Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:bd241a14a75744c2c07ced36cc951abd720a314bf4a2dc99dab3aa4b0aea94a2
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: approved
+        reviewer: tomas@tyk.io
+        reviewed_at: "2026-06-02T08:06:10Z"
+        ai_generated: false
+    impact_reviews:
+        - requirement: REQ-CFG-007
+          artifact: internal/client/client.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Re-annotated existing production functions to declare implementation linkage for previously-unlinked requirements: FuzzySuggestions → SW-REQ-001/002/003; ParseDuration → SW-REQ-004/005/006; GenerateListenPath → SW-REQ-007/008/009; NewClient → REQ-CFG-007 (env timeout); classifyDashboardError → REQ-API-027/POL-022/POL-027; ExitCode enum → REQ-API-020/021, REQ-CFG-020/021, REQ-POL-020/021. No behavioural change — purely trace metadata.'
+          base: origin/main
+          requirement_fingerprint: sha256:bd241a14a75744c2c07ced36cc951abd720a314bf4a2dc99dab3aa4b0aea94a2
+          approval_fingerprint: sha256:ae64fced6d245859c2e3da81c1d0ad66486ad08c9bb49432d06f959409bb9be2
+          artifact_fingerprint: sha256:b8a08970248fcd70599c3d2826646101ddf67ec20033fd6fd2c15e9b4924899c
+          reviewed_at: "2026-06-02T13:56:27Z"
+history:
+    created_by: human:cli
+    created_at: "2026-06-02T08:06:10Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-06-02T08:06:10Z"
+lifecycle:
+    change_history:
+        - date: "2026-06-02T08:06:10Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:cli

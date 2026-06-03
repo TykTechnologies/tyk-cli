@@ -1,0 +1,55 @@
+id: SW-REQ-006
+version: 1
+status: review
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when valid_seconds_input the policy shall immediately satisfy format_parse_roundtrip_equal
+description: 'ParseDuration and FormatDuration roundtrip: ParseDuration(FormatDuration(n)) == n for any non-negative n expressible as an exact unit multiple'
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+parent: REQ-POL-010
+component: policy
+rationale: ""
+tags: []
+variables: []
+traces:
+    satisfies:
+        - REQ-POL-010
+    reviewed_at: "2026-06-01T13:00:40.561204Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:3725231c8e0ee1dbf5d7c3c7954f52cd1e411e91bdd4f191d121e0144e12bf04
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: approved
+        reviewer: tomas@tyk.io
+        reviewed_at: "2026-06-01T13:01:57Z"
+        ai_generated: false
+    impact_reviews:
+        - requirement: SW-REQ-006
+          artifact: internal/policy/duration.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Re-annotated existing production functions to declare implementation linkage for previously-unlinked requirements: FuzzySuggestions → SW-REQ-001/002/003; ParseDuration → SW-REQ-004/005/006; GenerateListenPath → SW-REQ-007/008/009; NewClient → REQ-CFG-007 (env timeout); classifyDashboardError → REQ-API-027/POL-022/POL-027; ExitCode enum → REQ-API-020/021, REQ-CFG-020/021, REQ-POL-020/021. No behavioural change — purely trace metadata.'
+          base: origin/main
+          requirement_fingerprint: sha256:3725231c8e0ee1dbf5d7c3c7954f52cd1e411e91bdd4f191d121e0144e12bf04
+          approval_fingerprint: sha256:67a18827ca7d65d975e56405510f31f44c83bbde5ec3a96884f37e131941c47a
+          artifact_fingerprint: sha256:fd8bcbf1527e4d6655525f8d78249f7ccf483118f366209f0c721a71a9a15364
+          reviewed_at: "2026-06-02T13:56:27Z"
+history:
+    created_by: human:cli
+    created_at: "2026-06-01T12:53:43Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-06-01T13:00:11Z"
+lifecycle:
+    change_history:
+        - date: "2026-06-01T13:00:11Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:cli

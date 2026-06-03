@@ -1,0 +1,7 @@
+cache/
+index.db
+jobs/
+locks/
+audit-cache.json
+workflow.json
+mcdc/

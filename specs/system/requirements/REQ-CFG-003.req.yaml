@@ -1,0 +1,50 @@
+id: REQ-CFG-003
+version: 1
+status: draft
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when use_invoked_with_valid_env the config shall immediately satisfy (default_env_switched & toml_persisted_with_new_default)
+description: config use switches the active named environment; the switch persists to ~/.config/tyk/cli.toml; config current shows the active environment name and its values
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+component: config
+rationale: ""
+tags: []
+variables:
+    - use_invoked_with_valid_env
+    - default_env_switched
+    - toml_persisted_with_new_default
+traces:
+    satisfies:
+        - STK-REQ-003
+    reviewed_at: "2026-06-01T12:35:57.263882Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:83e71ead9630afca0487673c0622c054641c7047d690b05b0cea23a2bde0891f
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: pending
+        reviewer: ""
+        reviewed_at: ""
+        ai_generated: false
+    impact_reviews:
+        - requirement: REQ-CFG-003
+          artifact: internal/cli/config.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Closed 9 known-issues across api/policy/config and oas. New SYS-REQs (REQ-API-014/024/025/026/027/040, REQ-POL-024/025/026/027, REQ-CFG-004/005/006/007) added with FRETish. Code changes: new exit codes (5/6/7/8), classifyDashboardError + helpers in errors.go, ValidateOASStructure in oas/transform.go, TimeoutSeconds field on Environment, runner re-annotations. Tests added in transform_test.go (OAS validator), client_test.go (env timeout), config_crud_test.go (flag combinations), exit_codes_test.go (401/403/429/5xx), api_versions_test.go (placeholders), api_import_update_test.go (no-Dashboard contact).'
+          base: origin/main
+          requirement_fingerprint: sha256:83e71ead9630afca0487673c0622c054641c7047d690b05b0cea23a2bde0891f
+          approval_fingerprint: sha256:730b093ed67a1d5bf392fd1e814bfa6b50b72b83979e4cce0df75acef48fdbef
+          artifact_fingerprint: sha256:e68f5953a18e7a3e9b636488a1abc15d9e78f1511dc500937730c94c4646e55e
+          reviewed_at: "2026-06-02T08:37:11Z"
+history:
+    created_by: human:cli
+    created_at: "2026-05-29T15:43:17Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-06-01T12:35:41Z"

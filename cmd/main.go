@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/tyktech/tyk-cli/internal/cli"
@@ -15,18 +16,24 @@ var (
 	buildTime = "unknown"
 )
 
+// classifyExitError maps an Execute() error into the process exit code,
+// writing the user-facing message to errOut. Returns 0 when err is nil.
+// Extracted so main()'s error-handling can be tested without spawning a
+// subprocess or wrapping os.Exit.
+func classifyExitError(err error, errOut io.Writer) int {
+	if err == nil {
+		return 0
+	}
+	var exitError *cli.ExitError
+	if errors.As(err, &exitError) {
+		fmt.Fprintf(errOut, "Error: %v\n", exitError.Message)
+		return exitError.Code
+	}
+	fmt.Fprintf(errOut, "Error: %v\n", err)
+	return 1
+}
+
 func main() {
 	rootCmd := cli.NewRootCommand(version, commit, buildTime)
-	
-	if err := rootCmd.Execute(); err != nil {
-		// Check for ExitError to use specific exit codes
-		var exitError *cli.ExitError
-		if errors.As(err, &exitError) {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", exitError.Message)
-			os.Exit(exitError.Code)
-		}
-		
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-		os.Exit(1)
-	}
+	os.Exit(classifyExitError(rootCmd.Execute(), os.Stderr))
 }

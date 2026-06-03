@@ -1,0 +1,70 @@
+id: REQ-CFG-002
+version: 1
+status: draft
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when init_wizard_completed the config shall immediately satisfy (toml_file_written & default_environment_set)
+description: tyk init runs an interactive wizard that writes one or more named environments to ~/.config/tyk/cli.toml and sets the default environment
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+component: config
+rationale: ""
+tags: []
+variables:
+    - init_wizard_completed
+    - toml_file_written
+    - default_environment_set
+traces:
+    satisfies:
+        - STK-REQ-003
+    reviewed_at: "2026-06-01T12:35:57.250774Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:4d4d7ebff8a47f04f629a6b1e34963f037369cc80d166ffce11239864eddf47a
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: pending
+        reviewer: ""
+        reviewed_at: ""
+        ai_generated: false
+    impact_reviews:
+        - requirement: REQ-CFG-002
+          artifact: internal/cli/config.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Closed 9 known-issues across api/policy/config and oas. New SYS-REQs (REQ-API-014/024/025/026/027/040, REQ-POL-024/025/026/027, REQ-CFG-004/005/006/007) added with FRETish. Code changes: new exit codes (5/6/7/8), classifyDashboardError + helpers in errors.go, ValidateOASStructure in oas/transform.go, TimeoutSeconds field on Environment, runner re-annotations. Tests added in transform_test.go (OAS validator), client_test.go (env timeout), config_crud_test.go (flag combinations), exit_codes_test.go (401/403/429/5xx), api_versions_test.go (placeholders), api_import_update_test.go (no-Dashboard contact).'
+          base: origin/main
+          requirement_fingerprint: sha256:4d4d7ebff8a47f04f629a6b1e34963f037369cc80d166ffce11239864eddf47a
+          approval_fingerprint: sha256:2c194ff748badaeac727ed414a3c57d266807be06651aa5613e23fce74fe2b57
+          artifact_fingerprint: sha256:e68f5953a18e7a3e9b636488a1abc15d9e78f1511dc500937730c94c4646e55e
+          reviewed_at: "2026-06-02T08:37:11Z"
+        - requirement: REQ-CFG-002
+          artifact: internal/cli/init.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Capability requirements gained meaningful FRETish capturing real invariants (preconditions, defaults, auto-generation, header presence, round-trip preservation) replacing trivial tautologies. Implementation already satisfies these invariants; no production change required.'
+          base: origin/main
+          requirement_fingerprint: sha256:4d4d7ebff8a47f04f629a6b1e34963f037369cc80d166ffce11239864eddf47a
+          approval_fingerprint: sha256:2c194ff748badaeac727ed414a3c57d266807be06651aa5613e23fce74fe2b57
+          artifact_fingerprint: sha256:77532a5e9281a0e5a52efbfe268da9bff9a83a8e66cab8dbe71f3e2180d7fb1e
+          reviewed_at: "2026-06-01T12:36:49Z"
+        - requirement: REQ-CFG-002
+          artifact: internal/client/client.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Re-annotated existing production functions to declare implementation linkage for previously-unlinked requirements: FuzzySuggestions → SW-REQ-001/002/003; ParseDuration → SW-REQ-004/005/006; GenerateListenPath → SW-REQ-007/008/009; NewClient → REQ-CFG-007 (env timeout); classifyDashboardError → REQ-API-027/POL-022/POL-027; ExitCode enum → REQ-API-020/021, REQ-CFG-020/021, REQ-POL-020/021. No behavioural change — purely trace metadata.'
+          base: origin/main
+          requirement_fingerprint: sha256:4d4d7ebff8a47f04f629a6b1e34963f037369cc80d166ffce11239864eddf47a
+          approval_fingerprint: sha256:2c194ff748badaeac727ed414a3c57d266807be06651aa5613e23fce74fe2b57
+          artifact_fingerprint: sha256:b8a08970248fcd70599c3d2826646101ddf67ec20033fd6fd2c15e9b4924899c
+          reviewed_at: "2026-06-02T13:56:27Z"
+history:
+    created_by: human:cli
+    created_at: "2026-05-29T15:43:17Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-06-01T12:35:41Z"

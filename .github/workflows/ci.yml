@@ -31,3 +31,14 @@ jobs:
 
       - name: Test
         run: go test ./...
+
+      - name: Install proof
+        # proof (ReqProof) CLI — installed locally via Homebrew; no public Linux release URL yet.
+        # TODO: replace the echo with a real install command when proof publishes official releases.
+        # e.g.: curl -sSL https://github.com/TykTechnologies/proof/releases/latest/download/proof-linux-amd64 -o /usr/local/bin/proof && chmod +x /usr/local/bin/proof
+        run: |
+          echo "proof CI gate skipped: no public distribution URL available yet for Linux runners"
+
+      - name: proof CI gate
+        if: false  # Enable once proof publishes an official Linux distribution
+        run: proof ci --format github

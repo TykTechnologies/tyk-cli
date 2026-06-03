@@ -1,0 +1,231 @@
+component: api
+variables:
+    # --- Contract variables (REQ-API-010/011/012) -----------------------------
+    - name: id_present
+      type: bool
+      direction: input
+      description: whether the OAS document has a pre-existing API ID set
+    - name: id_stripped
+      type: bool
+      direction: output
+      description: whether the API ID has been removed before submission
+    - name: oas_lacks_extensions
+      type: bool
+      direction: input
+      description: whether the OAS document has no x-tyk-api-gateway extension
+    - name: extensions_added
+      type: bool
+      direction: output
+      description: whether x-tyk-api-gateway extensions have been injected
+    - name: listen_path_valid
+      type: bool
+      direction: output
+      description: whether the generated listen path is a non-empty URL-safe string starting and ending with /
+    - name: api_title_provided
+      type: bool
+      direction: input
+      description: whether a non-empty title string was supplied to GenerateListenPath
+
+    # --- REQ-API-001: list pagination default ---------------------------------
+    - name: page_flag_omitted
+      type: bool
+      direction: input
+      description: whether the --page flag was absent from the api-list invocation
+    - name: requested_page_equals_one
+      type: bool
+      direction: output
+      description: whether the Dashboard request used page=1
+
+    # --- REQ-API-002: --oas-only strips x-tyk-api-gateway --------------------
+    - name: oas_only_flag_set
+      type: bool
+      direction: input
+      description: whether --oas-only was passed to api-get
+    - name: tyk_extensions_stripped
+      type: bool
+      direction: output
+      description: whether x-tyk-api-gateway was removed from the response before output
+
+    # --- REQ-API-003: auto-generated listen path ------------------------------
+    - name: listen_path_flag_omitted
+      type: bool
+      direction: input
+      description: whether --listen-path was absent from api-create
+    - name: listen_path_auto_generated
+      type: bool
+      direction: output
+      description: whether the runner derived a listen path from --name
+
+    # --- REQ-API-004: import-oas always takes the create path ---------------
+    - name: import_oas_invoked
+      type: bool
+      direction: input
+      description: whether api import-oas was the active runner
+    - name: import_takes_create_path
+      type: bool
+      direction: output
+      description: whether import-oas called CreateOASAPI (never UpdateOASAPI), forcing the Dashboard to mint a new ID
+
+    # --- REQ-API-005: apply idempotent upsert ---------------------------------
+    - name: apply_invoked
+      type: bool
+      direction: input
+      description: whether api apply was the active runner
+    - name: apply_target_exists
+      type: bool
+      direction: input
+      description: whether the Dashboard already contains an API with the supplied ID
+    - name: apply_takes_update_path
+      type: bool
+      direction: output
+      description: whether apply called UpdateOASAPI rather than CreateOASAPI
+
+    # --- REQ-API-006: update-oas precondition ---------------------------------
+    - name: update_invoked
+      type: bool
+      direction: input
+      description: whether api update-oas was the active runner
+    - name: update_target_does_not_exist
+      type: bool
+      direction: input
+      description: whether the Dashboard preflight returned 404 for the target API
+
+    # --- REQ-API-007: delete precondition -------------------------------------
+    - name: delete_invoked
+      type: bool
+      direction: input
+      description: whether api delete was the active runner
+    - name: delete_target_does_not_exist
+      type: bool
+      direction: input
+      description: whether the Dashboard preflight returned 404 for the target API
+
+    # --- REQ-API-013: OAS utility extractability -----------------------------
+    - name: oas_has_tyk_extensions
+      type: bool
+      direction: input
+      description: whether the OAS document has a non-empty x-tyk-api-gateway block
+    - name: api_id_extractable
+      type: bool
+      direction: output
+      description: whether the utility could extract the API ID from x-tyk-api-gateway.info.id
+
+    # --- REQ-API-030: auth headers on every Dashboard request ----------------
+    - name: dashboard_request_sent
+      type: bool
+      direction: input
+      description: whether the HTTP client issued a request against the Dashboard
+    - name: authorization_header_set
+      type: bool
+      direction: output
+      description: whether the request carried the Authorization header
+    - name: org_id_header_set
+      type: bool
+      direction: output
+      description: whether the request carried the x-org-id header
+
+    # --- REQ-API-031: OAS source loading -------------------------------------
+    - name: oas_file_provided
+      type: bool
+      direction: input
+      description: whether a local file path was passed to the OAS loader
+    - name: oas_url_provided
+      type: bool
+      direction: input
+      description: whether a URL was passed to the OAS loader
+    - name: parsed_oas_returned
+      type: bool
+      direction: output
+      description: whether the loader returned a non-nil map structure
+
+    # --- REQ-API-014: OAS structural validation before submit ---------------
+    - name: oas_missing_required_fields
+      type: bool
+      direction: input
+      description: whether the OAS document is missing openapi/info.title/info.version or has openapi != 3.x
+    - name: dashboard_round_trip_aborted
+      type: bool
+      direction: output
+      description: whether the runner returned an ExitBadArgs error before issuing any Dashboard HTTP request
+
+    # --- REQ-API-040: api versions placeholder subcommands ------------------
+    - name: versions_subcommand_invoked
+      type: bool
+      direction: input
+      description: whether one of api versions list/create/switch-default was invoked
+    - name: placeholder_message_emitted
+      type: bool
+      direction: output
+      description: whether the runner emitted the documented placeholder message
+    - name: no_dashboard_contact_made
+      type: bool
+      direction: output
+      description: whether the runner returned without issuing any Dashboard HTTP request
+
+    # --- REQ-API-024/025/026: error class to exit-code mapping ---------------
+    - name: api_auth_failed_response
+      type: bool
+      direction: input
+      description: whether the Dashboard responded with HTTP 401 to an api subcommand
+    - name: api_forbidden_response
+      type: bool
+      direction: input
+      description: whether the Dashboard responded with HTTP 403 to an api subcommand
+    - name: api_rate_limited_response
+      type: bool
+      direction: input
+      description: whether the Dashboard responded with HTTP 429 to an api subcommand
+    - name: api_server_error_response
+      type: bool
+      direction: input
+      description: whether the Dashboard responded with HTTP 5xx to an api subcommand
+    - name: api_exit_auth_failed
+      type: bool
+      direction: output
+      description: whether the api subcommand terminated with exit code 5 (ExitAuthFailed)
+    - name: api_exit_forbidden
+      type: bool
+      direction: output
+      description: whether the api subcommand terminated with exit code 6 (ExitForbidden)
+    - name: api_exit_rate_limited
+      type: bool
+      direction: output
+      description: whether the api subcommand terminated with exit code 7 (ExitRateLimited)
+    - name: api_exit_server_error
+      type: bool
+      direction: output
+      description: whether the api subcommand terminated with exit code 8 (ExitServerError)
+
+    # --- Exit-code variables (REQ-API-020..023) -------------------------------
+    - name: api_operation_succeeded
+      type: bool
+      direction: input
+      description: whether an api subcommand completed without error
+    - name: api_invalid_args
+      type: bool
+      direction: input
+      description: whether an api subcommand was invoked with invalid or missing required flags
+    - name: api_target_not_found
+      type: bool
+      direction: input
+      description: whether the Dashboard responded with HTTP 404 to an api subcommand
+    - name: api_conflict_response
+      type: bool
+      direction: input
+      description: whether the Dashboard responded with HTTP 409 to an api subcommand
+    - name: api_exit_zero
+      type: bool
+      direction: output
+      description: whether the api subcommand terminated with exit code 0
+    - name: api_exit_bad_args
+      type: bool
+      direction: output
+      description: whether the api subcommand terminated with exit code 2 (ExitBadArgs)
+    - name: api_exit_not_found
+      type: bool
+      direction: output
+      description: whether the api subcommand terminated with exit code 3 (ExitNotFound)
+    - name: api_exit_conflict
+      type: bool
+      direction: output
+      description: whether the api subcommand terminated with exit code 4 (ExitConflict)

@@ -1,0 +1,29 @@
+project:
+    name: tyk-cli
+    specs:
+        - path: specs/stakeholder
+          prefix: STK-REQ-
+          type: stakeholder
+        - path: specs/system
+          prefix: REQ-
+          type: system
+        - path: specs/software
+          prefix: SW-REQ-
+          type: software
+    commands:
+        build: go build ./...
+        test: go test ./...
+        lint: golangci-lint run
+    verification_scope:
+        include:
+            - internal/**
+            - pkg/**
+        components:
+            - api
+            - policy
+            - config
+    checks:
+        slow_tests: {}
+        mcdc_coverage: {}
+        code_mcdc:
+            max_incomplete_decisions: 5

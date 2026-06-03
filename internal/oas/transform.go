@@ -9,13 +9,13 @@ import (
 // TykExtensionKey is the key for Tyk-specific extensions in OAS documents
 const TykExtensionKey = "x-tyk-api-gateway"
 
-// HasTykExtensions checks if an OAS document contains x-tyk-api-gateway extensions
+// reqproof:req REQ-API-013
 func HasTykExtensions(oasDoc map[string]interface{}) bool {
 	_, exists := oasDoc[TykExtensionKey]
 	return exists
 }
 
-// ExtractAPIIDFromTykExtensions extracts the API ID from x-tyk-api-gateway.info.id
+// reqproof:req REQ-API-013
 func ExtractAPIIDFromTykExtensions(oasDoc map[string]interface{}) (string, bool) {
 	if !HasTykExtensions(oasDoc) {
 		return "", false
@@ -40,6 +40,7 @@ func ExtractAPIIDFromTykExtensions(oasDoc map[string]interface{}) (string, bool)
 }
 
 // AddTykExtensions adds minimal x-tyk-api-gateway extensions to a plain OAS document
+// reqproof:req REQ-API-011
 func AddTykExtensions(oasDoc map[string]interface{}) (map[string]interface{}, error) {
 	if HasTykExtensions(oasDoc) {
 		return oasDoc, nil // Already has extensions
@@ -93,7 +94,7 @@ func AddTykExtensions(oasDoc map[string]interface{}) (map[string]interface{}, er
 	return result, nil
 }
 
-// extractUpstreamURL extracts the upstream URL from OAS servers section
+// reqproof:req REQ-API-011
 func extractUpstreamURL(oasDoc map[string]interface{}) string {
 	servers, ok := oasDoc["servers"].([]interface{})
 	if !ok || len(servers) == 0 {
@@ -115,6 +116,10 @@ func extractUpstreamURL(oasDoc map[string]interface{}) string {
 
 // GenerateListenPath creates a listen path from API title
 // Examples: "My API" -> "/my-api/", "Swagger Petstore" -> "/swagger-petstore/"
+// reqproof:req REQ-API-012
+// reqproof:req SW-REQ-007
+// reqproof:req SW-REQ-008
+// reqproof:req SW-REQ-009
 func GenerateListenPath(title string) string {
 	// Convert to lowercase and replace spaces/special chars with hyphens
 	slug := strings.ToLower(title)
@@ -137,4 +142,41 @@ func GenerateListenPath(title string) string {
 	}
 	
 	return "/" + slug + "/"
+}
+// ValidateOASStructure performs a lightweight structural check on an OAS
+// document before it is submitted to the Dashboard. It enforces the minimum
+// schema invariants that the Dashboard rejects with opaque errors: openapi
+// field present and non-empty, info section with non-empty title and version.
+// It does NOT perform full OpenAPI JSON Schema validation — the goal is to
+// catch obvious authoring errors locally and surface a clear message before
+// any network round-trip.
+//
+// reqproof:req REQ-API-014
+func ValidateOASStructure(oasDoc map[string]interface{}) error {
+	if oasDoc == nil {
+		return fmt.Errorf("OAS document is empty")
+	}
+
+	openapi, ok := oasDoc["openapi"].(string)
+	if !ok || openapi == "" {
+		return fmt.Errorf("OAS document is missing required field 'openapi'")
+	}
+	if !strings.HasPrefix(openapi, "3.") {
+		return fmt.Errorf("OAS document declares openapi=%q; tyk-cli only supports OpenAPI 3.x", openapi)
+	}
+
+	info, ok := oasDoc["info"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("OAS document is missing required 'info' section")
+	}
+	title, ok := info["title"].(string)
+	if !ok || title == "" {
+		return fmt.Errorf("OAS document is missing required field 'info.title'")
+	}
+	version, ok := info["version"].(string)
+	if !ok || version == "" {
+		return fmt.Errorf("OAS document is missing required field 'info.version'")
+	}
+
+	return nil
 }

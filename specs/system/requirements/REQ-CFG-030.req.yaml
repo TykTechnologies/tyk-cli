@@ -1,0 +1,69 @@
+id: REQ-CFG-030
+version: 1
+status: draft
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when toml_file_exists the config shall immediately satisfy config_loaded_from_toml
+description: config manager loads environments from a TOML file in the XDG base directory, falls back to environment variables, and exposes an effective config resolving precedence
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+component: config
+rationale: ""
+tags: []
+variables:
+    - toml_file_exists
+    - config_loaded_from_toml
+traces:
+    satisfies:
+        - STK-REQ-003
+    reviewed_at: "2026-06-01T12:35:57.277108Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:c5f7ca6f5f566ee1cd842675d933649df52897b92606650e1335fe572fd8a049
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: pending
+        reviewer: ""
+        reviewed_at: ""
+        ai_generated: false
+    impact_reviews:
+        - requirement: REQ-CFG-030
+          artifact: internal/cli/config.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Closed 9 known-issues across api/policy/config and oas. New SYS-REQs (REQ-API-014/024/025/026/027/040, REQ-POL-024/025/026/027, REQ-CFG-004/005/006/007) added with FRETish. Code changes: new exit codes (5/6/7/8), classifyDashboardError + helpers in errors.go, ValidateOASStructure in oas/transform.go, TimeoutSeconds field on Environment, runner re-annotations. Tests added in transform_test.go (OAS validator), client_test.go (env timeout), config_crud_test.go (flag combinations), exit_codes_test.go (401/403/429/5xx), api_versions_test.go (placeholders), api_import_update_test.go (no-Dashboard contact).'
+          base: origin/main
+          requirement_fingerprint: sha256:c5f7ca6f5f566ee1cd842675d933649df52897b92606650e1335fe572fd8a049
+          approval_fingerprint: sha256:a64c11f601640a627c1d83e59f59d5acf9a4e44f96cc7e4d5ca320fb0d1612b9
+          artifact_fingerprint: sha256:e68f5953a18e7a3e9b636488a1abc15d9e78f1511dc500937730c94c4646e55e
+          reviewed_at: "2026-06-02T08:37:11Z"
+        - requirement: REQ-CFG-030
+          artifact: internal/config/config.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Capability requirements gained meaningful FRETish capturing real invariants (preconditions, defaults, auto-generation, header presence, round-trip preservation) replacing trivial tautologies. Implementation already satisfies these invariants; no production change required.'
+          base: origin/main
+          requirement_fingerprint: sha256:c5f7ca6f5f566ee1cd842675d933649df52897b92606650e1335fe572fd8a049
+          approval_fingerprint: sha256:a64c11f601640a627c1d83e59f59d5acf9a4e44f96cc7e4d5ca320fb0d1612b9
+          artifact_fingerprint: sha256:9478962584973e721763b613b92153a33de7d18ec223217c3aa3cf78ebb8e7a3
+          reviewed_at: "2026-06-01T12:36:49Z"
+        - requirement: REQ-CFG-030
+          artifact: pkg/types/config.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Re-annotated existing production functions to declare implementation linkage for previously-unlinked requirements: FuzzySuggestions → SW-REQ-001/002/003; ParseDuration → SW-REQ-004/005/006; GenerateListenPath → SW-REQ-007/008/009; NewClient → REQ-CFG-007 (env timeout); classifyDashboardError → REQ-API-027/POL-022/POL-027; ExitCode enum → REQ-API-020/021, REQ-CFG-020/021, REQ-POL-020/021. No behavioural change — purely trace metadata.'
+          base: origin/main
+          requirement_fingerprint: sha256:c5f7ca6f5f566ee1cd842675d933649df52897b92606650e1335fe572fd8a049
+          approval_fingerprint: sha256:a64c11f601640a627c1d83e59f59d5acf9a4e44f96cc7e4d5ca320fb0d1612b9
+          artifact_fingerprint: sha256:652ce36e053bda6f7774e1acd99313fc53e057ea3f70cc170c6075d5b5ba9ac3
+          reviewed_at: "2026-06-02T13:56:27Z"
+history:
+    created_by: human:cli
+    created_at: "2026-05-29T16:11:40Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-06-01T12:35:41Z"

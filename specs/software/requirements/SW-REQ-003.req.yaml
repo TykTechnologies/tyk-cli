@@ -1,0 +1,58 @@
+id: SW-REQ-003
+version: 1
+status: review
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when fuzzy_invoked_with_empty_list the policy shall immediately satisfy (fuzzy_result_is_empty & resolve_error_returned)
+description: FuzzySuggestions returns an empty slice when invoked with an empty candidate list
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+parent: REQ-POL-011
+component: policy
+rationale: ""
+tags: []
+variables:
+    - fuzzy_invoked_with_empty_list
+    - fuzzy_result_is_empty
+    - resolve_error_returned
+traces:
+    satisfies:
+        - REQ-POL-011
+    reviewed_at: "2026-06-01T13:00:40.54358Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:d4693a280134e86d1c146f421b9ace469fb72cc385a90d56d7fb668df06f93ad
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: approved
+        reviewer: tomas@tyk.io
+        reviewed_at: "2026-06-01T13:01:57Z"
+        ai_generated: false
+    impact_reviews:
+        - requirement: SW-REQ-003
+          artifact: internal/policy/selector.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Re-annotated existing production functions to declare implementation linkage for previously-unlinked requirements: FuzzySuggestions → SW-REQ-001/002/003; ParseDuration → SW-REQ-004/005/006; GenerateListenPath → SW-REQ-007/008/009; NewClient → REQ-CFG-007 (env timeout); classifyDashboardError → REQ-API-027/POL-022/POL-027; ExitCode enum → REQ-API-020/021, REQ-CFG-020/021, REQ-POL-020/021. No behavioural change — purely trace metadata.'
+          base: origin/main
+          requirement_fingerprint: sha256:d4693a280134e86d1c146f421b9ace469fb72cc385a90d56d7fb668df06f93ad
+          approval_fingerprint: sha256:79cdf5c5b25979df1d8be44c4aba1dc0beef556777d6caf3224f8670860875b7
+          artifact_fingerprint: sha256:ea1495e9964fc046f46118eb828ec63d5a99ada901ce0d37ea1ec66050640af9
+          reviewed_at: "2026-06-02T13:56:27Z"
+history:
+    created_by: human:cli
+    created_at: "2026-06-01T12:52:06Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-06-01T13:00:11Z"
+lifecycle:
+    change_history:
+        - date: "2026-06-01T13:00:11Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:cli

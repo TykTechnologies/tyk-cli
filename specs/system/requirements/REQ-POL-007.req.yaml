@@ -1,0 +1,59 @@
+id: REQ-POL-007
+version: 1
+status: draft
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when valid_cli_policy_input the policy shall immediately satisfy wire_roundtrip_preserves_fields
+description: policy documents are bi-directionally converted between CLI YAML (PolicyFile) and Dashboard wire JSON (DashboardPolicy) preserving all access rights, duration, and metadata
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+component: policy
+rationale: ""
+tags: []
+variables:
+    - valid_cli_policy_input
+    - wire_roundtrip_preserves_fields
+traces:
+    satisfies:
+        - STK-REQ-002
+    reviewed_at: "2026-06-01T12:35:57.375057Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:cba71020168ee6f32e570e2cd68c85dee42f86b04cee2c018bb2fe78b222f6db
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: pending
+        reviewer: ""
+        reviewed_at: ""
+        ai_generated: false
+    impact_reviews:
+        - requirement: REQ-POL-007
+          artifact: internal/policy/convert.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Capability requirements gained meaningful FRETish capturing real invariants (preconditions, defaults, auto-generation, header presence, round-trip preservation) replacing trivial tautologies. Implementation already satisfies these invariants; no production change required.'
+          base: origin/main
+          requirement_fingerprint: sha256:cba71020168ee6f32e570e2cd68c85dee42f86b04cee2c018bb2fe78b222f6db
+          approval_fingerprint: sha256:f50f93776f306529abcc04482fec4e9fc5db3b44bc429a73af45777e21580201
+          artifact_fingerprint: sha256:96cdeeaba1bfeb8b1cacc78845a9fcdb420513ba66a06a42ac8c7e077cd19d1b
+          reviewed_at: "2026-06-01T12:36:49Z"
+        - requirement: REQ-POL-007
+          artifact: pkg/types/policy.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Added //mcdc:ignore comment on json.Marshal err-check in *AccessRight.MarshalJSON — the branch is structurally unreachable since the *RateQuotaLimit type is plain int64 fields whose marshaler cannot fail. Annotated rather than tested to avoid forging a synthetic failure case. No behavioural change.'
+          base: origin/main
+          requirement_fingerprint: sha256:cba71020168ee6f32e570e2cd68c85dee42f86b04cee2c018bb2fe78b222f6db
+          approval_fingerprint: sha256:f50f93776f306529abcc04482fec4e9fc5db3b44bc429a73af45777e21580201
+          artifact_fingerprint: sha256:1b05b877f25de8a92893f437e711dffb9f01719ee7be83bc6245d42c81a662cc
+          reviewed_at: "2026-06-02T09:46:55Z"
+history:
+    created_by: human:cli
+    created_at: "2026-05-29T16:11:40Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-06-01T12:35:17Z"

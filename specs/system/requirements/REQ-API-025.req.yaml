@@ -1,0 +1,55 @@
+id: REQ-API-025
+version: 1
+status: review
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when api_rate_limited_response the api shall immediately satisfy api_exit_rate_limited
+description: API subcommands map rate-limit responses (HTTP 429) to exit 7, enabling CI scripts to detect throttling and back off
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+parent: STK-REQ-001
+component: api
+rationale: ""
+tags: []
+variables: []
+traces:
+    satisfies:
+        - STK-REQ-001
+    reviewed_at: "2026-06-02T13:51:17.100402Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:7f5b7e043495a6847f87855e29b060a5c1245a0c9c0abb7ba214cc67da779220
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: approved
+        reviewer: tomas@tyk.io
+        reviewed_at: "2026-06-02T07:52:59Z"
+        ai_generated: false
+    impact_reviews:
+        - requirement: REQ-API-025
+          artifact: internal/cli/errors.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Re-annotated existing production functions to declare implementation linkage for previously-unlinked requirements: FuzzySuggestions → SW-REQ-001/002/003; ParseDuration → SW-REQ-004/005/006; GenerateListenPath → SW-REQ-007/008/009; NewClient → REQ-CFG-007 (env timeout); classifyDashboardError → REQ-API-027/POL-022/POL-027; ExitCode enum → REQ-API-020/021, REQ-CFG-020/021, REQ-POL-020/021. No behavioural change — purely trace metadata.'
+          base: origin/main
+          requirement_fingerprint: sha256:7f5b7e043495a6847f87855e29b060a5c1245a0c9c0abb7ba214cc67da779220
+          approval_fingerprint: sha256:6f0eef33b1df9e23e81631161d3822991d08b14df1959e510764d2f5f0a27c81
+          artifact_fingerprint: sha256:4b9268161414a9876b3b330312fdc696f08dd159589de50f81b1739c04f32372
+          reviewed_at: "2026-06-02T13:56:27Z"
+history:
+    created_by: human:cli
+    created_at: "2026-06-02T07:37:15Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-06-02T07:52:59Z"
+lifecycle:
+    change_history:
+        - date: "2026-06-02T07:52:59Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:cli

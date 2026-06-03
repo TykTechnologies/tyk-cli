@@ -1,0 +1,55 @@
+id: REQ-API-024
+version: 1
+status: review
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when api_auth_failed_response the api shall immediately satisfy api_exit_auth_failed
+description: API subcommands map authentication failures (HTTP 401) to exit 5, so callers can detect 'rotate the auth token' situations programmatically
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+parent: STK-REQ-001
+component: api
+rationale: ""
+tags: []
+variables: []
+traces:
+    satisfies:
+        - STK-REQ-001
+    reviewed_at: "2026-06-02T13:51:17.070787Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:aebf93541b2beb939f9103cbadb3399a6b909cd8cf807d2c11cebf6d96421912
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: approved
+        reviewer: tomas@tyk.io
+        reviewed_at: "2026-06-02T07:52:59Z"
+        ai_generated: false
+    impact_reviews:
+        - requirement: REQ-API-024
+          artifact: internal/cli/errors.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Re-annotated existing production functions to declare implementation linkage for previously-unlinked requirements: FuzzySuggestions → SW-REQ-001/002/003; ParseDuration → SW-REQ-004/005/006; GenerateListenPath → SW-REQ-007/008/009; NewClient → REQ-CFG-007 (env timeout); classifyDashboardError → REQ-API-027/POL-022/POL-027; ExitCode enum → REQ-API-020/021, REQ-CFG-020/021, REQ-POL-020/021. No behavioural change — purely trace metadata.'
+          base: origin/main
+          requirement_fingerprint: sha256:aebf93541b2beb939f9103cbadb3399a6b909cd8cf807d2c11cebf6d96421912
+          approval_fingerprint: sha256:5c4855806f5d58ac50db2b71459264da06b8609390ac1cd8ddbc6706ceb066ee
+          artifact_fingerprint: sha256:4b9268161414a9876b3b330312fdc696f08dd159589de50f81b1739c04f32372
+          reviewed_at: "2026-06-02T13:56:27Z"
+history:
+    created_by: human:cli
+    created_at: "2026-06-02T07:37:15Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-06-02T07:52:59Z"
+lifecycle:
+    change_history:
+        - date: "2026-06-02T07:52:59Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:cli

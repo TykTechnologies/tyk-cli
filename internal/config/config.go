@@ -27,7 +27,7 @@ type Manager struct {
 	config *types.Config
 }
 
-// NewManager creates a new configuration manager
+// reqproof:req REQ-CFG-030
 func NewManager() *Manager {
 	v := viper.New()
 	
@@ -45,7 +45,7 @@ func NewManager() *Manager {
 	}
 }
 
-// LoadConfig loads configuration from environment, config file, and flags
+// reqproof:req REQ-CFG-030
 func (m *Manager) LoadConfig() error {
 	// Try to load config file from user config directory
 	if configDir, err := os.UserConfigDir(); err == nil {
@@ -89,19 +89,19 @@ func (m *Manager) LoadConfig() error {
 	return nil
 }
 
-// GetConfig returns the current configuration
+// reqproof:req REQ-CFG-030
 func (m *Manager) GetConfig() *types.Config {
 	return m.config
 }
 
-// GetEffectiveConfig returns a config with values resolved from the active environment
+// reqproof:req REQ-CFG-001
 func (m *Manager) GetEffectiveConfig() *types.Config {
 	// In unified approach, just return the config as-is
 	// The active environment is accessed via GetActiveEnvironment()
 	return m.config
 }
 
-// SetFromFlags updates the current environment with values from command line flags
+// reqproof:req REQ-CFG-001
 func (m *Manager) SetFromFlags(dashURL, authToken, orgID string) {
 	// Get or create a temporary environment for flag overrides
 	activeEnv, err := m.config.GetActiveEnvironment()
@@ -129,7 +129,7 @@ func (m *Manager) SetFromFlags(dashURL, authToken, orgID string) {
 	}
 }
 
-// SaveEnvironment saves an environment to the configuration
+// reqproof:req REQ-CFG-031
 func (m *Manager) SaveEnvironment(env *types.Environment, setAsDefault bool) error {
 	if m.config.Environments == nil {
 		m.config.Environments = make(map[string]*types.Environment)
@@ -144,7 +144,7 @@ func (m *Manager) SaveEnvironment(env *types.Environment, setAsDefault bool) err
 	return nil
 }
 
-// GetEnvironment returns a specific environment
+// reqproof:req REQ-CFG-031
 func (m *Manager) GetEnvironment(name string) (*types.Environment, error) {
 	if m.config.Environments == nil {
 		return nil, fmt.Errorf("no environments configured")
@@ -158,7 +158,7 @@ func (m *Manager) GetEnvironment(name string) (*types.Environment, error) {
 	return env, nil
 }
 
-// ListEnvironments returns all configured environments
+// reqproof:req REQ-CFG-031
 func (m *Manager) ListEnvironments() map[string]*types.Environment {
 	if m.config.Environments == nil {
 		return make(map[string]*types.Environment)
@@ -166,7 +166,7 @@ func (m *Manager) ListEnvironments() map[string]*types.Environment {
 	return m.config.Environments
 }
 
-// SetDefaultEnvironment sets the default environment
+// reqproof:req REQ-CFG-031
 func (m *Manager) SetDefaultEnvironment(name string) error {
 	if m.config.Environments == nil || m.config.Environments[name] == nil {
 		return fmt.Errorf("environment '%s' not found", name)
@@ -176,7 +176,7 @@ func (m *Manager) SetDefaultEnvironment(name string) error {
 	return nil
 }
 
-// GetViperInstance returns the underlying viper instance for testing
+// reqproof:req REQ-CFG-030
 func (m *Manager) GetViperInstance() *viper.Viper {
 	return m.viper
 }

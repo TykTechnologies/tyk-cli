@@ -13,7 +13,7 @@ import (
 	"github.com/tyktech/tyk-cli/pkg/types"
 )
 
-// NewConfigCommand creates the 'tyk config' command for unified environment management
+// reqproof:req REQ-CFG-001
 func NewConfigCommand() *cobra.Command {
 	configCmd := &cobra.Command{
 		Use:   "config",
@@ -41,7 +41,7 @@ Examples:
 	return configCmd
 }
 
-// NewConfigListCommand creates the 'tyk config list' command
+// reqproof:req REQ-CFG-031
 func NewConfigListCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
@@ -53,7 +53,7 @@ func NewConfigListCommand() *cobra.Command {
 	return cmd
 }
 
-// NewConfigUseCommand creates the 'tyk config use' command  
+// reqproof:req REQ-CFG-003
 func NewConfigUseCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "use [environment-name]",
@@ -66,7 +66,7 @@ func NewConfigUseCommand() *cobra.Command {
 	return cmd
 }
 
-// NewConfigCurrentCommand creates the 'tyk config current' command
+// reqproof:req REQ-CFG-001
 func NewConfigCurrentCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "current",
@@ -78,7 +78,7 @@ func NewConfigCurrentCommand() *cobra.Command {
 	return cmd
 }
 
-// NewConfigAddCommand creates the 'tyk config add' command
+// reqproof:req REQ-CFG-031
 func NewConfigAddCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add <environment-name>",
@@ -104,7 +104,7 @@ Examples:
 	return cmd
 }
 
-// NewConfigSetCommand creates the 'tyk config set' command
+// reqproof:req REQ-CFG-031
 func NewConfigSetCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "set",
@@ -128,7 +128,7 @@ Examples:
 	return cmd
 }
 
-// NewConfigRemoveCommand creates the 'tyk config remove' command
+// reqproof:req REQ-CFG-031
 func NewConfigRemoveCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "remove <environment-name>",
@@ -141,6 +141,7 @@ func NewConfigRemoveCommand() *cobra.Command {
 	return cmd
 }
 
+// reqproof:req REQ-CFG-004
 func runConfigList(cmd *cobra.Command, args []string) error {
 	manager := config.NewManager()
 	if err := manager.LoadConfig(); err != nil {
@@ -189,6 +190,7 @@ func runConfigList(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+// reqproof:req REQ-CFG-003
 func runConfigUse(cmd *cobra.Command, args []string) error {
 	manager := config.NewManager()
 	if err := manager.LoadConfig(); err != nil {
@@ -239,6 +241,7 @@ func runConfigUse(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+// reqproof:req REQ-CFG-001
 func runConfigCurrent(cmd *cobra.Command, args []string) error {
 	manager := config.NewManager()
 	if err := manager.LoadConfig(); err != nil {
@@ -246,7 +249,7 @@ func runConfigCurrent(cmd *cobra.Command, args []string) error {
 	}
 
 	cfg := manager.GetConfig()
-	
+
 	if cfg.DefaultEnvironment == "" {
 		yellow := color.New(color.FgYellow)
 		yellow.Println("No default environment set.")
@@ -271,6 +274,7 @@ func runConfigCurrent(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+// reqproof:req REQ-CFG-031
 func runConfigAdd(cmd *cobra.Command, args []string) error {
 	envName := args[0]
 	dashboardURL, _ := cmd.Flags().GetString("dashboard-url")
@@ -321,6 +325,7 @@ func runConfigAdd(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+// reqproof:req REQ-CFG-005
 func runConfigSet(cmd *cobra.Command, args []string) error {
 	dashboardURL, _ := cmd.Flags().GetString("dashboard-url")
 	authToken, _ := cmd.Flags().GetString("auth-token")
@@ -386,6 +391,7 @@ func runConfigSet(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+// reqproof:req REQ-CFG-006
 func runConfigRemove(cmd *cobra.Command, args []string) error {
 	envName := args[0]
 
@@ -429,6 +435,7 @@ func runConfigRemove(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+// reqproof:req REQ-CFG-030
 func saveConfigToFile(manager *config.Manager) error {
 	configDir, err := getConfigDir()
 	if err != nil {
@@ -451,6 +458,7 @@ func saveConfigToFile(manager *config.Manager) error {
 	return nil
 }
 
+// reqproof:req REQ-CFG-030
 func getConfigDir() (string, error) {
 	userConfigDir, err := os.UserConfigDir()
 	if err != nil {
@@ -459,6 +467,7 @@ func getConfigDir() (string, error) {
 	return filepath.Join(userConfigDir, "tyk"), nil
 }
 
+// reqproof:req REQ-CFG-030
 func generateTOMLConfigUnified(cfg *types.Config) string {
 	content := "# Tyk CLI Configuration\n"
 	content += "# This file stores named environments for the Tyk CLI\n"
@@ -477,13 +486,17 @@ func generateTOMLConfigUnified(cfg *types.Config) string {
 			content += fmt.Sprintf("dashboard_url = \"%s\"\n", env.DashboardURL)
 			content += fmt.Sprintf("auth_token = \"%s\"\n", env.AuthToken)
 			content += fmt.Sprintf("org_id = \"%s\"\n", env.OrgID)
+			if env.TimeoutSeconds > 0 {
+				content += fmt.Sprintf("timeout_seconds = %d\n", env.TimeoutSeconds)
+			}
 			content += "\n"
 		}
 	}
-	
+
 	return content
 }
 
+// reqproof:req REQ-CFG-002
 func maskToken(token string) string {
 	if token == "" {
 		return "(not set)"
@@ -494,6 +507,7 @@ func maskToken(token string) string {
 	return token[:4] + "****" + token[len(token)-4:]
 }
 
+// reqproof:req REQ-CFG-003
 func selectEnvironmentInteractively(environments map[string]*types.Environment, currentDefault string) (string, error) {
 	// Create sorted list of environment names for consistent display
 	var envNames []string

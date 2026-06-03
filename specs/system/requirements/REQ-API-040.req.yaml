@@ -1,0 +1,55 @@
+id: REQ-API-040
+version: 1
+status: review
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when versions_subcommand_invoked the api shall immediately satisfy (placeholder_message_emitted & no_dashboard_contact_made)
+description: tyk api versions list/create/switch-default are reserved placeholder subcommands for a future Phase 3 implementation; current invocation emits a fixed placeholder message and returns without contacting the Dashboard. This requirement documents the placeholder contract so the surface is auditable until full implementation lands.
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+parent: STK-REQ-001
+component: api
+rationale: ""
+tags: []
+variables: []
+traces:
+    satisfies:
+        - STK-REQ-001
+    reviewed_at: "2026-06-02T13:51:17.110318Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:1f84cd8d612d40563a00ab887e63f27f098e73ec04902f0925463720d79066ef
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: approved
+        reviewer: tomas@tyk.io
+        reviewed_at: "2026-06-01T14:53:50Z"
+        ai_generated: false
+    impact_reviews:
+        - requirement: REQ-API-040
+          artifact: internal/cli/api.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Closed 9 known-issues across api/policy/config and oas. New SYS-REQs (REQ-API-014/024/025/026/027/040, REQ-POL-024/025/026/027, REQ-CFG-004/005/006/007) added with FRETish. Code changes: new exit codes (5/6/7/8), classifyDashboardError + helpers in errors.go, ValidateOASStructure in oas/transform.go, TimeoutSeconds field on Environment, runner re-annotations. Tests added in transform_test.go (OAS validator), client_test.go (env timeout), config_crud_test.go (flag combinations), exit_codes_test.go (401/403/429/5xx), api_versions_test.go (placeholders), api_import_update_test.go (no-Dashboard contact).'
+          base: origin/main
+          requirement_fingerprint: sha256:1f84cd8d612d40563a00ab887e63f27f098e73ec04902f0925463720d79066ef
+          approval_fingerprint: sha256:16072eec0750c2b25839b017f0bc2dfe63bc472fb84c587299112afdbeb9e899
+          artifact_fingerprint: sha256:99052ec76bfed7b34bed8475f5aa534173b3a983b1a0a172a58644ad9d3eea50
+          reviewed_at: "2026-06-02T08:37:11Z"
+history:
+    created_by: human:cli
+    created_at: "2026-06-01T14:53:50Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-06-01T14:53:50Z"
+lifecycle:
+    change_history:
+        - date: "2026-06-01T14:53:50Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:cli

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -17,6 +18,7 @@ import (
 // Test data helpers
 // ---------------------------------------------------------------------------
 
+// reqproof:req REQ-POL-001
 func sampleDashboardPolicy(id, name string, rate int64) types.DashboardPolicy {
 	return types.DashboardPolicy{
 		MID:              id,
@@ -38,6 +40,59 @@ func sampleDashboardPolicy(id, name string, rate int64) types.DashboardPolicy {
 // ListPolicies
 // ---------------------------------------------------------------------------
 
+// reqproof:req REQ-POL-001
+func TestClient_ListPolicies_ZeroPage(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// page <= 0 must NOT append the `p=` query parameter.
+		assert.Empty(t, r.URL.RawQuery)
+		_ = json.NewEncoder(w).Encode(types.DashboardPolicyListResponse{Data: nil, Pages: 0})
+	}))
+	defer server.Close()
+
+	config := createTestConfig(server.URL, "test-token", "test-org")
+	client, err := NewClient(config)
+	require.NoError(t, err)
+
+	result, err := client.ListPolicies(context.Background(), 0)
+	require.NoError(t, err)
+	assert.Empty(t, result.Data)
+}
+
+// reqproof:req REQ-POL-001
+func TestClient_ListPolicies_HandleResponseError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(`{"status":500,"message":"server error"}`))
+	}))
+	defer server.Close()
+
+	config := createTestConfig(server.URL, "test-token", "test-org")
+	client, err := NewClient(config)
+	require.NoError(t, err)
+
+	_, err = client.ListPolicies(context.Background(), 1)
+	require.Error(t, err)
+	errResp, ok := err.(*types.ErrorResponse)
+	require.True(t, ok)
+	assert.Equal(t, 500, errResp.Status)
+}
+
+// reqproof:req REQ-POL-001
+func TestClient_ListPolicies_NetworkFailure(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {}))
+	closedURL := server.URL
+	server.Close()
+
+	config := createTestConfig(closedURL, "test-token", "test-org")
+	client, err := NewClient(config)
+	require.NoError(t, err)
+	client.SetTimeout(200 * time.Millisecond)
+
+	_, err = client.ListPolicies(context.Background(), 0)
+	require.Error(t, err)
+}
+
+// reqproof:req REQ-POL-001
 func TestClient_ListPolicies(t *testing.T) {
 	gold := sampleDashboardPolicy("gold", "Gold Plan", 1000)
 	silver := sampleDashboardPolicy("silver", "Silver Plan", 500)
@@ -68,6 +123,7 @@ func TestClient_ListPolicies(t *testing.T) {
 	assert.Equal(t, "silver", result.Data[1].MID)
 }
 
+// reqproof:req REQ-POL-001
 func TestClient_ListPolicies_Empty(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		resp := types.DashboardPolicyListResponse{
@@ -91,6 +147,7 @@ func TestClient_ListPolicies_Empty(t *testing.T) {
 // GetPolicy
 // ---------------------------------------------------------------------------
 
+// reqproof:req REQ-POL-002
 func TestClient_GetPolicy(t *testing.T) {
 	gold := sampleDashboardPolicy("gold", "Gold Plan", 1000)
 
@@ -112,6 +169,7 @@ func TestClient_GetPolicy(t *testing.T) {
 	assert.Equal(t, int64(1000), result.Rate)
 }
 
+// reqproof:req REQ-POL-022
 func TestClient_GetPolicy_NotFound(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
@@ -137,6 +195,7 @@ func TestClient_GetPolicy_NotFound(t *testing.T) {
 // CreatePolicy
 // ---------------------------------------------------------------------------
 
+// reqproof:req REQ-POL-003
 func TestClient_CreatePolicy(t *testing.T) {
 	policy := sampleDashboardPolicy("new-policy", "New Policy", 500)
 
@@ -171,6 +230,7 @@ func TestClient_CreatePolicy(t *testing.T) {
 // UpdatePolicy
 // ---------------------------------------------------------------------------
 
+// reqproof:req REQ-POL-003
 func TestClient_UpdatePolicy(t *testing.T) {
 	policy := sampleDashboardPolicy("gold", "Gold Plan Updated", 2000)
 
@@ -203,6 +263,7 @@ func TestClient_UpdatePolicy(t *testing.T) {
 // DeletePolicy
 // ---------------------------------------------------------------------------
 
+// reqproof:req REQ-POL-004
 func TestClient_DeletePolicy(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodDelete, r.Method)
@@ -223,6 +284,7 @@ func TestClient_DeletePolicy(t *testing.T) {
 	require.NoError(t, err)
 }
 
+// reqproof:req REQ-POL-022
 func TestClient_DeletePolicy_NotFound(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
@@ -241,4 +303,70 @@ func TestClient_DeletePolicy_NotFound(t *testing.T) {
 	errorResp, ok := err.(*types.ErrorResponse)
 	require.True(t, ok, "expected *types.ErrorResponse, got %T", err)
 	assert.Equal(t, 404, errorResp.Status)
+}
+
+// ---------------------------------------------------------------------------
+// doRequest network-failure coverage for every policy verb.
+// ---------------------------------------------------------------------------
+
+// reqproof:req REQ-POL-002
+func TestClient_GetPolicy_NetworkFailure(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {}))
+	closedURL := server.URL
+	server.Close()
+
+	config := createTestConfig(closedURL, "test-token", "test-org")
+	client, err := NewClient(config)
+	require.NoError(t, err)
+	client.SetTimeout(200 * time.Millisecond)
+
+	_, err = client.GetPolicy(context.Background(), "x")
+	require.Error(t, err)
+}
+
+// reqproof:req REQ-POL-003
+func TestClient_CreatePolicy_NetworkFailure(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {}))
+	closedURL := server.URL
+	server.Close()
+
+	config := createTestConfig(closedURL, "test-token", "test-org")
+	client, err := NewClient(config)
+	require.NoError(t, err)
+	client.SetTimeout(200 * time.Millisecond)
+
+	policy := sampleDashboardPolicy("x", "X", 1)
+	err = client.CreatePolicy(context.Background(), &policy)
+	require.Error(t, err)
+}
+
+// reqproof:req REQ-POL-003
+func TestClient_UpdatePolicy_NetworkFailure(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {}))
+	closedURL := server.URL
+	server.Close()
+
+	config := createTestConfig(closedURL, "test-token", "test-org")
+	client, err := NewClient(config)
+	require.NoError(t, err)
+	client.SetTimeout(200 * time.Millisecond)
+
+	policy := sampleDashboardPolicy("x", "X", 1)
+	err = client.UpdatePolicy(context.Background(), "x", &policy)
+	require.Error(t, err)
+}
+
+// reqproof:req REQ-POL-004
+func TestClient_DeletePolicy_NetworkFailure(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {}))
+	closedURL := server.URL
+	server.Close()
+
+	config := createTestConfig(closedURL, "test-token", "test-org")
+	client, err := NewClient(config)
+	require.NoError(t, err)
+	client.SetTimeout(200 * time.Millisecond)
+
+	err = client.DeletePolicy(context.Background(), "x")
+	require.Error(t, err)
 }

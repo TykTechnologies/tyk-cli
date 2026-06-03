@@ -18,13 +18,15 @@ type Config struct {
 // Environment represents a named configuration environment
 // In the unified model, environments ARE the configuration
 type Environment struct {
-	Name         string `mapstructure:"name" yaml:"name" json:"name"`
-	DashboardURL string `mapstructure:"dashboard_url" yaml:"dashboard_url" json:"dashboard_url"`
-	AuthToken    string `mapstructure:"auth_token" yaml:"auth_token" json:"auth_token"`
-	OrgID        string `mapstructure:"org_id" yaml:"org_id" json:"org_id"`
+	Name           string `mapstructure:"name"            yaml:"name"            json:"name"`
+	DashboardURL   string `mapstructure:"dashboard_url"   yaml:"dashboard_url"   json:"dashboard_url"`
+	AuthToken      string `mapstructure:"auth_token"      yaml:"auth_token"      json:"auth_token"`
+	OrgID          string `mapstructure:"org_id"          yaml:"org_id"          json:"org_id"`
+	TimeoutSeconds int    `mapstructure:"timeout_seconds" yaml:"timeout_seconds" json:"timeout_seconds,omitempty"`
 }
 
 // Validate checks if the configuration is valid
+// reqproof:req REQ-CFG-010
 func (c *Config) Validate() error {
 	// Must have at least one environment
 	if len(c.Environments) == 0 {
@@ -46,7 +48,7 @@ func (c *Config) Validate() error {
 	return env.Validate()
 }
 
-// GetActiveEnvironment returns the active environment configuration
+// reqproof:req REQ-CFG-030
 func (c *Config) GetActiveEnvironment() (*Environment, error) {
 	if c.DefaultEnvironment == "" || len(c.Environments) == 0 {
 		return nil, errors.New("no environments configured or no default environment set")
@@ -60,7 +62,7 @@ func (c *Config) GetActiveEnvironment() (*Environment, error) {
 	return env, nil
 }
 
-// GetEffectiveConfig returns the configuration values to use (from environment or direct config)
+// reqproof:req REQ-CFG-001
 func (c *Config) GetEffectiveConfig() (string, string, string, error) {
 	env, err := c.GetActiveEnvironment()
 	if err != nil {
@@ -69,7 +71,7 @@ func (c *Config) GetEffectiveConfig() (string, string, string, error) {
 	return env.DashboardURL, env.AuthToken, env.OrgID, nil
 }
 
-// Validate checks if an environment configuration is valid
+// reqproof:req REQ-CFG-010
 func (e *Environment) Validate() error {
 	if e.Name == "" {
 		return errors.New("environment name is required")
@@ -97,6 +99,13 @@ func (e *Environment) Validate() error {
 }
 
 // ExitCode represents different types of CLI exit codes
+//
+// reqproof:req REQ-API-020
+// reqproof:req REQ-API-021
+// reqproof:req REQ-CFG-020
+// reqproof:req REQ-CFG-021
+// reqproof:req REQ-POL-020
+// reqproof:req REQ-POL-021
 type ExitCode int
 
 const (
@@ -105,6 +114,10 @@ const (
 	ExitBadArgs     ExitCode = 2 // Bad arguments (missing file, invalid flag combination)
 	ExitNotFound    ExitCode = 3 // Not found (API or version)
 	ExitConflict    ExitCode = 4 // Conflict (e.g. creating an API that already exists without --force)
+	ExitAuthFailed  ExitCode = 5 // Authentication failed (HTTP 401 — invalid or expired token)
+	ExitForbidden   ExitCode = 6 // Forbidden (HTTP 403 — token lacks permission)
+	ExitRateLimited ExitCode = 7 // Rate-limited by Dashboard (HTTP 429)
+	ExitServerError ExitCode = 8 // Dashboard server error (HTTP 5xx after retry attempts)
 )
 
 // OutputFormat represents the output format for CLI commands

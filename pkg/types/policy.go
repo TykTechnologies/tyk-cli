@@ -45,9 +45,7 @@ type AccessEntry struct {
 // as the string representation.
 type Duration string
 
-// UnmarshalYAML implements yaml.Unmarshaler for Duration.
-// It handles both string nodes (e.g. "30d") and integer nodes (e.g. 60).
-// All YAML tag types are stored as their raw string value.
+// reqproof:req REQ-POL-010
 func (d *Duration) UnmarshalYAML(value *yaml.Node) error {
 	*d = Duration(value.Value)
 	return nil
@@ -108,7 +106,7 @@ type ValidationError struct {
 	Kind    string `json:"kind"` // "schema", "duration", or "selector"
 }
 
-// Error implements the error interface.
+// reqproof:req REQ-POL-006
 func (e *ValidationError) Error() string {
 	return fmt.Sprintf("%s: %s (%s)", e.Field, e.Message, e.Kind)
 }
@@ -116,7 +114,7 @@ func (e *ValidationError) Error() string {
 // ValidationErrors collects multiple validation failures.
 type ValidationErrors []ValidationError
 
-// Error implements the error interface.
+// reqproof:req REQ-POL-006
 func (ve ValidationErrors) Error() string {
 	if len(ve) == 0 {
 		return "no validation errors"
@@ -127,7 +125,7 @@ func (ve ValidationErrors) Error() string {
 	return fmt.Sprintf("%d validation errors: %s (and %d more)", len(ve), ve[0].Error(), len(ve)-1)
 }
 
-// MarshalJSON implements json.Marshaler for AccessRight to handle nil AllowedURLs as empty array.
+// reqproof:req REQ-POL-007
 func (ar *AccessRight) MarshalJSON() ([]byte, error) {
 	type Alias AccessRight
 	a := &struct {
@@ -146,7 +144,7 @@ func (ar *AccessRight) MarshalJSON() ([]byte, error) {
 		a.Limit = json.RawMessage("null")
 	} else {
 		b, err := json.Marshal(ar.Limit)
-		if err != nil {
+		if err != nil { //mcdc:ignore json.Marshal cannot fail for *RateQuotaLimit (struct of int64 fields); defensive plumbing only
 			return nil, err
 		}
 		a.Limit = b

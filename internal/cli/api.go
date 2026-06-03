@@ -21,7 +21,7 @@ import (
     "gopkg.in/yaml.v3"
 )
 
-// truncateWithEllipsis shortens s to fit max characters, adding "..." when needed
+// reqproof:req REQ-API-001
 func truncateWithEllipsis(s string, max int) string {
     if max <= 0 {
         return ""
@@ -36,7 +36,7 @@ func truncateWithEllipsis(s string, max int) string {
     return s[:max-3] + "..."
 }
 
-// computeTableLayout returns column widths for ID/Name/Path and whether to use a stacked fallback.
+// reqproof:req REQ-API-001
 func computeTableLayout(termWidth int) (idW, nameW, pathW int, stacked bool) {
     if termWidth < 20 {
         return 0, 0, 0, true
@@ -109,11 +109,13 @@ func computeTableLayout(termWidth int) (idW, nameW, pathW int, stacked bool) {
     return idW, nameW, pathW, false
 }
 
+// reqproof:req REQ-API-001
 func hideCursor(w io.Writer) { fmt.Fprint(w, "\x1b[?25l") }
+
+// reqproof:req REQ-API-001
 func showCursor(w io.Writer) { fmt.Fprint(w, "\x1b[?25h") }
 
-// readKey reads a single key or interprets ESC [ C/D as right/left arrows.
-// It returns 'R' for right, 'L' for left, or the raw byte for other keys.
+// reqproof:req REQ-API-001
 func readKey(r io.Reader) (byte, error) {
     buf := make([]byte, 1)
     if _, err := os.Stdin.Read(buf); err != nil { // use stdin directly (raw mode)
@@ -137,13 +139,13 @@ func readKey(r io.Reader) (byte, error) {
     return 27, nil // plain ESC
 }
 
-// alPrintf writes at column 0 for the current line to avoid drift from prior content.
+// reqproof:req REQ-API-001
 func alPrintf(w io.Writer, format string, a ...interface{}) {
     fmt.Fprint(w, "\x1b[0G")
     fmt.Fprintf(w, format, a...)
 }
 
-// NewAPICommand creates the 'tyk api' command and its subcommands
+// reqproof:req REQ-API-001
 func NewAPICommand() *cobra.Command {
 	apiCmd := &cobra.Command{
 		Use:   "api",
@@ -164,7 +166,7 @@ func NewAPICommand() *cobra.Command {
 	return apiCmd
 }
 
-// NewAPIVersionsCommand creates the 'tyk api versions' command and its subcommands
+// reqproof:req REQ-API-002
 func NewAPIVersionsCommand() *cobra.Command {
 	versionsCmd := &cobra.Command{
 		Use:   "versions",
@@ -182,6 +184,7 @@ func NewAPIVersionsCommand() *cobra.Command {
 
 // Placeholder functions for version commands - these will be implemented in phase 3
 
+// reqproof:req REQ-API-040
 func NewAPIVersionsListCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "list",
@@ -193,6 +196,7 @@ func NewAPIVersionsListCommand() *cobra.Command {
 	}
 }
 
+// reqproof:req REQ-API-040
 func NewAPIVersionsCreateCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "create",
@@ -204,6 +208,7 @@ func NewAPIVersionsCreateCommand() *cobra.Command {
 	}
 }
 
+// reqproof:req REQ-API-040
 func NewAPIVersionsSwitchDefaultCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "switch-default",
@@ -217,6 +222,7 @@ func NewAPIVersionsSwitchDefaultCommand() *cobra.Command {
 
 // Placeholder functions for API commands - these will be implemented in the next phases
 
+// reqproof:req REQ-API-003
 func NewAPICreateCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
@@ -253,6 +259,7 @@ After creation, you can:
 	return cmd
 }
 
+// reqproof:req REQ-API-002
 func NewAPIGetCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get <api-id>",
@@ -272,6 +279,7 @@ suitable for use with standard OpenAPI tooling.`,
 	return cmd
 }
 
+// reqproof:req REQ-API-004
 func NewAPIImportOASCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "import-oas",
@@ -295,6 +303,7 @@ For Tyk-enhanced OAS files, use 'tyk api apply' instead.`,
 	return cmd
 }
 
+// reqproof:req REQ-API-005
 func NewAPIApplyCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "apply",
@@ -326,6 +335,7 @@ Examples:
 	return cmd
 }
 
+// reqproof:req REQ-API-006
 func NewAPIUpdateOASCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update-oas <api-id>",
@@ -351,6 +361,7 @@ For full API updates including Tyk config, use 'tyk api apply' instead.`,
 	return cmd
 }
 
+// reqproof:req REQ-API-007
 func NewAPIDeleteCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete <api-id>",
@@ -365,7 +376,7 @@ func NewAPIDeleteCommand() *cobra.Command {
 	return cmd
 }
 
-// NewAPIListCommand creates the 'tyk api list' command
+// reqproof:req REQ-API-001
 func NewAPIListCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
@@ -380,7 +391,7 @@ func NewAPIListCommand() *cobra.Command {
 	return cmd
 }
 
-// runAPIList implements the 'tyk api list' command
+// reqproof:req REQ-API-001
 func runAPIList(cmd *cobra.Command, args []string) error {
 	page, _ := cmd.Flags().GetInt("page")
 	interactive, _ := cmd.Flags().GetBool("interactive")
@@ -420,6 +431,9 @@ func runAPIList(cmd *cobra.Command, args []string) error {
     // Use dashboard aggregate endpoint for broader compatibility in CLI
     apis, err := c.ListAPIsDashboard(ctx, page)
 	if err != nil {
+		if cls := classifyDashboardError(err, "list APIs"); cls != nil {
+			return cls
+		}
 		return fmt.Errorf("failed to list APIs: %w", err)
 	}
 
@@ -439,7 +453,7 @@ func runAPIList(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// displayAPIPage displays a page of APIs in a formatted table
+// reqproof:req REQ-API-001
 func displayAPIPage(apis []*types.OASAPI, page int, interactive bool) {
 	if len(apis) == 0 {
 		if interactive {
@@ -524,7 +538,7 @@ func displayAPIPage(apis []*types.OASAPI, page int, interactive bool) {
 	}
 }
 
-// runInteractiveAPIList handles the interactive pagination mode
+// reqproof:req REQ-API-001
 func runInteractiveAPIList(c *client.Client, startPage int) error {
     // Make sure we're in a terminal that supports interactive input
     if !term.IsTerminal(int(os.Stdin.Fd())) {
@@ -589,7 +603,7 @@ func runInteractiveAPIList(c *client.Client, startPage int) error {
 	}
 }
 
-// runAPIGet implements the 'tyk api get' command
+// reqproof:req REQ-API-002
 func runAPIGet(cmd *cobra.Command, args []string) error {
 	apiID := args[0]
 	versionName, _ := cmd.Flags().GetString("version-name")
@@ -631,7 +645,7 @@ func runAPIGet(cmd *cobra.Command, args []string) error {
 	return outputAPIAsHuman(api, versionName, oasOnly)
 }
 
-// outputAPIAsJSON outputs the API in JSON format
+// reqproof:req REQ-API-002
 func outputAPIAsJSON(api *types.OASAPI, oasOnly bool) error {
 	encoder := json.NewEncoder(os.Stdout)
 	encoder.SetIndent("", "  ")
@@ -650,7 +664,7 @@ func outputAPIAsJSON(api *types.OASAPI, oasOnly bool) error {
 	return encoder.Encode(api)
 }
 
-// outputAPIAsHuman outputs the API in human-readable format
+// reqproof:req REQ-API-002
 func outputAPIAsHuman(api *types.OASAPI, requestedVersion string, oasOnly bool) error {
 	if api == nil {
 		return fmt.Errorf("API data is nil")
@@ -755,7 +769,7 @@ func outputAPIAsHuman(api *types.OASAPI, requestedVersion string, oasOnly bool) 
 	return nil
 }
 
-// runAPIImportOAS implements the 'tyk api import-oas' command
+// reqproof:req REQ-API-004
 func runAPIImportOAS(cmd *cobra.Command, args []string) error {
 	// Get flags
 	filePath, _ := cmd.Flags().GetString("file")
@@ -790,6 +804,11 @@ func runAPIImportOAS(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	// Structural validation before any Dashboard round-trip (REQ-API-014).
+	if vErr := oas.ValidateOASStructure(oasData); vErr != nil {
+		return &ExitError{Code: int(types.ExitBadArgs), Message: vErr.Error()}
+	}
+
 	// Auto-generate x-tyk-api-gateway extensions for plain OAS documents
 	if !oas.HasTykExtensions(oasData) {
 		oasData, err = oas.AddTykExtensions(oasData)
@@ -820,9 +839,11 @@ func runAPIImportOAS(cmd *cobra.Command, args []string) error {
 	// Create the API
 	api, err := c.CreateOASAPI(ctx, oasData)
 	if err != nil {
-		// Check for conflict errors
-		if strings.Contains(err.Error(), "409") || strings.Contains(err.Error(), "conflict") {
-			return &ExitError{Code: 4, Message: fmt.Sprintf("API import failed due to conflict: %v", err)}
+		if isConflictError(err) {
+			return &ExitError{Code: int(types.ExitConflict), Message: fmt.Sprintf("API import failed due to conflict: %v", err)}
+		}
+		if cls := classifyDashboardError(err, "import API"); cls != nil {
+			return cls
 		}
 		return fmt.Errorf("failed to import API: %w", err)
 	}
@@ -837,7 +858,7 @@ func runAPIImportOAS(cmd *cobra.Command, args []string) error {
 	return outputImportedAPIAsHuman(api, versionName)
 }
 
-// extractVersionFromOAS extracts version from OAS info.version field
+// reqproof:req REQ-API-004
 func extractVersionFromOAS(oasData map[string]interface{}) string {
 	if info, ok := oasData["info"].(map[string]interface{}); ok {
 		if version, ok := info["version"].(string); ok && version != "" {
@@ -847,7 +868,7 @@ func extractVersionFromOAS(oasData map[string]interface{}) string {
 	return ""
 }
 
-// outputImportedAPIAsJSON outputs the imported API result in JSON format
+// reqproof:req REQ-API-004
 func outputImportedAPIAsJSON(api *types.OASAPI, versionName string) error {
 	result := map[string]interface{}{
 		"api_id":          api.ID,
@@ -863,7 +884,7 @@ func outputImportedAPIAsJSON(api *types.OASAPI, versionName string) error {
 	return encoder.Encode(result)
 }
 
-// outputImportedAPIAsHuman outputs the imported API result in human-readable format
+// reqproof:req REQ-API-004
 func outputImportedAPIAsHuman(api *types.OASAPI, versionName string) error {
 	green := color.New(color.FgGreen, color.Bold)
 	blue := color.New(color.FgBlue, color.Bold)
@@ -886,8 +907,7 @@ func outputImportedAPIAsHuman(api *types.OASAPI, versionName string) error {
 	return nil
 }
 
-// stripExistingAPIID removes x-tyk-api-gateway.info.id from OAS document
-// This ensures create command always generates new ID
+// reqproof:req REQ-API-010
 func stripExistingAPIID(oasData map[string]interface{}) map[string]interface{} {
 	if xTyk, exists := oasData["x-tyk-api-gateway"]; exists {
 		if xTykMap, ok := xTyk.(map[string]interface{}); ok {
@@ -901,7 +921,7 @@ func stripExistingAPIID(oasData map[string]interface{}) map[string]interface{} {
 	return oasData
 }
 
-// runAPIApply implements the 'tyk api apply' command (declarative upsert)
+// reqproof:req REQ-API-005
 func runAPIApply(cmd *cobra.Command, args []string) error {
     // Get flags
     filePath, _ := cmd.Flags().GetString("file")
@@ -970,7 +990,7 @@ func runAPIApply(cmd *cobra.Command, args []string) error {
     return createNewAPIViaApply(cmd, config, oasData, versionName, setDefault)
 }
 
-// updateExistingAPI handles updating an existing API via apply
+// reqproof:req REQ-API-005
 func updateExistingAPI(cmd *cobra.Command, config *types.Config, apiID string, oasData map[string]interface{}, versionName string, setDefault bool) error {
 	// Create client
 	c, err := client.NewClient(config)
@@ -1012,8 +1032,8 @@ func updateExistingAPI(cmd *cobra.Command, config *types.Config, apiID string, o
 
             api, cerr := c.CreateOASAPI(ctx, oasData)
             if cerr != nil {
-                if strings.Contains(cerr.Error(), "409") || strings.Contains(cerr.Error(), "conflict") {
-                    return &ExitError{Code: 4, Message: fmt.Sprintf("API creation failed due to conflict: %v", cerr)}
+                if isConflictError(cerr) {
+                    return &ExitError{Code: int(types.ExitConflict), Message: fmt.Sprintf("API creation failed due to conflict: %v", cerr)}
                 }
                 return fmt.Errorf("failed to create API: %w", cerr)
             }
@@ -1053,7 +1073,7 @@ func updateExistingAPI(cmd *cobra.Command, config *types.Config, apiID string, o
 	return outputUpdatedAPIAsHuman(api, versionName)
 }
 
-// createNewAPIViaApply handles creating a new API via apply
+// reqproof:req REQ-API-005
 func createNewAPIViaApply(cmd *cobra.Command, config *types.Config, oasData map[string]interface{}, versionName string, setDefault bool) error {
 	// Auto-generate x-tyk-api-gateway extensions for plain OAS documents
 	if !oas.HasTykExtensions(oasData) {
@@ -1088,9 +1108,8 @@ func createNewAPIViaApply(cmd *cobra.Command, config *types.Config, oasData map[
 	// Create the API
 	api, err := c.CreateOASAPI(ctx, oasData)
 	if err != nil {
-		// Check for conflict errors
-		if strings.Contains(err.Error(), "409") || strings.Contains(err.Error(), "conflict") {
-			return &ExitError{Code: 4, Message: fmt.Sprintf("API creation failed due to conflict: %v", err)}
+		if isConflictError(err) {
+			return &ExitError{Code: int(types.ExitConflict), Message: fmt.Sprintf("API creation failed due to conflict: %v", err)}
 		}
 		return fmt.Errorf("failed to create API: %w", err)
 	}
@@ -1105,7 +1124,7 @@ func createNewAPIViaApply(cmd *cobra.Command, config *types.Config, oasData map[
 	return outputImportedAPIAsHuman(api, versionName)
 }
 
-// runAPIUpdateOAS implements the 'tyk api update-oas' command
+// reqproof:req REQ-API-006
 func runAPIUpdateOAS(cmd *cobra.Command, args []string) error {
 	// Get API ID from args
 	apiID := args[0]
@@ -1143,10 +1162,15 @@ func runAPIUpdateOAS(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	// Structural validation before any Dashboard round-trip (REQ-API-014).
+	if vErr := oas.ValidateOASStructure(oasData); vErr != nil {
+		return &ExitError{Code: int(types.ExitBadArgs), Message: vErr.Error()}
+	}
+
 	return updateExistingAPIWithOAS(cmd, config, apiID, oasData)
 }
 
-// runAPIDelete implements the 'tyk api delete' command
+// reqproof:req REQ-API-007
 func runAPIDelete(cmd *cobra.Command, args []string) error {
 	apiID := args[0]
 	skipConfirmation, _ := cmd.Flags().GetBool("yes")
@@ -1172,6 +1196,9 @@ func runAPIDelete(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		if strings.Contains(err.Error(), "404") || strings.Contains(err.Error(), "not found") {
 			return &ExitError{Code: 3, Message: fmt.Sprintf("API '%s' not found", apiID)}
+		}
+		if cls := classifyDashboardError(err, "verify API exists"); cls != nil {
+			return cls
 		}
 		return fmt.Errorf("failed to verify API exists: %w", err)
 	}
@@ -1206,7 +1233,7 @@ func runAPIDelete(cmd *cobra.Command, args []string) error {
 	return outputDeletedAPIAsHuman(apiID, api.Name)
 }
 
-// outputUpdatedAPIAsJSON outputs the updated API result in JSON format
+// reqproof:req REQ-API-006
 func outputUpdatedAPIAsJSON(api *types.OASAPI, versionName string) error {
 	result := map[string]interface{}{
 		"api_id":          api.ID,
@@ -1222,7 +1249,7 @@ func outputUpdatedAPIAsJSON(api *types.OASAPI, versionName string) error {
 	return encoder.Encode(result)
 }
 
-// outputUpdatedAPIAsHuman outputs the updated API result in human-readable format
+// reqproof:req REQ-API-006
 func outputUpdatedAPIAsHuman(api *types.OASAPI, versionName string) error {
 	green := color.New(color.FgGreen, color.Bold)
 	blue := color.New(color.FgBlue, color.Bold)
@@ -1245,7 +1272,7 @@ func outputUpdatedAPIAsHuman(api *types.OASAPI, versionName string) error {
 	return nil
 }
 
-// outputDeletedAPIAsJSON outputs the deleted API result in JSON format
+// reqproof:req REQ-API-007
 func outputDeletedAPIAsJSON(apiID string) error {
 	result := map[string]interface{}{
 		"api_id":    apiID,
@@ -1258,7 +1285,7 @@ func outputDeletedAPIAsJSON(apiID string) error {
 	return encoder.Encode(result)
 }
 
-// outputDeletedAPIAsHuman outputs the deleted API result in human-readable format
+// reqproof:req REQ-API-007
 func outputDeletedAPIAsHuman(apiID, apiName string) error {
 	green := color.New(color.FgGreen, color.Bold)
 
@@ -1270,7 +1297,7 @@ func outputDeletedAPIAsHuman(apiID, apiName string) error {
 	return nil
 }
 
-// loadOASFromFile loads and parses an OAS file from the local filesystem
+// reqproof:req REQ-API-031
 func loadOASFromFile(filePath string) (map[string]interface{}, error) {
 	// Validate and read the OAS file
 	if !filepath.IsAbs(filePath) {
@@ -1295,7 +1322,7 @@ func loadOASFromFile(filePath string) (map[string]interface{}, error) {
 	return fileInfo.Content, nil
 }
 
-// loadOASFromURL loads and parses an OAS document from a URL
+// reqproof:req REQ-API-031
 func loadOASFromURL(urlStr string) (map[string]interface{}, error) {
 	// Create HTTP client with timeout
 	client := &http.Client{
@@ -1334,7 +1361,7 @@ func loadOASFromURL(urlStr string) (map[string]interface{}, error) {
 	return oasData, nil
 }
 
-// runAPICreate implements the 'tyk api create' command
+// reqproof:req REQ-API-003
 func runAPICreate(cmd *cobra.Command, args []string) error {
 	// Get flags
 	name, _ := cmd.Flags().GetString("name")
@@ -1379,9 +1406,8 @@ func runAPICreate(cmd *cobra.Command, args []string) error {
 	// Create the API
 	api, err := c.CreateOASAPI(ctx, oasData)
 	if err != nil {
-		// Check for conflict errors
-		if strings.Contains(err.Error(), "409") || strings.Contains(err.Error(), "conflict") {
-			return &ExitError{Code: 4, Message: fmt.Sprintf("API creation failed due to conflict: %v", err)}
+		if isConflictError(err) {
+			return &ExitError{Code: int(types.ExitConflict), Message: fmt.Sprintf("API creation failed due to conflict: %v", err)}
 		}
 		return fmt.Errorf("failed to create API: %w", err)
 	}
@@ -1396,7 +1422,7 @@ func runAPICreate(cmd *cobra.Command, args []string) error {
 	return outputCreatedAPIAsHuman(api, versionName)
 }
 
-// generateOASForCreate creates a minimal OAS document with Tyk extensions for the create command
+// reqproof:req REQ-API-003
 func generateOASForCreate(name, description, version, upstreamURL, listenPath, customDomain string) (map[string]interface{}, error) {
 	// Create basic OAS structure
 	oasDoc := map[string]interface{}{
@@ -1446,7 +1472,7 @@ func generateOASForCreate(name, description, version, upstreamURL, listenPath, c
 	return oasDoc, nil
 }
 
-// outputCreatedAPIAsJSON outputs the created API result in JSON format
+// reqproof:req REQ-API-003
 func outputCreatedAPIAsJSON(api *types.OASAPI, versionName string) error {
 	result := map[string]interface{}{
 		"api_id":          api.ID,
@@ -1469,7 +1495,7 @@ func outputCreatedAPIAsJSON(api *types.OASAPI, versionName string) error {
 	return encoder.Encode(result)
 }
 
-// outputCreatedAPIAsHuman outputs the created API result in human-readable format
+// reqproof:req REQ-API-003
 func outputCreatedAPIAsHuman(api *types.OASAPI, versionName string) error {
 	green := color.New(color.FgGreen, color.Bold)
 	blue := color.New(color.FgBlue, color.Bold)
@@ -1498,7 +1524,7 @@ func outputCreatedAPIAsHuman(api *types.OASAPI, versionName string) error {
 	return nil
 }
 
-// updateExistingAPIWithOAS handles updating an existing API with a clean OAS document
+// reqproof:req REQ-API-006
 func updateExistingAPIWithOAS(cmd *cobra.Command, config *types.Config, apiID string, oasData map[string]interface{}) error {
 	// Create client
 	c, err := client.NewClient(config)

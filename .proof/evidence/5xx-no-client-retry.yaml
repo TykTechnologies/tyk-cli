@@ -1,0 +1,29 @@
+schema_version: proof.evidence_profile.v1
+results:
+    - profile: known_issue_reproducer
+      requirement: SYS-REQ-019
+      status: pass
+      observed_result: known_issue_reproduced
+      known_issues:
+          - 5xx-no-client-retry
+      input_set:
+          - 5xx-no-client-retry source review
+          - internal/client/client.go:doRequest
+          - internal/client/client.go:handleResponse
+          - internal/cli/errors.go:isServerError
+          - internal/cli/errors.go:classifyDashboardError
+          - internal/cli/exit_codes_test.go:TestAPIList_ServerErrorReturnsExit8
+      summary: >
+          internal/client/client.go issues a single HTTP request per Dashboard call
+          with no retry loop or exponential backoff. When the Dashboard responds
+          5xx, isServerError classifies the error and classifyDashboardError
+          maps it to ExitError{Code: 8} (SYS-REQ-019), but the CLI aborts
+          immediately — no retry attempt is made. TestAPIList_ServerErrorReturnsExit8
+          verifies exit-code mapping only; there is no test that would fail if
+          retry were added, which is intentional per the KI documentation.
+      freshness_hashes:
+          internal/client/client.go: sha256:9927022e3be6fe6c2809caa5c2be93ca188c72f29147972de9bbbd60d5c0cf38
+          internal/cli/errors.go: sha256:8cfd8d8bf4496e4e548c0fef3ed990536e14d17d4dcaedff29360217aa34fefb
+          internal/cli/exit_codes_test.go: sha256:c55180b542a0759cc9100d2b9d4f57e42c47c285e18df85017443fca45f9ff3d
+          specs/system/requirements/SYS-REQ-019.req.yaml: sha256:2421732f4ed45ff7fa0946e52fe17bee676898153bea799df59dac18ee49c838
+          specs/system/requirements/SYS-REQ-039.req.yaml: sha256:8d3e6f4c1583f8a7b02e026a0d162290bd9db9a9a33efc3fb499fc57dfad5040

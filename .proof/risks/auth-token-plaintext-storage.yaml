@@ -1,0 +1,19 @@
+id: auth-token-plaintext-storage
+title: Auth token stored in plaintext TOML at ~/.config/tyk/cli.toml
+description: 'internal/cli/config.go writes the Dashboard auth token to ~/.config/tyk/cli.toml in plaintext. The file gets 0600 permissions (owner-only) but is not encrypted, not stored in OS keychain, and survives indefinitely on disk. Any process running as the same user (or anyone who reads a backup) can extract the token. The token is high-privilege: it can list/create/update/delete every API and policy in the Dashboard tenant.'
+affected_requirements:
+    - SYS-REQ-052
+    - SYS-REQ-051
+mitigation: File permissions are 0600. Operators are advised to use short-lived rotating tokens and to avoid shared dev machines for production tenants.
+customer_impact: Token disclosure on a developer machine leaks broad Dashboard write access. Shared dev environments, leaked dotfiles, or shoulder-surfing all expose the credential. Industry-standard pattern is OS keychain (Keychain/libsecret/Credential Manager).
+owner: tomas@tyk.io
+review_date: "2026-08-31"
+release_disposition: ship_with_known_issue
+accepted_by: human:tomas
+accepted_at: "2026-06-01T13:16:07Z"
+status: active
+history:
+    - at: "2026-06-01T13:16:07Z"
+      by: human:tombuchaillot
+      action: accepted
+      detail: accepted_by=human:tomas

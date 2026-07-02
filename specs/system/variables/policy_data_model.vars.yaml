@@ -1,0 +1,38 @@
+component: policy_data_model
+variables:
+    - name: ambiguous_selector
+      type: bool
+      direction: input
+      description: whether the API selector matches zero or more than one API
+    - name: duration_positive
+      type: bool
+      direction: output
+      description: whether the resolved duration in seconds is a positive integer
+    - name: no_dashboard_request_sent
+      type: bool
+      direction: output
+      description: whether the runner aborted before issuing any Dashboard request
+    - name: resolve_error_returned
+      type: bool
+      direction: output
+      description: whether an error is returned for an ambiguous or missing selector
+    - name: valid_cli_policy_input
+      type: bool
+      direction: input
+      description: whether the input PolicyFile passed validation
+    - name: valid_duration_string
+      type: bool
+      direction: input
+      description: whether the input string is a valid duration (e.g. 30d, 1h)
+    - name: wire_roundtrip_preserves_fields
+      type: bool
+      direction: output
+      description: whether CLIToWire followed by WireToCLI returns a PolicyFile equal to the original
+    - name: yaml_validation_failed
+      type: bool
+      direction: input
+      description: whether the policy YAML failed ValidatePolicy before any HTTP call
+    - name: policy_apply_invoked
+      type: bool
+      direction: input
+      description: whether policy apply was the active runner

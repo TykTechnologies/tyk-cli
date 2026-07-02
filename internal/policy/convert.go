@@ -7,8 +7,7 @@ import (
 	"github.com/tyktech/tyk-cli/pkg/types"
 )
 
-// CLIToWire converts a PolicyFile and pre-resolved access entries into the Dashboard wire format.
-// The caller is responsible for resolving selectors before calling this function.
+// Implements: SYS-REQ-030
 func CLIToWire(pf types.PolicyFile, resolved []ResolvedAccess, orgID string) (types.DashboardPolicy, error) {
 	dp := types.DashboardPolicy{
 		// MID intentionally left empty — caller sets it after resolution
@@ -68,8 +67,7 @@ func CLIToWire(pf types.PolicyFile, resolved []ResolvedAccess, orgID string) (ty
 	return dp, nil
 }
 
-// WireToCLI converts a DashboardPolicy back to the CLI PolicyFile format.
-// It uses the provided API list for best-effort reverse resolution of API IDs to names.
+// Implements: SYS-REQ-030
 func WireToCLI(dp types.DashboardPolicy, apis []ResolverAPI) types.PolicyFile {
 	friendlyID := dp.ID
 	if friendlyID == "" {

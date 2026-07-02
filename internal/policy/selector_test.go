@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Verifies: SYS-REQ-032
 func testAPIList() []ResolverAPI {
 	return []ResolverAPI{
 		{ID: "a1b2c3d4e5f6", Name: "users-api", ListenPath: "/users/", Tags: []string{"public", "v1"}},
@@ -15,6 +16,7 @@ func testAPIList() []ResolverAPI {
 	}
 }
 
+// Verifies: SYS-REQ-032
 func TestResolveByName(t *testing.T) {
 	apis := testAPIList()
 
@@ -42,6 +44,7 @@ func TestResolveByName(t *testing.T) {
 	})
 }
 
+// Verifies: SYS-REQ-032
 func TestResolveByListenPath(t *testing.T) {
 	apis := testAPIList()
 
@@ -58,6 +61,7 @@ func TestResolveByListenPath(t *testing.T) {
 	})
 }
 
+// Verifies: SYS-REQ-032
 func TestResolveByID(t *testing.T) {
 	apis := testAPIList()
 
@@ -74,6 +78,7 @@ func TestResolveByID(t *testing.T) {
 	})
 }
 
+// Verifies: SYS-REQ-032
 func TestResolveByTags(t *testing.T) {
 	apis := testAPIList()
 
@@ -97,6 +102,7 @@ func TestResolveByTags(t *testing.T) {
 	})
 }
 
+// Verifies: SYS-REQ-032
 func TestFuzzySuggestions(t *testing.T) {
 	apis := testAPIList()
 
@@ -110,6 +116,7 @@ func TestFuzzySuggestions(t *testing.T) {
 	assert.Greater(t, suggestions[0].Distance, 0)
 }
 
+// Verifies: SYS-REQ-032
 func TestResolveAccessEntries(t *testing.T) {
 	apis := testAPIList()
 	entries := []ResolveRequest{
@@ -130,6 +137,7 @@ func TestResolveAccessEntries(t *testing.T) {
 	assert.Equal(t, "a1b2c3d4e5f6", resolved[3].APIID)
 }
 
+// Verifies: SYS-REQ-032
 func TestResolveAccessEntries_CollectsErrors(t *testing.T) {
 	apis := testAPIList()
 	entries := []ResolveRequest{
@@ -143,4 +151,88 @@ func TestResolveAccessEntries_CollectsErrors(t *testing.T) {
 	assert.Len(t, resolved, 1)
 	// Two errors should be collected
 	assert.Len(t, errs, 2)
+}
+
+// Verifies: SYS-REQ-032
+// MC/DC: exercise the err != nil = T branches for id and tags selectors in
+// ResolveAccessEntries (selector.go:211 and selector.go:241). The success
+// paths are already covered by TestResolveAccessEntries.
+func TestResolveAccessEntries_IDAndTagsErrors(t *testing.T) {
+	apis := testAPIList()
+
+	t.Run("id selector with unknown id yields error", func(t *testing.T) {
+		entries := []ResolveRequest{
+			{SelectorType: "id", Value: "no-such-id", Versions: []string{"v1"}},
+		}
+		resolved, errs := ResolveAccessEntries(entries, apis)
+		assert.Empty(t, resolved)
+		require.Len(t, errs, 1)
+		assert.Contains(t, errs[0].Error(), "no API found")
+	})
+
+	t.Run("tags selector with no matching tags yields error", func(t *testing.T) {
+		entries := []ResolveRequest{
+			{SelectorType: "tags", TagValues: []string{"no-such-tag"}, Versions: []string{"v1"}},
+		}
+		resolved, errs := ResolveAccessEntries(entries, apis)
+		assert.Empty(t, resolved)
+		require.Len(t, errs, 1)
+		assert.Contains(t, errs[0].Error(), "no APIs matched tags")
+	})
+
+	t.Run("unknown selector type yields error", func(t *testing.T) {
+		entries := []ResolveRequest{
+			{SelectorType: "bogus", Value: "x"},
+		}
+		resolved, errs := ResolveAccessEntries(entries, apis)
+		assert.Empty(t, resolved)
+		require.Len(t, errs, 1)
+		assert.Contains(t, errs[0].Error(), "unknown selector type")
+	})
+}
+
+// Verifies: SYS-REQ-032
+// MC/DC: levenshtein decisions need both lenA == 0 = T (empty a) and
+// lenB == 0 = T (empty b) to be observed (selector.go:172, selector.go:175).
+func TestLevenshtein_EmptyInputs(t *testing.T) {
+	t.Run("empty a returns lenB", func(t *testing.T) {
+		assert.Equal(t, 5, levenshtein("", "hello"))
+	})
+
+	t.Run("empty b returns lenA", func(t *testing.T) {
+		assert.Equal(t, 5, levenshtein("hello", ""))
+	})
+
+	t.Run("both empty returns 0", func(t *testing.T) {
+		assert.Equal(t, 0, levenshtein("", ""))
+	})
+
+	t.Run("identical non-empty strings return 0", func(t *testing.T) {
+		assert.Equal(t, 0, levenshtein("abc", "abc"))
+	})
+}
+
+// Verifies: SYS-REQ-032
+// MC/DC: ResolveByListenPath len(matches) > 1 = T branch (selector.go:87)
+// — two APIs sharing a listenPath produce an ambiguous error.
+func TestResolveByListenPath_Ambiguous(t *testing.T) {
+	dupes := []ResolverAPI{
+		{ID: "dup-1", Name: "svc-1", ListenPath: "/shared/"},
+		{ID: "dup-2", Name: "svc-2", ListenPath: "/shared/"},
+	}
+	_, err := ResolveByListenPath("/shared/", dupes)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "ambiguous")
+	assert.Contains(t, err.Error(), "/shared/")
+}
+
+// Verifies: SYS-REQ-032
+// MC/DC: ResolveByName len(suggestions) > 0 = F branch (selector.go:52)
+// — with an empty API list, no fuzzy suggestions can be produced, so the
+// error message must omit the "Did you mean" suffix.
+func TestResolveByName_NotFound_NoSuggestions(t *testing.T) {
+	_, err := ResolveByName("anything", nil)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "no API found")
+	assert.NotContains(t, err.Error(), "Did you mean")
 }

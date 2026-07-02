@@ -1,0 +1,119 @@
+project:
+    name: tyk-cli
+    specs:
+        - path: specs/stakeholder
+          prefix: STK-REQ
+          type: stakeholder
+        - path: specs/system
+          prefix: SYS-REQ
+          type: system
+          parent_spec: specs/stakeholder
+        - path: specs/software
+          prefix: SW-REQ
+          type: software
+          parent_spec: specs/system
+        - path: specs/interface
+          prefix: INT-REQ
+          type: interface
+          parent_spec: specs/system
+          cross_component: true
+    default_assurance_level: B
+    catalog:
+        version: 1.0.0
+    commands:
+        build: go build ./...
+        test: go test -count=1 -p 1 -timeout=20m -coverprofile=../cover.out ./...
+        tests:
+            all:
+                language: go
+                command: go test -count=1 -p 1 -timeout=20m -coverprofile=../cover.out ./...
+                mcdc_command: go test -count=1 -p 1 -timeout=20m -coverprofile=../cover.out ./...
+        lint: golangci-lint run
+    lint:
+        exclude:
+            - .proof/**
+            - vendor/**
+    verification_scope:
+        include:
+            - internal/**
+            - pkg/**
+            - cmd/**
+            - docs/**
+        components:
+            - api_lifecycle
+            - api_versioning
+            - cli_exit_codes
+            - dashboard_client
+            - environment_config
+            - oas_transformer
+            - policy_data_model
+            - policy_lifecycle
+            - cli_dashboard_contract
+    checks:
+        solver_latency_clean:
+            threshold: 5
+        coverage_threshold:
+            threshold: 100
+        slow_tests:
+            enabled: true
+            threshold_seconds: 1
+        mcdc_coverage:
+            advisory: false
+            require_verifies_witnesses: true
+            max_no_verifying_tests: 0
+            max_missing_row_witnesses: 0
+            max_partial_row_coverage: 0
+            max_stale_witness_lines: 0
+            max_budget_skips: 0
+        code_mcdc:
+            advisory: false
+            min_statement_percent: 95
+            min_decision_percent: 95
+            min_condition_percent: 95
+            languages:
+                go:
+                    test_command: all
+                    test_args:
+                        - -timeout=20m
+            targets:
+                - id: all
+                  language: go
+                  scope: ./...
+        evidence_diversity:
+            min_classes:
+                B: 2
+        code_signal_obligations_reviewed:
+            enabled: true
+    signals:
+        defaults: auto
+        refresh_on_audit: false
+        rule_packs:
+            - signal-rules/tyk-cli-phase-n.yaml
+        providers:
+            opengrep:
+                enabled: true
+                mode: run
+                managed: true
+                format: sarif
+                exclude_paths:
+                    - '**/*_test.go'
+                    - '**/testdata/**'
+                    - vendor/**
+                fail_if_missing: false
+                timeout_seconds: 600
+    approval:
+        required_for:
+            assurance_levels:
+                - A
+                - B
+    audit:
+        fail_level: info
+        scope: full
+        evidence_strict: true
+    workflow:
+        fail_level: info
+    documentation:
+        sources:
+            - path: docs/
+              type: auto
+        threshold: 100

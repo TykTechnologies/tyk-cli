@@ -1,0 +1,18 @@
+id: no-tls-verification-controls
+title: No control over TLS certificate verification or proxy configuration
+description: internal/client/client.go uses http.DefaultClient with no TLSClientConfig customisation. Self-signed Dashboards (common in on-prem and air-gapped deployments) cannot be reached without setting GODEBUG or similar Go environment variables. No --insecure flag, no --ca-cert flag, no HTTP_PROXY-respecting documentation. CONNECT-style proxies that require additional headers are unsupported.
+affected_requirements:
+    - SYS-REQ-021
+mitigation: Operators install the Dashboard's CA into the OS trust store, or run the CLI from a container with the trust store pre-populated. Production deployments terminate TLS at a known load balancer.
+customer_impact: On-prem and air-gapped deployments require manual Go runtime tweaks to use the CLI. Enterprise proxies that inject custom CAs need OS-trust-store sync. No way to disable cert verification for tightly controlled internal environments.
+owner: tomas@tyk.io
+review_date: "2026-08-31"
+release_disposition: ship_with_known_issue
+accepted_by: human:tomas
+accepted_at: "2026-06-01T13:16:07Z"
+status: active
+history:
+    - at: "2026-06-01T13:16:07Z"
+      by: human:tombuchaillot
+      action: accepted
+      detail: accepted_by=human:tomas

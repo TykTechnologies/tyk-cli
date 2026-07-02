@@ -29,7 +29,7 @@ type FileInfo struct {
 	RawBytes []byte
 }
 
-// LoadFile loads and parses a file, automatically detecting its format
+// Implements: SYS-REQ-022
 func LoadFile(filePath string) (*FileInfo, error) {
 	// Check if file exists
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
@@ -71,7 +71,7 @@ func LoadFile(filePath string) (*FileInfo, error) {
 	}, nil
 }
 
-// LoadFileAsRawJSON loads a file and converts it to raw JSON bytes
+// Implements: SYS-REQ-022
 func LoadFileAsRawJSON(filePath string) (json.RawMessage, error) {
 	fileInfo, err := LoadFile(filePath)
 	if err != nil {
@@ -87,7 +87,7 @@ func LoadFileAsRawJSON(filePath string) (json.RawMessage, error) {
 	return json.RawMessage(jsonBytes), nil
 }
 
-// SaveFile saves content to a file in the specified format
+// Implements: SYS-REQ-028
 func SaveFile(filePath string, content map[string]interface{}) error {
 	fileType, err := getFileType(filePath)
 	if err != nil {
@@ -126,7 +126,7 @@ func SaveFile(filePath string, content map[string]interface{}) error {
 	return nil
 }
 
-// ValidateFilePath checks if a file path is valid and supported
+// Implements: SYS-REQ-022
 func ValidateFilePath(filePath string) error {
 	if filePath == "" {
 		return fmt.Errorf("file path cannot be empty")
@@ -142,7 +142,7 @@ func ValidateFilePath(filePath string) error {
 	return fmt.Errorf("unsupported file extension %s (supported: %v)", ext, SupportedExtensions)
 }
 
-// GetOASVersion extracts the OpenAPI version from parsed content
+// Implements: SYS-REQ-011
 func GetOASVersion(content map[string]interface{}) string {
 	if openapi, ok := content["openapi"].(string); ok {
 		return openapi
@@ -153,7 +153,7 @@ func GetOASVersion(content map[string]interface{}) string {
 	return ""
 }
 
-// GetOASInfo extracts info section from OAS content
+// Implements: SYS-REQ-011
 func GetOASInfo(content map[string]interface{}) map[string]interface{} {
 	if info, ok := content["info"].(map[string]interface{}); ok {
 		return info
@@ -161,7 +161,7 @@ func GetOASInfo(content map[string]interface{}) map[string]interface{} {
 	return nil
 }
 
-// GetOASInfoVersion extracts the version from OAS info section
+// Implements: SYS-REQ-011
 func GetOASInfoVersion(content map[string]interface{}) string {
 	if info := GetOASInfo(content); info != nil {
 		if version, ok := info["version"].(string); ok {
@@ -171,7 +171,7 @@ func GetOASInfoVersion(content map[string]interface{}) string {
 	return ""
 }
 
-// GetOASTitle extracts the title from OAS info section
+// Implements: SYS-REQ-011
 func GetOASTitle(content map[string]interface{}) string {
 	if info := GetOASInfo(content); info != nil {
 		if title, ok := info["title"].(string); ok {
@@ -181,7 +181,7 @@ func GetOASTitle(content map[string]interface{}) string {
 	return ""
 }
 
-// getFileType determines file type from extension
+// Implements: SYS-REQ-022
 func getFileType(filePath string) (FileType, error) {
 	ext := strings.ToLower(filepath.Ext(filePath))
 	switch ext {
@@ -194,12 +194,12 @@ func getFileType(filePath string) (FileType, error) {
 	}
 }
 
-// ConvertToJSON converts any supported file content to JSON
+// Implements: SYS-REQ-022
 func ConvertToJSON(content map[string]interface{}) ([]byte, error) {
 	return json.MarshalIndent(content, "", "  ")
 }
 
-// ConvertToYAML converts any supported file content to YAML
+// Implements: SYS-REQ-022
 func ConvertToYAML(content map[string]interface{}) ([]byte, error) {
 	return yaml.Marshal(content)
 }

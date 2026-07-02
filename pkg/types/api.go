@@ -79,7 +79,7 @@ type ErrorResponse struct {
 	Details map[string]interface{} `json:"details,omitempty"`
 }
 
-// Error implements the error interface
+// Implements: SYS-REQ-015
 func (e *ErrorResponse) Error() string {
 	return e.Message
 }

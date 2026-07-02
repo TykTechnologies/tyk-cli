@@ -1,0 +1,15 @@
+id: rate-limit-no-client-backoff
+title: HTTP client does not implement backoff or honour Retry-After on 429 responses
+description: internal/client/client.go does not parse the Retry-After header on HTTP 429 responses and does not implement exponential backoff. SYS-REQ-018/POL-025 only specify the exit-code mapping for 429; they do not require automatic retry. Heavy CI usage that triggers rate limits aborts immediately rather than waiting for the suggested cool-down window.
+affected_requirements:
+    - SYS-REQ-021
+mitigation: Operators throttle CLI invocations in CI scripts. The 'back off and retry' hint in the exit-7 error message tells the user what to do.
+customer_impact: CI loops that issue many CLI calls fail fast on rate-limit instead of pacing themselves; operators must implement backoff externally (e.g. sleep between invocations).
+owner: tomas@tyk.io
+review_date: "2026-08-31"
+release_disposition: ship_with_known_issue
+status: open
+history:
+    - at: "2026-06-02T13:40:43Z"
+      by: human:tombuchaillot
+      action: created

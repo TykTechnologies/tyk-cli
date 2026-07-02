@@ -1,0 +1,60 @@
+id: SYS-REQ-039
+version: 1
+status: approved
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when policy_server_error_response the cli_exit_codes shall immediately satisfy policy_exit_server_error
+description: POL subcommands map server errors (HTTP 5xx) to exit 8, distinguishing Dashboard-side failures from local errors
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+parent: STK-REQ-001
+component: cli_exit_codes
+rationale: ""
+tags: []
+variables: []
+traces:
+    satisfies:
+        - STK-REQ-001
+    reviewed_at: "2026-07-01T15:07:15.271865Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:b7ba15625a31c614b954f9463c1d84a8e7401799ee49f93a6506e51bb7e3f374
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: approved
+        reviewer: tomas@tyk.io
+        reviewed_at: "2026-06-02T07:52:59Z"
+        ai_generated: false
+    impact_reviews:
+        - requirement: SYS-REQ-039
+          artifact: internal/cli/errors.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Component rename to domain-oriented names (api → api_lifecycle/oas_transformer/api_versioning/dashboard_client, policy → policy_lifecycle/policy_data_model, config → environment_config; cli_exit_codes cross-cuts). FRETish sentences updated accordingly. Purely metadata; production behaviour unchanged.'
+          base: origin/main
+          requirement_fingerprint: sha256:b7ba15625a31c614b954f9463c1d84a8e7401799ee49f93a6506e51bb7e3f374
+          approval_fingerprint: sha256:390e2516c5eccf96ac9a77e9ad7a7f4bcea2ca6535af11eda97d6c016a9599e5
+          artifact_fingerprint: sha256:8cfd8d8bf4496e4e548c0fef3ed990536e14d17d4dcaedff29360217aa34fefb
+          reviewed_at: "2026-07-01T15:10:09Z"
+history:
+    created_by: human:cli
+    created_at: "2026-06-02T07:37:15Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-07-01T13:38:22Z"
+lifecycle:
+    change_history:
+        - date: "2026-06-02T07:52:59Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:cli
+        - date: "2026-07-01T13:38:22Z"
+          from: review
+          to: approved
+          reason: ""
+          changed_by: human:cli

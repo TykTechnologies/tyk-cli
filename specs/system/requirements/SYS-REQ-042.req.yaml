@@ -1,0 +1,82 @@
+id: SYS-REQ-042
+version: 1
+status: approved
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when init_wizard_completed the environment_config shall immediately satisfy (toml_file_written & default_environment_set)
+description: tyk init runs an interactive wizard that writes one or more named environments to ~/.config/tyk/cli.toml and sets the default environment
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+component: environment_config
+rationale: ""
+tags: []
+variables:
+    - init_wizard_completed
+    - toml_file_written
+    - default_environment_set
+traces:
+    satisfies:
+        - STK-REQ-003
+    reviewed_at: "2026-07-01T15:07:15.39491Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:bcd69044f4700257a05f557653fd551a56a82f1286ecbb3e359d63b80a048e9f
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: approved
+        reviewer: tomas@tyk.io
+        reviewed_at: "2026-07-01T13:38:54Z"
+        ai_generated: false
+    impact_reviews:
+        - requirement: SYS-REQ-042
+          artifact: internal/cli/config.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Component rename to domain-oriented names (api → api_lifecycle/oas_transformer/api_versioning/dashboard_client, policy → policy_lifecycle/policy_data_model, config → environment_config; cli_exit_codes cross-cuts). FRETish sentences updated accordingly. Purely metadata; production behaviour unchanged.'
+          base: origin/main
+          requirement_fingerprint: sha256:bcd69044f4700257a05f557653fd551a56a82f1286ecbb3e359d63b80a048e9f
+          approval_fingerprint: sha256:b04956732917ab93169c5ead2f70214944413986a7d846d824d206ed0867e8a2
+          artifact_fingerprint: sha256:081612f8659e6f77b0d4653dec2ab586869910e3ba99f5fce79d445293e93be6
+          reviewed_at: "2026-07-01T15:10:09Z"
+        - requirement: SYS-REQ-042
+          artifact: internal/cli/init.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Component rename to domain-oriented names (api → api_lifecycle/oas_transformer/api_versioning/dashboard_client, policy → policy_lifecycle/policy_data_model, config → environment_config; cli_exit_codes cross-cuts). FRETish sentences updated accordingly. Purely metadata; production behaviour unchanged.'
+          base: origin/main
+          requirement_fingerprint: sha256:bcd69044f4700257a05f557653fd551a56a82f1286ecbb3e359d63b80a048e9f
+          approval_fingerprint: sha256:b04956732917ab93169c5ead2f70214944413986a7d846d824d206ed0867e8a2
+          artifact_fingerprint: sha256:f99144ba3983e46074327b6356ab512eb6f1631d721ffce14968e9698564ba65
+          reviewed_at: "2026-07-01T15:10:09Z"
+        - requirement: SYS-REQ-042
+          artifact: internal/client/client.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Component rename to domain-oriented names (api → api_lifecycle/oas_transformer/api_versioning/dashboard_client, policy → policy_lifecycle/policy_data_model, config → environment_config; cli_exit_codes cross-cuts). FRETish sentences updated accordingly. Purely metadata; production behaviour unchanged.'
+          base: origin/main
+          requirement_fingerprint: sha256:bcd69044f4700257a05f557653fd551a56a82f1286ecbb3e359d63b80a048e9f
+          approval_fingerprint: sha256:b04956732917ab93169c5ead2f70214944413986a7d846d824d206ed0867e8a2
+          artifact_fingerprint: sha256:9927022e3be6fe6c2809caa5c2be93ca188c72f29147972de9bbbd60d5c0cf38
+          reviewed_at: "2026-07-01T15:10:09Z"
+history:
+    created_by: human:cli
+    created_at: "2026-05-29T15:43:17Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-07-01T13:38:41Z"
+lifecycle:
+    change_history:
+        - date: "2026-07-01T13:38:41Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:cli
+        - date: "2026-07-01T13:38:41Z"
+          from: review
+          to: approved
+          reason: ""
+          changed_by: human:cli

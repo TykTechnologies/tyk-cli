@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Verifies: SYS-REQ-031
 func TestParseDuration(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -35,6 +36,7 @@ func TestParseDuration(t *testing.T) {
 	}
 }
 
+// Verifies: SYS-REQ-031
 func TestParseDuration_Errors(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -60,6 +62,7 @@ func TestParseDuration_Errors(t *testing.T) {
 	}
 }
 
+// Verifies: SYS-REQ-031
 func TestFormatDuration(t *testing.T) {
 	tests := []struct {
 		name     string

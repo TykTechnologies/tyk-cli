@@ -1,0 +1,70 @@
+component: api_lifecycle
+variables:
+    - name: apply_invoked
+      type: bool
+      direction: input
+      description: whether api apply was the active runner
+    - name: apply_takes_update_path
+      type: bool
+      direction: output
+      description: whether apply called UpdateOASAPI rather than CreateOASAPI
+    - name: apply_target_exists
+      type: bool
+      direction: input
+      description: whether the Dashboard already contains an API with the supplied ID
+    - name: delete_invoked
+      type: bool
+      direction: input
+      description: whether api delete was the active runner
+    - name: delete_target_does_not_exist
+      type: bool
+      direction: input
+      description: whether the Dashboard preflight returned 404 for the target API
+    - name: import_oas_invoked
+      type: bool
+      direction: input
+      description: whether api import-oas was the active runner
+    - name: import_takes_create_path
+      type: bool
+      direction: output
+      description: whether import-oas called CreateOASAPI (never UpdateOASAPI), forcing the Dashboard to mint a new ID
+    - name: listen_path_auto_generated
+      type: bool
+      direction: output
+      description: whether the runner derived a listen path from --name
+    - name: listen_path_flag_omitted
+      type: bool
+      direction: input
+      description: whether --listen-path was absent from api-create
+    - name: oas_only_flag_set
+      type: bool
+      direction: input
+      description: whether --oas-only was passed to api-get
+    - name: page_flag_omitted
+      type: bool
+      direction: input
+      description: whether the --page flag was absent from the api-list invocation
+    - name: requested_page_equals_one
+      type: bool
+      direction: output
+      description: whether the Dashboard request used page=1
+    - name: tyk_extensions_stripped
+      type: bool
+      direction: output
+      description: whether x-tyk-api-gateway was removed from the response before output
+    - name: update_invoked
+      type: bool
+      direction: input
+      description: whether api update-oas was the active runner
+    - name: update_target_does_not_exist
+      type: bool
+      direction: input
+      description: whether the Dashboard preflight returned 404 for the target API
+    - name: api_title_provided
+      type: bool
+      direction: input
+      description: whether a non-empty title string was supplied to GenerateListenPath
+    - name: api_exit_not_found
+      type: bool
+      direction: output
+      description: whether the api subcommand terminated with exit code 3 (ExitNotFound)

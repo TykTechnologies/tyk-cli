@@ -16,7 +16,7 @@ import (
 )
 
 
-// NewInitCommand creates the 'tyk init' command for guided setup
+// Implements: SYS-REQ-042
 func NewInitCommand() *cobra.Command {
 	cmd := &cobra.Command{
     Use:   "init",
@@ -37,6 +37,7 @@ This wizard will help you:
 	return cmd
 }
 
+// Implements: SYS-REQ-042
 func runInitWizard(cmd *cobra.Command, args []string) error {
     skipTest, _ := cmd.Flags().GetBool("skip-test")
     // quick flag retained for compatibility; the wizard now always bootstraps a single env
@@ -50,6 +51,7 @@ func runInitWizard(cmd *cobra.Command, args []string) error {
     return runQuickSetup(scanner, skipTest)
 }
 
+// Implements: SYS-REQ-042
 func printWelcome() {
     fmt.Println("🚀 Welcome to Tyk CLI Setup Wizard!")
     fmt.Println("====================================")
@@ -59,6 +61,7 @@ func printWelcome() {
     fmt.Println()
 }
 
+// Implements: SYS-REQ-042
 func runQuickSetup(scanner *bufio.Scanner, skipTest bool) error {
     fmt.Println("⚡ Quick Setup Mode")
     fmt.Println("------------------")
@@ -88,6 +91,7 @@ func runQuickSetup(scanner *bufio.Scanner, skipTest bool) error {
 	return nil
 }
 
+// Implements: SYS-REQ-042
 func gatherEnvironmentInfo(scanner *bufio.Scanner, envName string, isFirst bool) (*types.Environment, error) {
 	env := &types.Environment{Name: envName}
 
@@ -136,6 +140,7 @@ func gatherEnvironmentInfo(scanner *bufio.Scanner, envName string, isFirst bool)
 	return env, nil
 }
 
+// Implements: SYS-REQ-042
 func testConnection(env *types.Environment) error {
 	config := &types.Config{
 		DefaultEnvironment: "test",
@@ -155,6 +160,7 @@ func testConnection(env *types.Environment) error {
 	return client.Health(ctx)
 }
 
+// Implements: SYS-REQ-042
 func saveEnvironment(env *types.Environment, setAsGlobal bool) error {
 	// Get config directory
 	configDir, err := getConfigDir()
@@ -173,7 +179,7 @@ func saveEnvironment(env *types.Environment, setAsGlobal bool) error {
 	}
 
 	// Add the environment
-	if err := manager.SaveEnvironment(env, setAsGlobal); err != nil {
+	if err := manager.SaveEnvironment(env, setAsGlobal); err != nil { //mcdc:ignore Manager.SaveEnvironment unconditionally returns nil (config.go:144); it has no error path
 		return err
 	}
 
@@ -192,6 +198,7 @@ func saveEnvironment(env *types.Environment, setAsGlobal bool) error {
 	return nil
 }
 
+// Implements: SYS-REQ-042
 func printSuccess(activeEnv string) {
     fmt.Println("🎉 Setup Complete!")
     fmt.Println("==================")
@@ -208,6 +215,7 @@ func printSuccess(activeEnv string) {
     fmt.Println()
 }
 
+// Implements: SYS-REQ-042
 func askString(scanner *bufio.Scanner, prompt, defaultValue string) string {
 	if defaultValue != "" {
 		fmt.Printf("%s [%s]: ", prompt, defaultValue)
@@ -225,6 +233,7 @@ func askString(scanner *bufio.Scanner, prompt, defaultValue string) string {
 	return input
 }
 
+// Implements: SYS-REQ-042
 func askYesNo(scanner *bufio.Scanner, prompt string) bool {
 	fmt.Printf("%s [y/N]: ", prompt)
 	scanner.Scan()

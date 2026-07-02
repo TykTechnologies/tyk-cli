@@ -7,3 +7,15 @@ docs/.jekyll-cache/
 docs/.jekyll-metadata
 docs/vendor/
 docs/_includes/
+
+# ReqProof — allowlist authored evidence, ignore internal state
+.proof/cache/
+.proof/index.db
+.proof/jobs/
+.proof/locks/
+.proof/audit-cache.json
+.proof/workflow.json
+# .proof/mcdc: keep only audit-relevant snapshots; ignore internal cache
+.proof/mcdc/*/latest.prev.json
+.proof/mcdc/*/objects/
+.proof/mcdc/*/adhoc/

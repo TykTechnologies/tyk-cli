@@ -1,0 +1,22 @@
+component: dashboard_client
+variables:
+    - name: authorization_header_set
+      type: bool
+      direction: output
+      description: whether the request carried the Authorization header
+    - name: dashboard_request_sent
+      type: bool
+      direction: input
+      description: whether the HTTP client issued a request against the Dashboard
+    - name: http_client_uses_environment_timeout
+      type: bool
+      direction: output
+      description: whether NewClient configures the http.Client with the environment's timeout_seconds rather than DefaultTimeout
+    - name: org_id_header_set
+      type: bool
+      direction: output
+      description: whether the request carried the x-org-id header
+    - name: timeout_seconds_set_on_environment
+      type: bool
+      direction: input
+      description: whether the active environment has a positive timeout_seconds field set in cli.toml

@@ -1,0 +1,59 @@
+component: policy_data_model
+variables:
+    # --- selector.go / FuzzySuggestions (SW-REQ-001..003) -------------------
+    - name: fuzzy_invoked
+      type: bool
+      direction: input
+      description: whether FuzzySuggestions was called with any candidate list
+    - name: fuzzy_invoked_with_empty_list
+      type: bool
+      direction: input
+      description: whether FuzzySuggestions was called with zero candidate APIs
+    - name: fuzzy_result_count_bounded
+      type: bool
+      direction: output
+      description: whether the returned slice has length <= n (the max argument)
+    - name: fuzzy_result_sorted_ascending
+      type: bool
+      direction: output
+      description: whether result[i].Distance <= result[i+1].Distance for every i
+    - name: fuzzy_result_is_empty
+      type: bool
+      direction: output
+      description: whether the returned slice has length zero
+
+    # --- duration.go / ParseDuration & FormatDuration (SW-REQ-010..012) ----
+    - name: parse_duration_invalid_input
+      type: bool
+      direction: input
+      description: whether the input is empty, negative, fractional, or has unsupported suffix
+    - name: parse_duration_error
+      type: bool
+      direction: output
+      description: whether ParseDuration returned a non-nil error
+    - name: parse_duration_with_suffix
+      type: bool
+      direction: input
+      description: whether the input string ends with a recognised suffix (s|m|h|d)
+    - name: resolved_seconds_matches_suffix_table
+      type: bool
+      direction: output
+      description: whether the returned int64 equals numeric_part * suffix_multiplier (s=1, m=60, h=3600, d=86400)
+    - name: valid_seconds_input
+      type: bool
+      direction: input
+      description: whether the input is a positive integer expressible as an exact multiple of one suffix unit
+    - name: format_parse_roundtrip_equal
+      type: bool
+      direction: output
+      description: whether ParseDuration(FormatDuration(n)) returns exactly n
+
+    # --- Variables refined from parent SYS-REQs (cross-level coverage) -----
+    - name: duration_positive
+      type: bool
+      direction: output
+      description: refines SYS-REQ-031 — whether the resolved duration in seconds is positive
+    - name: resolve_error_returned
+      type: bool
+      direction: output
+      description: refines SYS-REQ-032 — whether an error is returned for an ambiguous or missing selector

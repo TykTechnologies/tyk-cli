@@ -19,7 +19,7 @@ import (
 
 const httpTimeout = 30 * time.Second
 
-// NewPolicyCommand creates the 'tyk policy' command and its subcommands
+// Implements: SYS-REQ-024
 func NewPolicyCommand() *cobra.Command {
 	policyCmd := &cobra.Command{
 		Use:   "policy",
@@ -36,7 +36,7 @@ func NewPolicyCommand() *cobra.Command {
 	return policyCmd
 }
 
-// NewPolicyListCommand creates the 'tyk policy list' command
+// Implements: SYS-REQ-024
 func NewPolicyListCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
@@ -50,7 +50,7 @@ func NewPolicyListCommand() *cobra.Command {
 	return cmd
 }
 
-// runPolicyList implements the 'tyk policy list' command
+// Implements: SYS-REQ-024
 func runPolicyList(cmd *cobra.Command, args []string) error {
 	page, _ := cmd.Flags().GetInt("page")
 	if page <= 0 {
@@ -79,6 +79,9 @@ func runPolicyList(cmd *cobra.Command, args []string) error {
 	// Fetch policies
 	result, err := c.ListPolicies(ctx, page)
 	if err != nil {
+		if cls := classifyDashboardError(err, "list policies"); cls != nil {
+			return cls
+		}
 		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to list policies: %v", err)}
 	}
 
@@ -100,7 +103,7 @@ func runPolicyList(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// NewPolicyGetCommand creates the 'tyk policy get' command
+// Implements: SYS-REQ-025
 func NewPolicyGetCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get <policy-id>",
@@ -113,7 +116,7 @@ func NewPolicyGetCommand() *cobra.Command {
 	return cmd
 }
 
-// runPolicyGet implements the 'tyk policy get' command
+// Implements: SYS-REQ-025
 func runPolicyGet(cmd *cobra.Command, args []string) error {
 	policyID := args[0]
 
@@ -139,6 +142,9 @@ func runPolicyGet(cmd *cobra.Command, args []string) error {
 	// Resolve friendly ID to fetch the policy (O(1) GET)
 	dp, err := resolveFriendlyID(ctx, c, policyID)
 	if err != nil {
+		if cls := classifyDashboardError(err, "resolve policy"); cls != nil {
+			return cls
+		}
 		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to resolve policy: %v", err)}
 	}
 	if dp == nil {
@@ -172,7 +178,7 @@ func runPolicyGet(cmd *cobra.Command, args []string) error {
 	fmt.Fprintf(os.Stderr, "  APIs: %d\n", apiCount)
 
 	yamlData, err := yaml.Marshal(pf)
-	if err != nil {
+	if err != nil { //mcdc:ignore pf is a plain types.PolicyFile struct with only string/int/slice/map fields; go-yaml Marshal cannot fail on such a type (no cycles, no channels/functions)
 		return fmt.Errorf("failed to marshal policy as YAML: %w", err)
 	}
 	fmt.Fprint(os.Stdout, string(yamlData))
@@ -180,7 +186,7 @@ func runPolicyGet(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// NewPolicyApplyCommand creates the 'tyk policy apply' command
+// Implements: SYS-REQ-026
 func NewPolicyApplyCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "apply",
@@ -207,7 +213,7 @@ Examples:
 	return cmd
 }
 
-// runPolicyApply implements the 'tyk policy apply' command
+// Implements: SYS-REQ-026
 func runPolicyApply(cmd *cobra.Command, args []string) error {
 	filePath, _ := cmd.Flags().GetString("file")
 
@@ -232,6 +238,9 @@ func runPolicyApply(cmd *cobra.Command, args []string) error {
 	// Fetch API list and resolve selectors
 	apis, err := c.ListAPIsDashboard(ctx, 1)
 	if err != nil {
+		if cls := classifyDashboardError(err, "fetch API list"); cls != nil {
+			return cls
+		}
 		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to fetch API list: %v", err)}
 	}
 
@@ -243,11 +252,11 @@ func runPolicyApply(cmd *cobra.Command, args []string) error {
 
 	// Convert CLI to wire format
 	activeEnv, err := config.GetActiveEnvironment()
-	if err != nil {
+	if err != nil { //mcdc:ignore client.NewClient already succeeded above (line 230), which required config.Validate + a successful internal GetActiveEnvironment call; the config is unchanged so this second GetActiveEnvironment cannot fail
 		return fmt.Errorf("no active environment: %w", err)
 	}
 	dp, err := policy.CLIToWire(pf, resolved, activeEnv.OrgID)
-	if err != nil {
+	if err != nil { //mcdc:ignore CLIToWire only fails via ParseDuration on RateLimit.Per / Quota.Period / KeyTTL; readPolicyFile above invoked ValidatePolicy which ran ParseDuration on those exact same fields and rejected the file if any failed, so ParseDuration here cannot fail
 		return &ExitError{Code: int(types.ExitBadArgs), Message: err.Error()}
 	}
 
@@ -261,6 +270,12 @@ func runPolicyApply(cmd *cobra.Command, args []string) error {
 	if existingPolicy != nil {
 		// Update path — use the friendly ID
 		if err := c.UpdatePolicy(ctx, pf.ID, &dp); err != nil {
+			if isConflictError(err) {
+				return &ExitError{Code: int(types.ExitConflict), Message: fmt.Sprintf("policy update failed due to conflict: %v", err)}
+			}
+			if cls := classifyDashboardError(err, "update policy"); cls != nil {
+				return cls
+			}
 			return &ExitError{Code: 1, Message: fmt.Sprintf("failed to update policy: %v", err)}
 		}
 		fmt.Fprintf(os.Stderr, "Policy '%s' (%s) updated.\n", pf.Name, pf.ID)
@@ -268,6 +283,12 @@ func runPolicyApply(cmd *cobra.Command, args []string) error {
 		// Create path — omit _id, let Dashboard generate it
 		dp.MID = ""
 		if err := c.CreatePolicy(ctx, &dp); err != nil {
+			if isConflictError(err) {
+				return &ExitError{Code: int(types.ExitConflict), Message: fmt.Sprintf("policy creation failed due to conflict: %v", err)}
+			}
+			if cls := classifyDashboardError(err, "create policy"); cls != nil {
+				return cls
+			}
 			return &ExitError{Code: 1, Message: fmt.Sprintf("failed to create policy: %v", err)}
 		}
 		fmt.Fprintf(os.Stderr, "Policy '%s' (%s) created.\n", pf.Name, pf.ID)
@@ -276,7 +297,7 @@ func runPolicyApply(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// NewPolicyDeleteCommand creates the 'tyk policy delete' command
+// Implements: SYS-REQ-027
 func NewPolicyDeleteCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete <policy-id>",
@@ -291,7 +312,7 @@ func NewPolicyDeleteCommand() *cobra.Command {
 	return cmd
 }
 
-// runPolicyDelete implements the 'tyk policy delete' command
+// Implements: SYS-REQ-027
 func runPolicyDelete(cmd *cobra.Command, args []string) error {
 	policyID := args[0]
 	skipConfirmation, _ := cmd.Flags().GetBool("yes")
@@ -315,6 +336,9 @@ func runPolicyDelete(cmd *cobra.Command, args []string) error {
 	// Resolve friendly ID to fetch the policy (O(1) GET)
 	dp, err := resolveFriendlyID(ctx, c, policyID)
 	if err != nil {
+		if cls := classifyDashboardError(err, "resolve policy"); cls != nil {
+			return cls
+		}
 		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to resolve policy: %v", err)}
 	}
 	if dp == nil {
@@ -334,6 +358,9 @@ func runPolicyDelete(cmd *cobra.Command, args []string) error {
 
 	// Delete the policy using the friendly ID
 	if err := c.DeletePolicy(ctx, policyID); err != nil {
+		if cls := classifyDashboardError(err, "delete policy"); cls != nil {
+			return cls
+		}
 		return &ExitError{Code: 1, Message: fmt.Sprintf("failed to delete policy: %v", err)}
 	}
 
@@ -356,7 +383,7 @@ func runPolicyDelete(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// NewPolicyInitCommand creates the 'tyk policy init' command
+// Implements: SYS-REQ-028
 func NewPolicyInitCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "init",
@@ -380,7 +407,7 @@ Examples:
 	return cmd
 }
 
-// runPolicyInit implements the 'tyk policy init' command
+// Implements: SYS-REQ-028
 func runPolicyInit(cmd *cobra.Command, args []string) error {
 	id, _ := cmd.Flags().GetString("id")
 	name, _ := cmd.Flags().GetString("name")
@@ -424,7 +451,7 @@ func runPolicyInit(cmd *cobra.Command, args []string) error {
 	}
 
 	data, err := yaml.Marshal(pf)
-	if err != nil {
+	if err != nil { //mcdc:ignore pf is a locally-constructed types.PolicyFile literal with only string/int/slice/map fields; go-yaml Marshal cannot fail on such a value
 		return fmt.Errorf("failed to marshal scaffold: %w", err)
 	}
 
@@ -441,8 +468,7 @@ func runPolicyInit(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// readPolicyFile reads a policy YAML from a file path or stdin ("-"), parses it,
-// and validates the schema. Returns the parsed PolicyFile or an error.
+// Implements: SYS-REQ-029
 func readPolicyFile(filePath string) (types.PolicyFile, error) {
 	var data []byte
 	var err error
@@ -478,7 +504,7 @@ func readPolicyFile(filePath string) (types.PolicyFile, error) {
 	return pf, nil
 }
 
-// buildResolveRequests converts access entries from a PolicyFile into ResolveRequests.
+// Implements: SYS-REQ-032
 func buildResolveRequests(entries []types.AccessEntry) []policy.ResolveRequest {
 	requests := make([]policy.ResolveRequest, 0, len(entries))
 	for _, entry := range entries {
@@ -502,7 +528,7 @@ func buildResolveRequests(entries []types.AccessEntry) []policy.ResolveRequest {
 	return requests
 }
 
-// joinErrorMessages concatenates error messages into a semicolon-separated string.
+// Implements: SYS-REQ-029
 func joinErrorMessages(errs []error) string {
 	msgs := make([]string, len(errs))
 	for i, e := range errs {
@@ -511,6 +537,7 @@ func joinErrorMessages(errs []error) string {
 	return strings.Join(msgs, "; ")
 }
 
+// Implements: SYS-REQ-026
 func resolveFriendlyID(ctx context.Context, c *client.Client, friendlyID string) (*types.DashboardPolicy, error) {
 	dp, err := c.GetPolicy(ctx, friendlyID)
 	if err != nil {
@@ -522,7 +549,7 @@ func resolveFriendlyID(ctx context.Context, c *client.Client, friendlyID string)
 	return dp, nil
 }
 
-// isNotFoundError returns true if the error indicates a 404 / not found response.
+// Implements: SYS-REQ-015
 func isNotFoundError(err error) bool {
 	if er, ok := err.(*types.ErrorResponse); ok && er.Status == 404 {
 		return true
@@ -531,7 +558,7 @@ func isNotFoundError(err error) bool {
 	return strings.Contains(msg, "404") || strings.Contains(strings.ToLower(msg), "not found")
 }
 
-// toResolverAPIs converts OAS API objects to the resolver's input type.
+// Implements: SYS-REQ-032
 func toResolverAPIs(apis []*types.OASAPI) []policy.ResolverAPI {
 	result := make([]policy.ResolverAPI, 0, len(apis))
 	for _, api := range apis {
@@ -544,7 +571,7 @@ func toResolverAPIs(apis []*types.OASAPI) []policy.ResolverAPI {
 	return result
 }
 
-// displayPolicyPage displays a page of policies in a formatted table
+// Implements: SYS-REQ-024
 func displayPolicyPage(policies []types.DashboardPolicy, page int) {
 	if len(policies) == 0 {
 		fmt.Fprintf(os.Stderr, "No policies found.\n")

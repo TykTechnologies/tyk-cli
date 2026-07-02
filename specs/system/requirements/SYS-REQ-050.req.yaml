@@ -1,0 +1,62 @@
+id: SYS-REQ-050
+version: 1
+status: approved
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when config_invalid_args the cli_exit_codes shall immediately satisfy config_exit_bad_args
+description: All config subcommands exit 2 on invalid arguments or missing required fields
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+component: cli_exit_codes
+rationale: ""
+tags: []
+variables:
+    - config_invalid_args
+    - config_exit_bad_args
+traces:
+    satisfies:
+        - STK-REQ-003
+    reviewed_at: "2026-07-01T15:07:15.450711Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:d50a43b40697c784b798f55a0c3f1c7610a7b789b0fb2f5b3e353300b24b8113
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: approved
+        reviewer: tomas@tyk.io
+        reviewed_at: "2026-07-01T13:38:54Z"
+        ai_generated: false
+    impact_reviews:
+        - requirement: SYS-REQ-050
+          artifact: pkg/types/config.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Component rename to domain-oriented names (api → api_lifecycle/oas_transformer/api_versioning/dashboard_client, policy → policy_lifecycle/policy_data_model, config → environment_config; cli_exit_codes cross-cuts). FRETish sentences updated accordingly. Purely metadata; production behaviour unchanged.'
+          base: origin/main
+          requirement_fingerprint: sha256:d50a43b40697c784b798f55a0c3f1c7610a7b789b0fb2f5b3e353300b24b8113
+          approval_fingerprint: sha256:1573f170162e6bb7795346981323bad86087b11562b68a8b3396d94ecc29f4c0
+          artifact_fingerprint: sha256:96f0a220f75bf6ed558fc5c8c184ea4f78db4e75bb1405d9a298fca761b0f399
+          reviewed_at: "2026-07-01T15:10:09Z"
+history:
+    created_by: human:cli
+    created_at: "2026-05-29T15:43:22Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-07-01T13:38:41Z"
+obligation_class: boundary
+lifecycle:
+    change_history:
+        - date: "2026-07-01T13:38:41Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:cli
+        - date: "2026-07-01T13:38:41Z"
+          from: review
+          to: approved
+          reason: ""
+          changed_by: human:cli

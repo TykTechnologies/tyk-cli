@@ -10,6 +10,7 @@ import (
 	"github.com/tyktech/tyk-cli/pkg/types"
 )
 
+// Verifies: SYS-REQ-041
 func TestNewRootCommand(t *testing.T) {
 	rootCmd := NewRootCommand("1.0.0", "abc123", "2023-01-01T00:00:00Z")
 	
@@ -31,6 +32,7 @@ func TestNewRootCommand(t *testing.T) {
 	assert.Equal(t, "init", initCmd.Use)
 }
 
+// Verifies: SYS-REQ-041
 func TestGlobalFlags(t *testing.T) {
 	rootCmd := NewRootCommand("1.0.0", "abc123", "2023-01-01T00:00:00Z")
 	
@@ -50,6 +52,7 @@ func TestGlobalFlags(t *testing.T) {
 	assert.Equal(t, "bool", jsonFlag.Value.Type())
 }
 
+// Verifies: SYS-REQ-041
 func TestGetOutputFormat(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -68,6 +71,7 @@ func TestGetOutputFormat(t *testing.T) {
 	}
 }
 
+// Verifies: SYS-REQ-041
 func TestInitConfigWithEnvironment(t *testing.T) {
 	// This test verifies that configuration can be loaded from flags
 	// (since existing config files may override environment variables in real environments)
@@ -102,6 +106,7 @@ func TestInitConfigWithEnvironment(t *testing.T) {
 	assert.Equal(t, "test-org", activeEnv.OrgID)
 }
 
+// Verifies: SYS-REQ-041
 func TestInitConfigWithFlags(t *testing.T) {
 	// Clean environment
 	os.Unsetenv("TYK_DASH_URL")
@@ -143,6 +148,7 @@ func TestInitConfigWithFlags(t *testing.T) {
 	assert.Equal(t, types.OutputJSON, format)
 }
 
+// Verifies: SYS-REQ-041
 func TestCommandSkipping(t *testing.T) {
 	// Test that init and config commands don't require configuration
 	rootCmd := NewRootCommand("1.0.0", "abc123", "2023-01-01T00:00:00Z")
@@ -158,6 +164,7 @@ func TestCommandSkipping(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// Verifies: SYS-REQ-041
 func TestVersionCommand(t *testing.T) {
 	rootCmd := NewRootCommand("1.2.3", "def456", "2023-12-25T10:30:00Z")
 	
@@ -167,6 +174,49 @@ func TestVersionCommand(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// Verifies: SYS-REQ-041
+// TestInitConfig_LoadConfigFails covers L79 err!=nil from LoadConfig
+// (malformed cli.toml).
+func TestInitConfig_LoadConfigFails(t *testing.T) {
+	tempHome := t.TempDir()
+	t.Setenv("HOME", tempHome)
+	t.Setenv("XDG_CONFIG_HOME", tempHome+"/.config")
+	userCfg, _ := os.UserConfigDir()
+	tykDir := userCfg + "/tyk"
+	require.NoError(t, os.MkdirAll(tykDir, 0o755))
+	require.NoError(t, os.WriteFile(tykDir+"/cli.toml", []byte("[bad\n"), 0o600))
+
+	rootCmd := NewRootCommand("1.0.0", "abc", "now")
+	apiCmd, _, err := rootCmd.Find([]string{"api", "get"})
+	require.NoError(t, err)
+	apiCmd.SetContext(context.Background())
+
+	flags := GlobalFlags{}
+	err = initConfig(apiCmd, &flags)
+	require.Error(t, err)
+}
+
+// Verifies: SYS-REQ-041
+// TestInitConfig_ValidateFails covers L88 err!=nil from config.Validate (no
+// environments configured).
+func TestInitConfig_ValidateFails(t *testing.T) {
+	tempHome := t.TempDir()
+	t.Setenv("HOME", tempHome)
+	t.Setenv("XDG_CONFIG_HOME", tempHome+"/.config")
+	// No cli.toml present and no flags provided → manager has empty config →
+	// config.Validate returns "no environments configured".
+
+	rootCmd := NewRootCommand("1.0.0", "abc", "now")
+	apiCmd, _, err := rootCmd.Find([]string{"api", "get"})
+	require.NoError(t, err)
+	apiCmd.SetContext(context.Background())
+
+	flags := GlobalFlags{} // no dash-url/auth-token/org-id set
+	err = initConfig(apiCmd, &flags)
+	require.Error(t, err)
+}
+
+// Verifies: SYS-REQ-041
 func TestHelpCommand(t *testing.T) {
 	rootCmd := NewRootCommand("1.0.0", "abc123", "2023-01-01T00:00:00Z")
 	

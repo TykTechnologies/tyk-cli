@@ -8,6 +8,7 @@ import (
 	"github.com/tyktech/tyk-cli/pkg/types"
 )
 
+// Verifies: SYS-REQ-029
 func validPolicyFile() types.PolicyFile {
 	return types.PolicyFile{
 		ID:   "gold",
@@ -21,11 +22,13 @@ func validPolicyFile() types.PolicyFile {
 	}
 }
 
+// Verifies: SYS-REQ-029
 func TestValidatePolicy_Valid(t *testing.T) {
 	errs := ValidatePolicy(validPolicyFile())
 	assert.Empty(t, errs)
 }
 
+// Verifies: SYS-REQ-029
 func TestValidatePolicy_MissingRequiredFields(t *testing.T) {
 	tests := []struct {
 		name          string
@@ -70,6 +73,7 @@ func TestValidatePolicy_MissingRequiredFields(t *testing.T) {
 	}
 }
 
+// Verifies: SYS-REQ-029
 func TestValidatePolicy_InvalidDurations(t *testing.T) {
 	tests := []struct {
 		name          string
@@ -113,6 +117,7 @@ func TestValidatePolicy_InvalidDurations(t *testing.T) {
 	}
 }
 
+// Verifies: SYS-REQ-029
 func TestValidatePolicy_SelectorConstraints(t *testing.T) {
 	tests := []struct {
 		name   string
@@ -160,6 +165,7 @@ func TestValidatePolicy_SelectorConstraints(t *testing.T) {
 	}
 }
 
+// Verifies: SYS-REQ-029
 func TestValidatePolicy_CollectsAllErrors(t *testing.T) {
 	pf := types.PolicyFile{
 		// Missing id, name
@@ -175,6 +181,7 @@ func TestValidatePolicy_CollectsAllErrors(t *testing.T) {
 		"expected at least 4 errors for multiply-broken policy, got %d: %v", len(errs), errs)
 }
 
+// Verifies: SYS-REQ-029
 func TestValidatePolicy_FriendlyID_Valid(t *testing.T) {
 	validIDs := []string{"gold", "free-tier", "rate-limit-basic", "v2.0", "a", "abc_def"}
 
@@ -190,6 +197,7 @@ func TestValidatePolicy_FriendlyID_Valid(t *testing.T) {
 	}
 }
 
+// Verifies: SYS-REQ-029
 func TestValidatePolicy_FriendlyID_Invalid(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -220,6 +228,148 @@ func TestValidatePolicy_FriendlyID_Invalid(t *testing.T) {
 				}
 			}
 			assert.True(t, found, "expected schema error for field 'id', got: %v", errs)
+		})
+	}
+}
+
+// ===========================================================================
+// MC/DC coverage of ValidatePolicy duration branches and isObjectIDFormat
+// character-class condition independence.
+// ===========================================================================
+
+// Verifies: SYS-REQ-029
+func TestValidatePolicy_DurationBranches_MCDC(t *testing.T) {
+	tests := []struct {
+		name           string
+		modify         func(*types.PolicyFile)
+		expectField    string
+		expectKindDur  bool
+	}{
+		{
+			name:          "rateLimit.per present and invalid",
+			modify:        func(p *types.PolicyFile) { p.RateLimit = &types.RateLimit{Requests: 100, Per: "garbage"} },
+			expectField:   "rateLimit.per",
+			expectKindDur: true,
+		},
+		{
+			name:          "quota.period present and invalid",
+			modify:        func(p *types.PolicyFile) { p.Quota = &types.Quota{Limit: 1000, Period: "garbage"} },
+			expectField:   "quota.period",
+			expectKindDur: true,
+		},
+		{
+			name:          "keyTTL present and invalid",
+			modify:        func(p *types.PolicyFile) { p.KeyTTL = "garbage" },
+			expectField:   "keyTTL",
+			expectKindDur: true,
+		},
+		{
+			name: "rateLimit nil — branch skipped",
+			modify: func(p *types.PolicyFile) {
+				p.RateLimit = nil
+			},
+			expectField:   "",
+			expectKindDur: false,
+		},
+		{
+			name: "rateLimit non-nil but Per empty — inner branch skipped",
+			modify: func(p *types.PolicyFile) {
+				p.RateLimit = &types.RateLimit{Requests: 100, Per: ""}
+			},
+			expectField:   "",
+			expectKindDur: false,
+		},
+		{
+			name: "quota nil — branch skipped",
+			modify: func(p *types.PolicyFile) {
+				p.Quota = nil
+			},
+			expectField:   "",
+			expectKindDur: false,
+		},
+		{
+			name: "quota non-nil but Period empty — inner branch skipped",
+			modify: func(p *types.PolicyFile) {
+				p.Quota = &types.Quota{Limit: 1000, Period: ""}
+			},
+			expectField:   "",
+			expectKindDur: false,
+		},
+		{
+			name: "keyTTL empty — branch skipped",
+			modify: func(p *types.PolicyFile) {
+				p.KeyTTL = ""
+			},
+			expectField:   "",
+			expectKindDur: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			pf := validPolicyFile()
+			tt.modify(&pf)
+			errs := ValidatePolicy(pf)
+
+			if tt.expectKindDur {
+				found := false
+				for _, e := range errs {
+					if e.Field == tt.expectField && e.Kind == "duration" {
+						found = true
+						break
+					}
+				}
+				assert.True(t, found, "expected duration error on %s, got: %v", tt.expectField, errs)
+			} else {
+				for _, e := range errs {
+					assert.NotEqual(t, "duration", e.Kind, "no duration error expected, got: %v", e)
+				}
+			}
+		})
+	}
+}
+
+// Verifies: SYS-REQ-029
+// MC/DC: selectorCount's len(e.Tags) > 0 = T branch (validate.go:128).
+// A policy with Tags as the sole selector must validate without selector errors,
+// proving the count++ branch executes when Tags is non-empty.
+func TestValidatePolicy_TagsAsSoleSelector(t *testing.T) {
+	pf := validPolicyFile()
+	pf.Access = []types.AccessEntry{
+		{Tags: []string{"public"}, Versions: []string{"v1"}},
+	}
+	errs := ValidatePolicy(pf)
+	for _, e := range errs {
+		assert.NotEqual(t, "selector", e.Kind,
+			"expected no selector error when Tags is the sole selector, got: %v", e)
+	}
+}
+
+// Verifies: SYS-REQ-029
+// isObjectIDFormat checks: len == 24 AND every char in [0-9a-f].
+// MC/DC requires independent exercise of each character-class condition.
+func TestIsObjectIDFormat_MCDC(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+		want  bool
+	}{
+		{"empty", "", false},
+		{"short hex", "abc123", false},
+		{"24 chars all hex", "507f1f77bcf86cd799439011", true},
+		{"24 chars with uppercase hex", "507F1F77BCF86CD799439011", false},
+		{"24 chars with G (out of hex)", "g07f1f77bcf86cd799439011", false},
+		{"24 chars with digit only", "123456789012345678901234", true},
+		{"24 chars with letters a-f only", "abcdefabcdefabcdefabcdef", true},
+		{"24 chars one non-hex letter", "abcdefabcdefabcdefabcde!", false},
+		{"23 chars", "abcdefabcdefabcdefabcde", false},
+		{"25 chars", "abcdefabcdefabcdefabcdeff", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := isObjectIDFormat(tt.input)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }

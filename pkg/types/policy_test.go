@@ -9,6 +9,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// Verifies: SYS-REQ-030
 func TestPolicyFile_YAMLRoundTrip(t *testing.T) {
 	original := PolicyFile{
 		ID:   "gold",
@@ -50,6 +51,7 @@ func TestPolicyFile_YAMLRoundTrip(t *testing.T) {
 	assert.Empty(t, restored.Access[3].Versions, "omitted versions should remain nil/empty")
 }
 
+// Verifies: SYS-REQ-030
 func TestDashboardPolicy_JSONRoundTrip(t *testing.T) {
 	wireJSON := `{
 		"_id": "gold",
@@ -127,6 +129,7 @@ func TestDashboardPolicy_JSONRoundTrip(t *testing.T) {
 	assert.Equal(t, policy.AccessRights, roundTripped.AccessRights)
 }
 
+// Verifies: SYS-REQ-031
 func TestDuration_UnmarshalYAML(t *testing.T) {
 	t.Run("string durations", func(t *testing.T) {
 		tests := []struct {
@@ -169,6 +172,7 @@ func TestDuration_UnmarshalYAML(t *testing.T) {
 	})
 }
 
+// Verifies: SYS-REQ-032
 func TestAccessEntry_SelectorFields(t *testing.T) {
 	// Verify that each selector field is independently settable and
 	// survives YAML round-trip in isolation.
@@ -229,6 +233,7 @@ func TestAccessEntry_SelectorFields(t *testing.T) {
 	}
 }
 
+// Verifies: SYS-REQ-030
 func TestAccessRight_MarshalJSON_NilHandling(t *testing.T) {
 	t.Run("nil AllowedURLs serializes as empty array", func(t *testing.T) {
 		ar := AccessRight{APIID: "a1", APIName: "test", AllowedURLs: nil, Limit: nil}
@@ -253,6 +258,50 @@ func TestAccessRight_MarshalJSON_NilHandling(t *testing.T) {
 	})
 }
 
+// Verifies: SYS-REQ-029
+func TestValidationError_Error(t *testing.T) {
+	t.Run("formats field, message, and kind", func(t *testing.T) {
+		e := &ValidationError{Field: "rateLimit.requests", Message: "must be positive", Kind: "schema"}
+		assert.Equal(t, "rateLimit.requests: must be positive (schema)", e.Error())
+	})
+
+	t.Run("handles empty fields without panicking", func(t *testing.T) {
+		e := &ValidationError{}
+		assert.Equal(t, ":  ()", e.Error())
+	})
+}
+
+// Verifies: SYS-REQ-029
+func TestValidationErrors_Error(t *testing.T) {
+	t.Run("empty slice returns sentinel message", func(t *testing.T) {
+		// Covers the len(ve) == 0 == T branch.
+		var ve ValidationErrors
+		assert.Equal(t, "no validation errors", ve.Error())
+	})
+
+	t.Run("single error returns that error's message", func(t *testing.T) {
+		// Covers len(ve) == 0 == F and len(ve) == 1 == T.
+		ve := ValidationErrors{
+			{Field: "access[0].id", Message: "must be set", Kind: "selector"},
+		}
+		assert.Equal(t, "access[0].id: must be set (selector)", ve.Error())
+	})
+
+	t.Run("multiple errors returns aggregated message", func(t *testing.T) {
+		// Covers len(ve) == 0 == F and len(ve) == 1 == F.
+		ve := ValidationErrors{
+			{Field: "access[0].id", Message: "must be set", Kind: "selector"},
+			{Field: "rateLimit.per", Message: "invalid duration", Kind: "duration"},
+			{Field: "name", Message: "required", Kind: "schema"},
+		}
+		got := ve.Error()
+		assert.Contains(t, got, "3 validation errors")
+		assert.Contains(t, got, "access[0].id: must be set (selector)")
+		assert.Contains(t, got, "and 2 more")
+	})
+}
+
+// Verifies: SYS-REQ-024
 func TestDashboardPolicyListResponse_JSONUnmarshal(t *testing.T) {
 	listJSON := `{
 		"Data": [

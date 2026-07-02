@@ -1,0 +1,23 @@
+id: error-classification-heuristic
+title: isConflictError retains a substring fallback for HTTP 409, leaving room for misclassification
+description: internal/cli/errors.go isConflictError first checks *types.ErrorResponse with Status == 409 (canonical signal), then falls back to substring match on err.Error() for 409 or conflict. The fallback is preserved for wrapped/string errors but a Dashboard whose error message body contains the word 'conflict' without an HTTP 409 status would be misclassified. A non-409 error containing the substring '409' (e.g. a body referencing port 409 or a timestamp) would also be misclassified.
+affected_requirements:
+    - SYS-REQ-016
+    - SYS-REQ-036
+mitigation: 'Scope narrowed: only isConflictError keeps the substring fallback (errors.go:53). The four classifiers added in the same iteration (isAuthError, isForbiddenError, isRateLimitError, isServerError) check er.Status exclusively via httpStatusFromError. Existing tests (TestAPIImportOAS_ConflictReturnsExit4, TestPolicyApply_*_ConflictReturnsExit4) verify the canonical typed path; the substring fallback only fires for wrapped/string errors which the current Tyk Dashboard does not produce. Future cleanup: remove the substring fallback once we confirm no middleware ever returns a wrapped error containing literal ''409'' or ''conflict''.'
+customer_impact: Rare misclassification cases (a non-409 error whose body contains '409' or 'conflict', or a wrapped 409 stripped of its *types.ErrorResponse type) may map to exit 4. CI scripts that branch on exit 4 would take the wrong remediation path. The other four classifiers (isAuthError/isForbiddenError/isRateLimitError/isServerError) are typed-only and not affected.
+owner: tomas@tyk.io
+review_date: "2026-08-31"
+release_disposition: ship_with_known_issue
+accepted_by: human:tomas
+accepted_at: "2026-06-01T13:16:07Z"
+status: active
+history:
+    - at: "2026-06-01T13:16:07Z"
+      by: human:tombuchaillot
+      action: accepted
+      detail: accepted_by=human:tomas
+    - at: "2026-06-02T13:40:55Z"
+      by: human:tombuchaillot
+      action: edit
+      detail: set-title,set-mitigation,set-customer-impact

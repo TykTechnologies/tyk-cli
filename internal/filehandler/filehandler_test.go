@@ -2,8 +2,10 @@ package filehandler
 
 import (
 	"encoding/json"
+	"math"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -26,6 +28,7 @@ var sampleOAS = map[string]interface{}{
 	},
 }
 
+// Verifies: SYS-REQ-022
 func TestValidateFilePath(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -54,6 +57,7 @@ func TestValidateFilePath(t *testing.T) {
 	}
 }
 
+// Verifies: SYS-REQ-022
 func TestGetFileType(t *testing.T) {
 	tests := []struct {
 		filePath    string
@@ -82,6 +86,7 @@ func TestGetFileType(t *testing.T) {
 	}
 }
 
+// Verifies: SYS-REQ-022
 func TestLoadFile_JSON(t *testing.T) {
 	// Create temporary JSON file
 	tmpDir, err := os.MkdirTemp("", "tyk-cli-test")
@@ -114,6 +119,7 @@ func TestLoadFile_JSON(t *testing.T) {
 	assert.Equal(t, "1.0.0", info["version"])
 }
 
+// Verifies: SYS-REQ-022
 func TestLoadFile_YAML(t *testing.T) {
 	// Create temporary YAML file
 	tmpDir, err := os.MkdirTemp("", "tyk-cli-test")
@@ -149,6 +155,7 @@ paths:
 	assert.Equal(t, "1.0.0", info["version"])
 }
 
+// Verifies: SYS-REQ-022
 func TestLoadFile_Errors(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "tyk-cli-test")
 	require.NoError(t, err)
@@ -179,8 +186,41 @@ func TestLoadFile_Errors(t *testing.T) {
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "failed to parse YAML")
 	})
+
+	// Exercises the os.ReadFile error branch (filehandler.go:41 err != nil = T).
+	// os.Stat reports the file exists, but the read fails because permissions
+	// prevent access. Skipped when running as root since root bypasses chmod.
+	t.Run("read failure (permission denied)", func(t *testing.T) {
+		if runtime.GOOS == "windows" || os.Geteuid() == 0 {
+			t.Skip("chmod permission semantics not applicable on this platform/user")
+		}
+
+		jsonFile := filepath.Join(tmpDir, "noread.json")
+		err := os.WriteFile(jsonFile, []byte(`{"openapi":"3.0.0"}`), 0644)
+		require.NoError(t, err)
+		require.NoError(t, os.Chmod(jsonFile, 0))
+		defer func() { _ = os.Chmod(jsonFile, 0644) }()
+
+		_, err = LoadFile(jsonFile)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "failed to read file")
+	})
+
+	// Exercises the getFileType error branch (filehandler.go:47 err != nil = T).
+	// The file exists (os.Stat OK) and is readable, but the extension is not
+	// in SupportedExtensions, so getFileType returns an error.
+	t.Run("unsupported extension on existing file", func(t *testing.T) {
+		txtFile := filepath.Join(tmpDir, "data.txt")
+		err := os.WriteFile(txtFile, []byte(`anything`), 0644)
+		require.NoError(t, err)
+
+		_, err = LoadFile(txtFile)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "unsupported file extension")
+	})
 }
 
+// Verifies: SYS-REQ-022
 func TestLoadFileAsRawJSON(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "tyk-cli-test")
 	require.NoError(t, err)
@@ -206,13 +246,42 @@ info:
 	var parsed map[string]interface{}
 	err = json.Unmarshal(rawJSON, &parsed)
 	require.NoError(t, err)
-	
+
 	assert.Equal(t, "3.0.0", parsed["openapi"])
 	info, ok := parsed["info"].(map[string]interface{})
 	require.True(t, ok)
 	assert.Equal(t, "Test API", info["title"])
 }
 
+// Verifies: SYS-REQ-022
+// Covers error branches in LoadFileAsRawJSON that the happy-path test cannot
+// reach: the LoadFile failure path and the json.Marshal failure path.
+func TestLoadFileAsRawJSON_Errors(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Exercises filehandler.go:77 err != nil = T: LoadFile fails on a missing
+	// file, so LoadFileAsRawJSON propagates the error before reaching marshal.
+	t.Run("LoadFile failure propagates", func(t *testing.T) {
+		_, err := LoadFileAsRawJSON(filepath.Join(tmpDir, "missing.json"))
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "file does not exist")
+	})
+
+	// Exercises filehandler.go:83 err != nil = T: yaml.v3 happily decodes
+	// `.nan` into math.NaN(), but json.Marshal rejects NaN/Inf, so the final
+	// marshal step fails.
+	t.Run("json.Marshal fails on NaN from YAML", func(t *testing.T) {
+		yamlFile := filepath.Join(tmpDir, "nan.yaml")
+		err := os.WriteFile(yamlFile, []byte("value: .nan\n"), 0644)
+		require.NoError(t, err)
+
+		_, err = LoadFileAsRawJSON(yamlFile)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "failed to marshal to JSON")
+	})
+}
+
+// Verifies: SYS-REQ-028
 func TestSaveFile(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "tyk-cli-test")
 	require.NoError(t, err)
@@ -254,8 +323,50 @@ func TestSaveFile(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, "3.0.0", fileInfo.Content["openapi"])
 	})
+
+	// Exercises filehandler.go:93 err != nil = T: getFileType inside SaveFile
+	// rejects unsupported extensions before any marshalling happens.
+	t.Run("unsupported extension", func(t *testing.T) {
+		err := SaveFile(filepath.Join(tmpDir, "out.txt"), sampleOAS)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "unsupported file extension")
+	})
+
+	// Exercises filehandler.go:102 err != nil = T: json.MarshalIndent fails on
+	// values that JSON cannot represent (NaN here).
+	t.Run("json marshal failure on NaN", func(t *testing.T) {
+		bad := map[string]interface{}{"value": math.NaN()}
+		err := SaveFile(filepath.Join(tmpDir, "nan.json"), bad)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "failed to marshal JSON")
+	})
+
+	// Exercises filehandler.go:116 err != nil = T: os.MkdirAll fails because
+	// the would-be parent directory already exists as a regular file.
+	t.Run("mkdir failure (parent is a file)", func(t *testing.T) {
+		blocker := filepath.Join(tmpDir, "blocker")
+		require.NoError(t, os.WriteFile(blocker, []byte("not a dir"), 0644))
+
+		// Target asks SaveFile to MkdirAll(<tmpDir>/blocker) which is a file.
+		target := filepath.Join(blocker, "child.json")
+		err := SaveFile(target, sampleOAS)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "failed to create directory")
+	})
+
+	// Exercises filehandler.go:122 err != nil = T: os.WriteFile fails when the
+	// final path is itself an existing directory.
+	t.Run("write failure (path is a directory)", func(t *testing.T) {
+		dirAsFile := filepath.Join(tmpDir, "dir-as-file.json")
+		require.NoError(t, os.Mkdir(dirAsFile, 0755))
+
+		err := SaveFile(dirAsFile, sampleOAS)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "failed to write file")
+	})
 }
 
+// Verifies: SYS-REQ-011
 func TestOASHelpers(t *testing.T) {
 	t.Run("GetOASVersion", func(t *testing.T) {
 		content1 := map[string]interface{}{"openapi": "3.0.0"}
@@ -284,6 +395,16 @@ func TestOASHelpers(t *testing.T) {
 
 		emptyContent := map[string]interface{}{}
 		assert.Equal(t, "", GetOASInfoVersion(emptyContent))
+
+		// Exercises filehandler.go:167 ok = F: info.version is present but
+		// is not a string, so the type assertion fails and we fall through
+		// to the empty-string return.
+		nonStringVersion := map[string]interface{}{
+			"info": map[string]interface{}{
+				"version": 1.0,
+			},
+		}
+		assert.Equal(t, "", GetOASInfoVersion(nonStringVersion))
 	})
 
 	t.Run("GetOASTitle", func(t *testing.T) {
@@ -292,9 +413,19 @@ func TestOASHelpers(t *testing.T) {
 
 		emptyContent := map[string]interface{}{}
 		assert.Equal(t, "", GetOASTitle(emptyContent))
+
+		// Exercises filehandler.go:177 ok = F: info.title is present but is
+		// not a string, so the type assertion fails and we return "".
+		nonStringTitle := map[string]interface{}{
+			"info": map[string]interface{}{
+				"title": 42,
+			},
+		}
+		assert.Equal(t, "", GetOASTitle(nonStringTitle))
 	})
 }
 
+// Verifies: SYS-REQ-022
 func TestConvertToJSON(t *testing.T) {
 	jsonBytes, err := ConvertToJSON(sampleOAS)
 	require.NoError(t, err)
@@ -309,6 +440,7 @@ func TestConvertToJSON(t *testing.T) {
 	assert.Equal(t, "Test API", info["title"])
 }
 
+// Verifies: SYS-REQ-022
 func TestConvertToYAML(t *testing.T) {
 	yamlBytes, err := ConvertToYAML(sampleOAS)
 	require.NoError(t, err)
@@ -319,6 +451,7 @@ func TestConvertToYAML(t *testing.T) {
 	assert.Contains(t, string(yamlBytes), "title: Test API")
 }
 
+// Verifies: SYS-REQ-022
 func TestRealOASFiles(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "tyk-cli-test")
 	require.NoError(t, err)

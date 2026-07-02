@@ -1,0 +1,54 @@
+component: policy_lifecycle
+variables:
+    - name: json_flag_set
+      type: bool
+      direction: input
+      description: whether --json was passed to policy-get
+    - name: output_is_json
+      type: bool
+      direction: output
+      description: whether the stdout payload was emitted as JSON (rather than CLI-schema YAML)
+    - name: policy_apply_invoked
+      type: bool
+      direction: input
+      description: whether policy apply was the active runner
+    - name: policy_apply_takes_update_path
+      type: bool
+      direction: output
+      description: whether apply called UpdatePolicy rather than CreatePolicy
+    - name: policy_delete_invoked
+      type: bool
+      direction: input
+      description: whether policy delete was the active runner
+    - name: policy_delete_target_does_not_exist
+      type: bool
+      direction: input
+      description: whether the Dashboard preflight returned 404 for the target policy
+    - name: policy_init_invoked
+      type: bool
+      direction: input
+      description: whether policy init was the active runner
+    - name: policy_init_target_file_exists
+      type: bool
+      direction: input
+      description: whether the target output file path already exists on disk
+    - name: policy_page_equals_one
+      type: bool
+      direction: output
+      description: whether the Dashboard request used page=1
+    - name: policy_page_flag_omitted
+      type: bool
+      direction: input
+      description: whether the --page flag was absent from the policy-list invocation
+    - name: policy_target_exists
+      type: bool
+      direction: input
+      description: whether the Dashboard already contains a policy with the friendly ID
+    - name: policy_exit_not_found
+      type: bool
+      direction: output
+      description: whether the policy subcommand terminated with exit code 3 (ExitNotFound)
+    - name: policy_exit_bad_args
+      type: bool
+      direction: output
+      description: whether the policy subcommand terminated with exit code 2 (ExitBadArgs)

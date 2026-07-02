@@ -1,0 +1,74 @@
+id: SYS-REQ-028
+version: 1
+status: approved
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when (policy_init_invoked & policy_init_target_file_exists) the policy_lifecycle shall immediately satisfy policy_exit_bad_args
+description: policy init scaffolds a new policy YAML file in CLI schema format with sensible defaults given --id and --name flags
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+component: policy_lifecycle
+rationale: ""
+tags: []
+variables:
+    - policy_init_invoked
+    - policy_init_target_file_exists
+    - policy_exit_bad_args
+traces:
+    satisfies:
+        - STK-REQ-002
+    reviewed_at: "2026-07-01T15:07:15.180813Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:deef4dfbba0eca48ff063cca5191895c0e97a1da33114b2d5ac524d956558fa3
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: approved
+        reviewer: tomas@tyk.io
+        reviewed_at: "2026-07-01T13:38:54Z"
+        ai_generated: false
+    gaps_reviewed_at: "2026-07-01T13:40:30.377499Z"
+    gaps_reviewed_by: tombuchaillot
+    impact_reviews:
+        - requirement: SYS-REQ-028
+          artifact: internal/cli/policy.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Component rename to domain-oriented names (api → api_lifecycle/oas_transformer/api_versioning/dashboard_client, policy → policy_lifecycle/policy_data_model, config → environment_config; cli_exit_codes cross-cuts). FRETish sentences updated accordingly. Purely metadata; production behaviour unchanged.'
+          base: origin/main
+          requirement_fingerprint: sha256:deef4dfbba0eca48ff063cca5191895c0e97a1da33114b2d5ac524d956558fa3
+          approval_fingerprint: sha256:c5adf1f98f60d17f456dd3b4f2faa49c54795623478d3af45d99e1553a2ece10
+          artifact_fingerprint: sha256:e6de1560a03e13789ffefb649d9baf828e55490b27ebb2df7e26dc190084c82b
+          reviewed_at: "2026-07-01T15:10:09Z"
+        - requirement: SYS-REQ-028
+          artifact: internal/filehandler/filehandler.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Component rename to domain-oriented names (api → api_lifecycle/oas_transformer/api_versioning/dashboard_client, policy → policy_lifecycle/policy_data_model, config → environment_config; cli_exit_codes cross-cuts). FRETish sentences updated accordingly. Purely metadata; production behaviour unchanged.'
+          base: origin/main
+          requirement_fingerprint: sha256:deef4dfbba0eca48ff063cca5191895c0e97a1da33114b2d5ac524d956558fa3
+          approval_fingerprint: sha256:c5adf1f98f60d17f456dd3b4f2faa49c54795623478d3af45d99e1553a2ece10
+          artifact_fingerprint: sha256:f72d1d0e475657eda9681620630ac568af1a59e978325ee260043179ae5c8667
+          reviewed_at: "2026-07-01T15:10:09Z"
+history:
+    created_by: human:cli
+    created_at: "2026-05-29T15:42:24Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-07-01T13:38:40Z"
+lifecycle:
+    change_history:
+        - date: "2026-07-01T13:38:40Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:cli
+        - date: "2026-07-01T13:38:40Z"
+          from: review
+          to: approved
+          reason: ""
+          changed_by: human:cli

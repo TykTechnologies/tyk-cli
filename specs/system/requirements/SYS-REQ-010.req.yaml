@@ -1,0 +1,59 @@
+id: SYS-REQ-010
+version: 1
+status: approved
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when api_title_provided the oas_transformer shall immediately satisfy listen_path_valid
+description: GenerateListenPath converts an API title to a URL-safe slug path (lowercase, non-alphanumeric replaced with hyphens, wrapped in leading/trailing slashes)
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+component: oas_transformer
+rationale: ""
+tags: []
+variables: []
+traces:
+    satisfies:
+        - STK-REQ-001
+    reviewed_at: "2026-07-01T15:07:15.002143Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:2518847afdadedbe8123ed2f1099a90906b41b310a3b329ca5887873385d6504
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: approved
+        reviewer: tomas@tyk.io
+        reviewed_at: "2026-07-01T13:38:54Z"
+        ai_generated: false
+    impact_reviews:
+        - requirement: SYS-REQ-010
+          artifact: internal/oas/transform.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Component rename to domain-oriented names (api → api_lifecycle/oas_transformer/api_versioning/dashboard_client, policy → policy_lifecycle/policy_data_model, config → environment_config; cli_exit_codes cross-cuts). FRETish sentences updated accordingly. Purely metadata; production behaviour unchanged.'
+          base: origin/main
+          requirement_fingerprint: sha256:2518847afdadedbe8123ed2f1099a90906b41b310a3b329ca5887873385d6504
+          approval_fingerprint: sha256:d1dc4bba620c8b9f6cafef6f83744eb671df66f55e758fadf4509171ee354031
+          artifact_fingerprint: sha256:72be4c854e4f8385d8b5969059cc329bd7c2379b606e91034eb5ecf2adb5652f
+          reviewed_at: "2026-07-01T15:10:09Z"
+history:
+    created_by: human:cli
+    created_at: "2026-05-29T15:38:38Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-07-01T13:38:39Z"
+lifecycle:
+    change_history:
+        - date: "2026-07-01T13:38:39Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:cli
+        - date: "2026-07-01T13:38:39Z"
+          from: review
+          to: approved
+          reason: ""
+          changed_by: human:cli

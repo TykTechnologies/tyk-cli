@@ -39,8 +39,7 @@ type Client struct {
 	baseURL    *url.URL
 }
 
-// reqproof:req REQ-API-030
-// reqproof:req REQ-CFG-007
+// Implements: SYS-REQ-021, SYS-REQ-047, INT-REQ-001
 func NewClient(config *types.Config) (*Client, error) {
 	if err := config.Validate(); err != nil {
 		return nil, fmt.Errorf("invalid configuration: %w", err)
@@ -48,12 +47,12 @@ func NewClient(config *types.Config) (*Client, error) {
 
 	// Get the active environment
 	activeEnv, err := config.GetActiveEnvironment()
-	if err != nil {
+	if err != nil { //mcdc:ignore config.Validate above already enforces DefaultEnvironment is set and exists in the Environments map, so GetActiveEnvironment cannot fail here
 		return nil, fmt.Errorf("no active environment: %w", err)
 	}
 
 	baseURL, err := url.Parse(activeEnv.DashboardURL)
-	if err != nil {
+	if err != nil { //mcdc:ignore Environment.Validate (invoked from config.Validate above) already performs url.Parse on the same DashboardURL and rejects any parse failure, so this second parse cannot return an error
 		return nil, fmt.Errorf("invalid dashboard URL: %w", err)
 	}
 
@@ -72,12 +71,12 @@ func NewClient(config *types.Config) (*Client, error) {
 	}, nil
 }
 
-// reqproof:req REQ-API-030
+// Implements: SYS-REQ-021
 func (c *Client) SetTimeout(timeout time.Duration) {
 	c.httpClient.Timeout = timeout
 }
 
-// reqproof:req REQ-API-030
+// Implements: SYS-REQ-021
 func (c *Client) doRequest(ctx context.Context, method, path string, body interface{}) (*http.Response, error) {
 	var reqBody io.Reader
 	var contentType string
@@ -131,7 +130,7 @@ func (c *Client) doRequest(ctx context.Context, method, path string, body interf
 	return c.httpClient.Do(req)
 }
 
-// reqproof:req REQ-API-020
+// Implements: SYS-REQ-013
 func (c *Client) handleResponse(resp *http.Response, result interface{}) error {
 	defer resp.Body.Close()
 
@@ -176,7 +175,7 @@ func (c *Client) handleResponse(resp *http.Response, result interface{}) error {
 	return nil
 }
 
-// reqproof:req REQ-API-002
+// Implements: SYS-REQ-002
 func (c *Client) GetOASAPI(ctx context.Context, apiID string, versionName string) (*types.OASAPI, error) {
 	apiPath := fmt.Sprintf(OASAPIPath, url.PathEscape(apiID))
 
@@ -228,7 +227,7 @@ func (c *Client) GetOASAPI(ctx context.Context, apiID string, versionName string
 	return api, nil
 }
 
-// reqproof:req REQ-API-003
+// Implements: SYS-REQ-003
 func (c *Client) CreateOASAPI(ctx context.Context, oasDocument map[string]interface{}) (*types.OASAPI, error) {
 	resp, err := c.doRequest(ctx, http.MethodPost, OASAPIsPath, oasDocument)
 	if err != nil {
@@ -249,7 +248,7 @@ func (c *Client) CreateOASAPI(ctx context.Context, oasDocument map[string]interf
 	return c.GetOASAPI(ctx, result.ID, "")
 }
 
-// reqproof:req REQ-API-006
+// Implements: SYS-REQ-006
 func (c *Client) UpdateOASAPI(ctx context.Context, apiID string, oasDocument map[string]interface{}) (*types.OASAPI, error) {
 	apiPath := fmt.Sprintf(OASAPIPath, url.PathEscape(apiID))
 
@@ -268,7 +267,7 @@ func (c *Client) UpdateOASAPI(ctx context.Context, apiID string, oasDocument map
 	return c.GetOASAPI(ctx, apiID, "")
 }
 
-// reqproof:req REQ-API-007
+// Implements: SYS-REQ-007
 func (c *Client) DeleteOASAPI(ctx context.Context, apiID string) error {
 	apiPath := fmt.Sprintf(OASAPIPath, url.PathEscape(apiID))
 
@@ -280,7 +279,7 @@ func (c *Client) DeleteOASAPI(ctx context.Context, apiID string) error {
 	return c.handleResponse(resp, nil)
 }
 
-// reqproof:req REQ-API-001
+// Implements: SYS-REQ-001
 func (c *Client) ListOASAPIs(ctx context.Context, page int) ([]*types.OASAPI, error) {
     listPath := OASAPIsPath
     if page > 0 {
@@ -301,7 +300,7 @@ func (c *Client) ListOASAPIs(ctx context.Context, page int) ([]*types.OASAPI, er
     return result.APIs, nil
 }
 
-// reqproof:req REQ-API-001
+// Implements: SYS-REQ-001
 func (c *Client) ListAPIsDashboard(ctx context.Context, page int) ([]*types.OASAPI, error) {
     listPath := "/api/apis"
     if page > 0 {
@@ -380,7 +379,7 @@ func (c *Client) ListAPIsDashboard(ctx context.Context, page int) ([]*types.OASA
     return apis, nil
 }
 
-// reqproof:req REQ-API-002
+// Implements: SYS-REQ-002
 func (c *Client) ListOASAPIVersions(ctx context.Context, apiID string) ([]string, string, error) {
 	versionsPath := fmt.Sprintf(OASAPIVersionsPath, url.PathEscape(apiID))
 
@@ -397,7 +396,7 @@ func (c *Client) ListOASAPIVersions(ctx context.Context, apiID string) ([]string
 	return result.Versions, result.Default, nil
 }
 
-// reqproof:req REQ-API-002
+// Implements: SYS-REQ-002
 func (c *Client) SwitchDefaultVersion(ctx context.Context, apiID string, versionName string) error {
 	apiPath := fmt.Sprintf(OASAPIPath, url.PathEscape(apiID))
 
@@ -413,7 +412,7 @@ func (c *Client) SwitchDefaultVersion(ctx context.Context, apiID string, version
 	return c.handleResponse(resp, nil)
 }
 
-// reqproof:req REQ-CFG-002
+// Implements: SYS-REQ-042
 func (c *Client) Health(ctx context.Context) error {
 	resp, err := c.doRequest(ctx, http.MethodGet, "/health", nil)
 	if err != nil {
@@ -428,7 +427,7 @@ func (c *Client) Health(ctx context.Context) error {
 	return nil
 }
 
-// reqproof:req REQ-API-013
+// Implements: SYS-REQ-011
 func (c *Client) parseOASDocumentToAPI(oasDoc map[string]interface{}) (*types.OASAPI, error) {
 	// Extract basic OAS info
 	info, ok := oasDoc["info"].(map[string]interface{})
@@ -488,7 +487,7 @@ func (c *Client) parseOASDocumentToAPI(oasDoc map[string]interface{}) (*types.OA
 	return api, nil
 }
 
-// reqproof:req REQ-API-013
+// Implements: SYS-REQ-011
 func getString(m map[string]interface{}, key string) string {
 	if val, ok := m[key].(string); ok {
 		return val

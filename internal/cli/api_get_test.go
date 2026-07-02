@@ -15,7 +15,7 @@ import (
 	"github.com/tyktech/tyk-cli/pkg/types"
 )
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 func mockOASAPIResponse() map[string]interface{} {
 	return map[string]interface{}{
 		"openapi": "3.0.3",
@@ -52,7 +52,7 @@ func mockOASAPIResponse() map[string]interface{} {
 	}
 }
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 func TestAPIGet_WithOASOnly_JSON(t *testing.T) {
 	mockOAS := mockOASAPIResponse()
 	
@@ -105,7 +105,7 @@ func TestAPIGet_WithOASOnly_JSON(t *testing.T) {
 	assert.NotNil(t, result["paths"])
 }
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 func TestAPIGet_WithOASOnly_YAML(t *testing.T) {
 	mockOAS := mockOASAPIResponse()
 	
@@ -165,7 +165,7 @@ func TestAPIGet_WithOASOnly_YAML(t *testing.T) {
 	assert.Empty(t, stderrOutput, "No API summary should be shown in OAS-only mode")
 }
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 func TestAPIGet_WithoutOASOnly_ShowsFullOutput(t *testing.T) {
 	mockOAS := mockOASAPIResponse()
 	
@@ -220,7 +220,7 @@ func TestAPIGet_WithoutOASOnly_ShowsFullOutput(t *testing.T) {
 	assert.True(t, hasTykExt, "x-tyk-api-gateway should be present in normal output")
 }
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 func TestAPIGet_WithOASOnly_HumanOutput_ShowsNoSummary(t *testing.T) {
 	mockOAS := mockOASAPIResponse()
 	
@@ -275,7 +275,7 @@ func TestAPIGet_WithOASOnly_HumanOutput_ShowsNoSummary(t *testing.T) {
 	assert.NotContains(t, stdoutStr, "x-tyk-api-gateway")
 }
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 func TestAPIGet_WithoutOASOnly_HumanOutput_ShowsSummary(t *testing.T) {
 	mockOAS := mockOASAPIResponse()
 	
@@ -337,7 +337,7 @@ func TestAPIGet_WithoutOASOnly_HumanOutput_ShowsSummary(t *testing.T) {
 // MC/DC coverage for outputAPIAsHuman / outputAPIAsJSON
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 // TestOutputAPIAsHuman_NilAPI covers L669 api==nil branch.
 func TestOutputAPIAsHuman_NilAPI(t *testing.T) {
 	err := outputAPIAsHuman(nil, "", false)
@@ -345,7 +345,7 @@ func TestOutputAPIAsHuman_NilAPI(t *testing.T) {
 	assert.Contains(t, err.Error(), "API data is nil")
 }
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 // TestOutputAPIAsHuman_NoCustomDomain_NoUpstream covers L687 CustomDomain==""
 // and L690 UpstreamURL=="" (both false branches).
 func TestOutputAPIAsHuman_NoCustomDomain_NoUpstream(t *testing.T) {
@@ -371,7 +371,7 @@ func TestOutputAPIAsHuman_NoCustomDomain_NoUpstream(t *testing.T) {
 	assert.NotContains(t, string(stderrBytes), "Upstream URL:")
 }
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 // TestOutputAPIAsHuman_WithCustomDomainAndUpstream covers L687/L690 true branches.
 func TestOutputAPIAsHuman_WithCustomDomainAndUpstream(t *testing.T) {
 	api := &types.OASAPI{
@@ -398,7 +398,7 @@ func TestOutputAPIAsHuman_WithCustomDomainAndUpstream(t *testing.T) {
 	assert.Contains(t, string(stderrBytes), "Upstream URL:")
 }
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 // TestOutputAPIAsHuman_VersionMatchesDefault covers L703 versionName==DefaultVersion=T.
 func TestOutputAPIAsHuman_VersionMatchesDefault(t *testing.T) {
 	api := &types.OASAPI{
@@ -426,7 +426,7 @@ func TestOutputAPIAsHuman_VersionMatchesDefault(t *testing.T) {
 	assert.Contains(t, string(stderrBytes), "(default)")
 }
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 // TestOutputAPIAsHuman_RequestedVersion_Existing covers L717 requestedVersion!=""
 // AND L719 versionData exists path.
 func TestOutputAPIAsHuman_RequestedVersion_Existing(t *testing.T) {
@@ -458,7 +458,7 @@ func TestOutputAPIAsHuman_RequestedVersion_Existing(t *testing.T) {
 	assert.Contains(t, string(stderrBytes), "version: v2")
 }
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 // TestOutputAPIAsHuman_RequestedVersion_FallbackToMain covers L719 versionData
 // not exists (or OAS nil) path with a non-OAS-only call so the "Warning" branch
 // emits to stderr (L726 !oasOnly=T).
@@ -485,7 +485,7 @@ func TestOutputAPIAsHuman_RequestedVersion_FallbackToMain(t *testing.T) {
 	assert.Contains(t, string(stderrBytes), "Warning")
 }
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 // TestOutputAPIAsHuman_OASOnlyMode covers L678 !oasOnly=F AND L738 oasOnly=T paths.
 func TestOutputAPIAsHuman_OASOnlyMode(t *testing.T) {
 	api := &types.OASAPI{
@@ -511,7 +511,7 @@ func TestOutputAPIAsHuman_OASOnlyMode(t *testing.T) {
 	assert.NotContains(t, string(stdoutBytes), "x-tyk-api-gateway")
 }
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 // TestOutputAPIAsHuman_RequestedVersion_FallbackToMain_OASOnly covers the
 // L726 !oasOnly=F branch (oasOnly=T with a fallback to main).
 func TestOutputAPIAsHuman_RequestedVersion_FallbackToMain_OASOnly(t *testing.T) {
@@ -534,7 +534,7 @@ func TestOutputAPIAsHuman_RequestedVersion_FallbackToMain_OASOnly(t *testing.T) 
 	require.NoError(t, err)
 }
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 // TestOutputAPIAsHuman_RequestedVersion_NoVersionDataNoMain drives L722
 // api.OAS != nil = F branch (requested version not in VersionData AND main
 // OAS is nil).
@@ -558,7 +558,7 @@ func TestOutputAPIAsHuman_RequestedVersion_NoVersionDataNoMain(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 // TestOutputAPIAsHuman_RequestedVersion_DataOASNil drives L719 second-half
 // branch where exists=T but VersionData[req].OAS==nil.
 func TestOutputAPIAsHuman_RequestedVersion_DataOASNil(t *testing.T) {
@@ -583,7 +583,7 @@ func TestOutputAPIAsHuman_RequestedVersion_DataOASNil(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 // TestOutputAPIAsHuman_NilOASData_OASOnly covers L764 !oasOnly=F branch.
 func TestOutputAPIAsHuman_NilOASData_OASOnly(t *testing.T) {
 	api := &types.OASAPI{
@@ -604,7 +604,7 @@ func TestOutputAPIAsHuman_NilOASData_OASOnly(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 // TestOutputAPIAsHuman_RequestedVersionWithVersionDataOASNil covers L719
 // exists && versionData.OAS != nil, where exists=T but OAS=nil (skipped is the
 // short-circuit; we need T => T case).
@@ -633,7 +633,7 @@ func TestOutputAPIAsHuman_RequestedVersionWithOAS(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 // TestOutputAPIAsHuman_NilOASData covers L763 oasData==nil path with !oasOnly=T.
 func TestOutputAPIAsHuman_NilOASData(t *testing.T) {
 	api := &types.OASAPI{
@@ -656,7 +656,7 @@ func TestOutputAPIAsHuman_NilOASData(t *testing.T) {
 	assert.Contains(t, string(stderrBytes), "No OAS document available")
 }
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 // TestOutputAPIAsJSON_NoOAS covers L653 (oasOnly && api.OAS != nil)=F branch
 // (oasOnly=T but OAS is nil so api.OAS != nil is false, so we encode the full
 // api).
@@ -682,7 +682,7 @@ func TestOutputAPIAsJSON_OASOnlyButNilOAS(t *testing.T) {
 // CustomDomain and UpstreamURL.
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-API-003
+// Verifies: SYS-REQ-003
 func TestOutputCreatedAPIAsHuman_AllOptionalsSet(t *testing.T) {
 	api := &types.OASAPI{
 		ID: "a", Name: "A", ListenPath: "/a/", DefaultVersion: "v1",
@@ -691,7 +691,7 @@ func TestOutputCreatedAPIAsHuman_AllOptionalsSet(t *testing.T) {
 	require.NoError(t, outputCreatedAPIAsHuman(api, "v1"))
 }
 
-// reqproof:req REQ-API-003
+// Verifies: SYS-REQ-003
 func TestOutputCreatedAPIAsHuman_NoOptionals(t *testing.T) {
 	api := &types.OASAPI{
 		ID: "a", Name: "A", ListenPath: "/a/", DefaultVersion: "v1",
@@ -700,7 +700,7 @@ func TestOutputCreatedAPIAsHuman_NoOptionals(t *testing.T) {
 	require.NoError(t, outputCreatedAPIAsHuman(api, "v1"))
 }
 
-// reqproof:req REQ-API-003
+// Verifies: SYS-REQ-003
 func TestOutputCreatedAPIAsJSON_AllOptionalsSet(t *testing.T) {
 	api := &types.OASAPI{
 		ID: "a", Name: "A", ListenPath: "/a/", DefaultVersion: "v1",
@@ -715,7 +715,7 @@ func TestOutputCreatedAPIAsJSON_AllOptionalsSet(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// reqproof:req REQ-API-003
+// Verifies: SYS-REQ-003
 func TestOutputCreatedAPIAsJSON_NoOptionals(t *testing.T) {
 	api := &types.OASAPI{ID: "a", Name: "A", ListenPath: "/a/", DefaultVersion: "v1"}
 	oldStdout := os.Stdout
@@ -727,13 +727,13 @@ func TestOutputCreatedAPIAsJSON_NoOptionals(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// reqproof:req REQ-API-004
+// Verifies: SYS-REQ-004
 func TestOutputImportedAPIAsHuman_NoOptionals(t *testing.T) {
 	api := &types.OASAPI{ID: "a", Name: "A", ListenPath: "/a/", DefaultVersion: "v1"}
 	require.NoError(t, outputImportedAPIAsHuman(api, "v1"))
 }
 
-// reqproof:req REQ-API-004
+// Verifies: SYS-REQ-004
 func TestOutputImportedAPIAsHuman_AllOptionals(t *testing.T) {
 	api := &types.OASAPI{
 		ID: "a", Name: "A", ListenPath: "/a/", DefaultVersion: "v1",
@@ -742,13 +742,13 @@ func TestOutputImportedAPIAsHuman_AllOptionals(t *testing.T) {
 	require.NoError(t, outputImportedAPIAsHuman(api, "v1"))
 }
 
-// reqproof:req REQ-API-006
+// Verifies: SYS-REQ-006
 func TestOutputUpdatedAPIAsHuman_NoOptionals(t *testing.T) {
 	api := &types.OASAPI{ID: "a", Name: "A", ListenPath: "/a/", DefaultVersion: "v1"}
 	require.NoError(t, outputUpdatedAPIAsHuman(api, "v1"))
 }
 
-// reqproof:req REQ-API-006
+// Verifies: SYS-REQ-006
 func TestOutputUpdatedAPIAsHuman_AllOptionals(t *testing.T) {
 	api := &types.OASAPI{
 		ID: "a", Name: "A", ListenPath: "/a/", DefaultVersion: "v1",
@@ -757,17 +757,17 @@ func TestOutputUpdatedAPIAsHuman_AllOptionals(t *testing.T) {
 	require.NoError(t, outputUpdatedAPIAsHuman(api, "v1"))
 }
 
-// reqproof:req REQ-API-007
+// Verifies: SYS-REQ-007
 func TestOutputDeletedAPIAsHuman_NoName(t *testing.T) {
 	require.NoError(t, outputDeletedAPIAsHuman("api-id", ""))
 }
 
-// reqproof:req REQ-API-007
+// Verifies: SYS-REQ-007
 func TestOutputDeletedAPIAsHuman_WithName(t *testing.T) {
 	require.NoError(t, outputDeletedAPIAsHuman("api-id", "API Name"))
 }
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 // TestRunAPIGet_NewClientFails covers L620 err!=nil from client.NewClient.
 func TestRunAPIGet_NewClientFails(t *testing.T) {
 	cmd := NewAPIGetCommand()
@@ -777,7 +777,7 @@ func TestRunAPIGet_NewClientFails(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 // TestRunAPIGet_ConfigNil covers L614 config==nil=T branch.
 func TestRunAPIGet_ConfigNil(t *testing.T) {
 	cmd := NewAPIGetCommand()
@@ -788,7 +788,7 @@ func TestRunAPIGet_ConfigNil(t *testing.T) {
 	assert.Contains(t, err.Error(), "configuration not found")
 }
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 // TestRunAPIGet_404OnlyMessage covers L632 substring branch where "404"
 // matches but "not found" does not. Use a JSON body with a message that
 // contains "404" alone.
@@ -815,7 +815,7 @@ func TestRunAPIGet_404OnlyMessage(t *testing.T) {
 	assert.Equal(t, 3, exitErr.Code)
 }
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 // TestRunAPIGet_GenericError covers L632 substring branches both F (the wrap
 // fallback case where err.Error() contains neither "404" nor "not found").
 func TestRunAPIGet_GenericError(t *testing.T) {
@@ -843,7 +843,7 @@ func TestRunAPIGet_GenericError(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 // TestRunAPIGet_NotFoundOnlyText covers L632 substring branch where the error
 // matches "not found" but not "404".
 func TestRunAPIGet_NotFoundTextOnly(t *testing.T) {
@@ -868,7 +868,7 @@ func TestRunAPIGet_NotFoundTextOnly(t *testing.T) {
 	assert.Equal(t, 3, exitErr.Code)
 }
 
-// reqproof:req REQ-API-022
+// Verifies: SYS-REQ-015
 func TestAPIGet_ErrorHandling(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)

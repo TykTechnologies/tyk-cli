@@ -1,0 +1,58 @@
+id: INT-REQ-003
+version: 1
+status: approved
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when oas_document_submitted_to_dashboard the cli_dashboard_contract shall immediately satisfy oas_passes_structural_validation
+description: Every OAS submission path (api import-oas, api update-oas) shall invoke oas.ValidateOASStructure before any Dashboard round-trip. Malformed OAS documents must be rejected locally with ExitBadArgs so that operators get fast feedback and the Dashboard is not asked to reject known-bad input.
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+parent: SYS-REQ-012
+component: cli_dashboard_contract
+rationale: ""
+tags: []
+variables: []
+traces:
+    satisfies:
+        - SYS-REQ-012
+    reviewed_at: "2026-07-01T14:19:46.520158Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:9a0b19270c1968e9190a4760f8b1b48be9e4d723f6bb2426fe99f4532fd6345b
+verification:
+    assurance_level: B
+    formalization_status: valid
+    review:
+        status: approved
+        reviewer: human:tombuchaillot
+        role: lead_engineer
+        reviewed_at: "2026-07-01T14:17:42Z"
+        comment: 'Interface contracts approved: cross-component auth headers, typed error mapping, OAS pre-flight validation.'
+        fingerprint: sha256:bdbf9b0468a8379dad3787a08fd56d81330a2e6fd4f8dacf9427540453702027
+        ai_generated: false
+    impact_reviews:
+        - requirement: INT-REQ-003
+          artifact: internal/oas/transform.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: Added INT-REQ (interface layer) annotations on NewClient, classifyDashboardError, ValidateOASStructure to formalise cross-component contracts. Purely trace metadata — no behavioural code change.
+          base: origin/main
+          requirement_fingerprint: sha256:9a0b19270c1968e9190a4760f8b1b48be9e4d723f6bb2426fe99f4532fd6345b
+          approval_fingerprint: sha256:bdbf9b0468a8379dad3787a08fd56d81330a2e6fd4f8dacf9427540453702027
+          artifact_fingerprint: sha256:72be4c854e4f8385d8b5969059cc329bd7c2379b606e91034eb5ecf2adb5652f
+          reviewed_at: "2026-07-01T14:20:19Z"
+history:
+    created_by: human:cli
+    created_at: "2026-07-01T14:14:09Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-07-01T14:17:42Z"
+lifecycle:
+    change_history:
+        - date: "2026-07-01T14:14:09Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:cli

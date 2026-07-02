@@ -1,6 +1,6 @@
 id: STK-REQ-001
 version: 1
-status: review
+status: approved
 priority: shall
 category: functional
 req_type: guarantee
@@ -16,9 +16,9 @@ rationale: Operators run automation pipelines that provision and reconcile APIs 
 tags: []
 variables: []
 traces:
-    reviewed_at: "2026-06-01T08:22:55.863236Z"
+    reviewed_at: "2026-07-01T13:40:06.354564Z"
     reviewed_by: human:tombuchaillot
-    reviewed_fingerprint: sha256:af88fe2fe2be9ba7ca7694ccbbdfff4a5ec33bc9c5e3b3182e1c56a26de0e216
+    reviewed_fingerprint: sha256:b43d054da09a4ec9a8986e48e4c485b173c7435d8e1701568b84f05731f3fef6
 verification:
     assurance_level: E
     formalization_status: none
@@ -31,7 +31,7 @@ history:
     created_by: human:cli
     created_at: "2026-05-29T00:00:00Z"
     last_modified_by: human:cli
-    last_modified_at: "2026-05-29T16:07:13Z"
+    last_modified_at: "2026-07-01T13:38:22Z"
 obligation_checklist:
     - boundary
 stakeholder:
@@ -42,27 +42,34 @@ stakeholder:
           text: tyk api list returns a paginated list of APIs
           testable: true
           derived_reqs:
-            - REQ-API-001
+            - SYS-REQ-001
         - id: AC-002
           text: tyk api get <id> returns a single API document
           testable: true
           derived_reqs:
-            - REQ-API-002
+            - SYS-REQ-002
         - id: AC-003
           text: tyk api create produces a minimal OAS document and posts it
           testable: true
           derived_reqs:
-            - REQ-API-003
-            - REQ-API-011
-            - REQ-API-012
+            - SYS-REQ-003
+            - SYS-REQ-009
+            - SYS-REQ-010
         - id: AC-004
           text: tyk api apply performs an idempotent upsert
           testable: true
           derived_reqs:
-            - REQ-API-005
-            - REQ-API-010
+            - SYS-REQ-005
+            - SYS-REQ-008
         - id: AC-005
           text: tyk api delete requires confirmation unless --yes is passed
           testable: true
           derived_reqs:
-            - REQ-API-007
+            - SYS-REQ-007
+lifecycle:
+    change_history:
+        - date: "2026-07-01T13:38:22Z"
+          from: review
+          to: approved
+          reason: ""
+          changed_by: human:cli

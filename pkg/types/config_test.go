@@ -9,7 +9,7 @@ import (
 )
 
 // validEnvironment returns a fully-populated Environment that passes Validate.
-// reqproof:req REQ-CFG-010
+// Verifies: SYS-REQ-048
 func validEnvironment() *Environment {
 	return &Environment{
 		Name:           "prod",
@@ -20,7 +20,7 @@ func validEnvironment() *Environment {
 	}
 }
 
-// reqproof:req REQ-CFG-010
+// Verifies: SYS-REQ-048
 func TestConfig_Validate(t *testing.T) {
 	t.Run("no environments returns error", func(t *testing.T) {
 		c := &Config{Environments: map[string]*Environment{}}
@@ -85,7 +85,7 @@ func TestConfig_Validate(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-CFG-030
+// Verifies: SYS-REQ-051
 func TestConfig_GetActiveEnvironment(t *testing.T) {
 	t.Run("empty default environment returns error", func(t *testing.T) {
 		c := &Config{
@@ -139,7 +139,7 @@ func TestConfig_GetActiveEnvironment(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-CFG-001
+// Verifies: SYS-REQ-041
 func TestConfig_GetEffectiveConfig(t *testing.T) {
 	t.Run("propagates error when no active environment", func(t *testing.T) {
 		c := &Config{}
@@ -165,7 +165,7 @@ func TestConfig_GetEffectiveConfig(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-CFG-010
+// Verifies: SYS-REQ-048
 func TestEnvironment_Validate(t *testing.T) {
 	t.Run("empty name returns error", func(t *testing.T) {
 		e := validEnvironment()
@@ -245,7 +245,7 @@ func TestEnvironment_Validate(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-CFG-010
+// Verifies: SYS-REQ-048
 func TestExitCode_Values(t *testing.T) {
 	// Lock the exit code contract — these numeric values are part of the CLI's
 	// scriptable surface and changing them is a breaking change.

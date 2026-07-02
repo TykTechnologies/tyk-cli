@@ -21,7 +21,7 @@ import (
     "gopkg.in/yaml.v3"
 )
 
-// reqproof:req REQ-API-001
+// Implements: SYS-REQ-001
 func truncateWithEllipsis(s string, max int) string {
     if max <= 0 {
         return ""
@@ -36,7 +36,7 @@ func truncateWithEllipsis(s string, max int) string {
     return s[:max-3] + "..."
 }
 
-// reqproof:req REQ-API-001
+// Implements: SYS-REQ-001
 func computeTableLayout(termWidth int) (idW, nameW, pathW int, stacked bool) {
     if termWidth < 20 {
         return 0, 0, 0, true
@@ -109,13 +109,13 @@ func computeTableLayout(termWidth int) (idW, nameW, pathW int, stacked bool) {
     return idW, nameW, pathW, false
 }
 
-// reqproof:req REQ-API-001
+// Implements: SYS-REQ-001
 func hideCursor(w io.Writer) { fmt.Fprint(w, "\x1b[?25l") }
 
-// reqproof:req REQ-API-001
+// Implements: SYS-REQ-001
 func showCursor(w io.Writer) { fmt.Fprint(w, "\x1b[?25h") }
 
-// reqproof:req REQ-API-001
+// Implements: SYS-REQ-001
 func readKey(r io.Reader) (byte, error) {
     buf := make([]byte, 1)
     if _, err := os.Stdin.Read(buf); err != nil { // use stdin directly (raw mode)
@@ -139,13 +139,13 @@ func readKey(r io.Reader) (byte, error) {
     return 27, nil // plain ESC
 }
 
-// reqproof:req REQ-API-001
+// Implements: SYS-REQ-001
 func alPrintf(w io.Writer, format string, a ...interface{}) {
     fmt.Fprint(w, "\x1b[0G")
     fmt.Fprintf(w, format, a...)
 }
 
-// reqproof:req REQ-API-001
+// Implements: SYS-REQ-001
 func NewAPICommand() *cobra.Command {
 	apiCmd := &cobra.Command{
 		Use:   "api",
@@ -166,7 +166,7 @@ func NewAPICommand() *cobra.Command {
 	return apiCmd
 }
 
-// reqproof:req REQ-API-002
+// Implements: SYS-REQ-002
 func NewAPIVersionsCommand() *cobra.Command {
 	versionsCmd := &cobra.Command{
 		Use:   "versions",
@@ -184,7 +184,7 @@ func NewAPIVersionsCommand() *cobra.Command {
 
 // Placeholder functions for version commands - these will be implemented in phase 3
 
-// reqproof:req REQ-API-040
+// Implements: SYS-REQ-023
 func NewAPIVersionsListCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "list",
@@ -196,7 +196,7 @@ func NewAPIVersionsListCommand() *cobra.Command {
 	}
 }
 
-// reqproof:req REQ-API-040
+// Implements: SYS-REQ-023
 func NewAPIVersionsCreateCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "create",
@@ -208,7 +208,7 @@ func NewAPIVersionsCreateCommand() *cobra.Command {
 	}
 }
 
-// reqproof:req REQ-API-040
+// Implements: SYS-REQ-023
 func NewAPIVersionsSwitchDefaultCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "switch-default",
@@ -222,7 +222,7 @@ func NewAPIVersionsSwitchDefaultCommand() *cobra.Command {
 
 // Placeholder functions for API commands - these will be implemented in the next phases
 
-// reqproof:req REQ-API-003
+// Implements: SYS-REQ-003
 func NewAPICreateCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
@@ -259,7 +259,7 @@ After creation, you can:
 	return cmd
 }
 
-// reqproof:req REQ-API-002
+// Implements: SYS-REQ-002
 func NewAPIGetCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get <api-id>",
@@ -279,7 +279,7 @@ suitable for use with standard OpenAPI tooling.`,
 	return cmd
 }
 
-// reqproof:req REQ-API-004
+// Implements: SYS-REQ-004
 func NewAPIImportOASCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "import-oas",
@@ -303,7 +303,7 @@ For Tyk-enhanced OAS files, use 'tyk api apply' instead.`,
 	return cmd
 }
 
-// reqproof:req REQ-API-005
+// Implements: SYS-REQ-005
 func NewAPIApplyCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "apply",
@@ -335,7 +335,7 @@ Examples:
 	return cmd
 }
 
-// reqproof:req REQ-API-006
+// Implements: SYS-REQ-006
 func NewAPIUpdateOASCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update-oas <api-id>",
@@ -361,7 +361,7 @@ For full API updates including Tyk config, use 'tyk api apply' instead.`,
 	return cmd
 }
 
-// reqproof:req REQ-API-007
+// Implements: SYS-REQ-007
 func NewAPIDeleteCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete <api-id>",
@@ -376,7 +376,7 @@ func NewAPIDeleteCommand() *cobra.Command {
 	return cmd
 }
 
-// reqproof:req REQ-API-001
+// Implements: SYS-REQ-001
 func NewAPIListCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
@@ -391,7 +391,7 @@ func NewAPIListCommand() *cobra.Command {
 	return cmd
 }
 
-// reqproof:req REQ-API-001
+// Implements: SYS-REQ-001
 func runAPIList(cmd *cobra.Command, args []string) error {
 	page, _ := cmd.Flags().GetInt("page")
 	interactive, _ := cmd.Flags().GetBool("interactive")
@@ -453,7 +453,7 @@ func runAPIList(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// reqproof:req REQ-API-001
+// Implements: SYS-REQ-001
 func displayAPIPage(apis []*types.OASAPI, page int, interactive bool) {
 	if len(apis) == 0 {
 		if interactive {
@@ -538,7 +538,7 @@ func displayAPIPage(apis []*types.OASAPI, page int, interactive bool) {
 	}
 }
 
-// reqproof:req REQ-API-001
+// Implements: SYS-REQ-001
 func runInteractiveAPIList(c *client.Client, startPage int) error {
     // Make sure we're in a terminal that supports interactive input
     if !term.IsTerminal(int(os.Stdin.Fd())) {
@@ -603,7 +603,7 @@ func runInteractiveAPIList(c *client.Client, startPage int) error {
 	}
 }
 
-// reqproof:req REQ-API-002
+// Implements: SYS-REQ-002
 func runAPIGet(cmd *cobra.Command, args []string) error {
 	apiID := args[0]
 	versionName, _ := cmd.Flags().GetString("version-name")
@@ -645,7 +645,7 @@ func runAPIGet(cmd *cobra.Command, args []string) error {
 	return outputAPIAsHuman(api, versionName, oasOnly)
 }
 
-// reqproof:req REQ-API-002
+// Implements: SYS-REQ-002
 func outputAPIAsJSON(api *types.OASAPI, oasOnly bool) error {
 	encoder := json.NewEncoder(os.Stdout)
 	encoder.SetIndent("", "  ")
@@ -664,7 +664,7 @@ func outputAPIAsJSON(api *types.OASAPI, oasOnly bool) error {
 	return encoder.Encode(api)
 }
 
-// reqproof:req REQ-API-002
+// Implements: SYS-REQ-002
 func outputAPIAsHuman(api *types.OASAPI, requestedVersion string, oasOnly bool) error {
 	if api == nil {
 		return fmt.Errorf("API data is nil")
@@ -754,7 +754,7 @@ func outputAPIAsHuman(api *types.OASAPI, requestedVersion string, oasOnly bool) 
 
 		// Convert to YAML for better readability and output to stdout
 		yamlData, err := yaml.Marshal(oasData)
-		if err != nil {
+		if err != nil { //mcdc:ignore oasData originates from JSON-unmarshaling into map[string]interface{} at the Dashboard boundary; go-yaml Marshal on such a value only fails on cycles or unsupported types (channels/funcs), which cannot appear from JSON decoding
 			return fmt.Errorf("failed to convert OAS to YAML: %w", err)
 		}
 
@@ -769,7 +769,7 @@ func outputAPIAsHuman(api *types.OASAPI, requestedVersion string, oasOnly bool) 
 	return nil
 }
 
-// reqproof:req REQ-API-004
+// Implements: SYS-REQ-004
 func runAPIImportOAS(cmd *cobra.Command, args []string) error {
 	// Get flags
 	filePath, _ := cmd.Flags().GetString("file")
@@ -804,7 +804,7 @@ func runAPIImportOAS(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Structural validation before any Dashboard round-trip (REQ-API-014).
+	// Structural validation before any Dashboard round-trip (SYS-REQ-012).
 	if vErr := oas.ValidateOASStructure(oasData); vErr != nil {
 		return &ExitError{Code: int(types.ExitBadArgs), Message: vErr.Error()}
 	}
@@ -822,7 +822,7 @@ func runAPIImportOAS(cmd *cobra.Command, args []string) error {
 
 	// Extract version name from OAS document
 	versionName := extractVersionFromOAS(oasData)
-	if versionName == "" {
+	if versionName == "" { //mcdc:ignore ValidateOASStructure above (SYS-REQ-012) already rejects any OAS whose info.version is missing or empty, so extractVersionFromOAS returns non-empty here
 		versionName = "v1" // fallback
 	}
 
@@ -858,7 +858,7 @@ func runAPIImportOAS(cmd *cobra.Command, args []string) error {
 	return outputImportedAPIAsHuman(api, versionName)
 }
 
-// reqproof:req REQ-API-004
+// Implements: SYS-REQ-004
 func extractVersionFromOAS(oasData map[string]interface{}) string {
 	if info, ok := oasData["info"].(map[string]interface{}); ok {
 		if version, ok := info["version"].(string); ok && version != "" {
@@ -868,7 +868,7 @@ func extractVersionFromOAS(oasData map[string]interface{}) string {
 	return ""
 }
 
-// reqproof:req REQ-API-004
+// Implements: SYS-REQ-004
 func outputImportedAPIAsJSON(api *types.OASAPI, versionName string) error {
 	result := map[string]interface{}{
 		"api_id":          api.ID,
@@ -884,7 +884,7 @@ func outputImportedAPIAsJSON(api *types.OASAPI, versionName string) error {
 	return encoder.Encode(result)
 }
 
-// reqproof:req REQ-API-004
+// Implements: SYS-REQ-004
 func outputImportedAPIAsHuman(api *types.OASAPI, versionName string) error {
 	green := color.New(color.FgGreen, color.Bold)
 	blue := color.New(color.FgBlue, color.Bold)
@@ -907,7 +907,7 @@ func outputImportedAPIAsHuman(api *types.OASAPI, versionName string) error {
 	return nil
 }
 
-// reqproof:req REQ-API-010
+// Implements: SYS-REQ-008
 func stripExistingAPIID(oasData map[string]interface{}) map[string]interface{} {
 	if xTyk, exists := oasData["x-tyk-api-gateway"]; exists {
 		if xTykMap, ok := xTyk.(map[string]interface{}); ok {
@@ -921,7 +921,7 @@ func stripExistingAPIID(oasData map[string]interface{}) map[string]interface{} {
 	return oasData
 }
 
-// reqproof:req REQ-API-005
+// Implements: SYS-REQ-005
 func runAPIApply(cmd *cobra.Command, args []string) error {
     // Get flags
     filePath, _ := cmd.Flags().GetString("file")
@@ -990,7 +990,7 @@ func runAPIApply(cmd *cobra.Command, args []string) error {
     return createNewAPIViaApply(cmd, config, oasData, versionName, setDefault)
 }
 
-// reqproof:req REQ-API-005
+// Implements: SYS-REQ-005
 func updateExistingAPI(cmd *cobra.Command, config *types.Config, apiID string, oasData map[string]interface{}, versionName string, setDefault bool) error {
 	// Create client
 	c, err := client.NewClient(config)
@@ -1017,7 +1017,7 @@ func updateExistingAPI(cmd *cobra.Command, config *types.Config, apiID string, o
                     notFound = true
                 }
             }
-        } else if strings.Contains(err.Error(), "404") || strings.Contains(strings.ToLower(err.Error()), "not found") {
+        } else if strings.Contains(err.Error(), "404") || strings.Contains(strings.ToLower(err.Error()), "not found") { //mcdc:ignore GetOASAPI (client.go:179-228) returns *types.ErrorResponse for all HTTP >= 400 responses (caught by the branch above); the only other errors it returns are wrapped marshal/unmarshal/io failures whose messages never contain "404" or "not found", so this else-if fallback for string-only errors is unreachable with the current client
             notFound = true
         }
 
@@ -1073,13 +1073,13 @@ func updateExistingAPI(cmd *cobra.Command, config *types.Config, apiID string, o
 	return outputUpdatedAPIAsHuman(api, versionName)
 }
 
-// reqproof:req REQ-API-005
+// Implements: SYS-REQ-005
 func createNewAPIViaApply(cmd *cobra.Command, config *types.Config, oasData map[string]interface{}, versionName string, setDefault bool) error {
 	// Auto-generate x-tyk-api-gateway extensions for plain OAS documents
-	if !oas.HasTykExtensions(oasData) {
+	if !oas.HasTykExtensions(oasData) { //mcdc:ignore runAPIApply already required HasTykExtensions(oasData) to be true before calling createNewAPIViaApply (api.go:974); this defensive re-check cannot fire
 		var err error
 		oasData, err = oas.AddTykExtensions(oasData)
-		if err != nil {
+		if err != nil { //mcdc:ignore inside a block that is itself structurally unreachable per the outer HasTykExtensions guarantee at api.go:974
 			return &ExitError{Code: 2, Message: fmt.Sprintf("failed to generate Tyk extensions: %v", err)}
 		}
 	}
@@ -1124,7 +1124,7 @@ func createNewAPIViaApply(cmd *cobra.Command, config *types.Config, oasData map[
 	return outputImportedAPIAsHuman(api, versionName)
 }
 
-// reqproof:req REQ-API-006
+// Implements: SYS-REQ-006
 func runAPIUpdateOAS(cmd *cobra.Command, args []string) error {
 	// Get API ID from args
 	apiID := args[0]
@@ -1162,7 +1162,7 @@ func runAPIUpdateOAS(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Structural validation before any Dashboard round-trip (REQ-API-014).
+	// Structural validation before any Dashboard round-trip (SYS-REQ-012).
 	if vErr := oas.ValidateOASStructure(oasData); vErr != nil {
 		return &ExitError{Code: int(types.ExitBadArgs), Message: vErr.Error()}
 	}
@@ -1170,7 +1170,7 @@ func runAPIUpdateOAS(cmd *cobra.Command, args []string) error {
 	return updateExistingAPIWithOAS(cmd, config, apiID, oasData)
 }
 
-// reqproof:req REQ-API-007
+// Implements: SYS-REQ-007
 func runAPIDelete(cmd *cobra.Command, args []string) error {
 	apiID := args[0]
 	skipConfirmation, _ := cmd.Flags().GetBool("yes")
@@ -1233,7 +1233,7 @@ func runAPIDelete(cmd *cobra.Command, args []string) error {
 	return outputDeletedAPIAsHuman(apiID, api.Name)
 }
 
-// reqproof:req REQ-API-006
+// Implements: SYS-REQ-006
 func outputUpdatedAPIAsJSON(api *types.OASAPI, versionName string) error {
 	result := map[string]interface{}{
 		"api_id":          api.ID,
@@ -1249,7 +1249,7 @@ func outputUpdatedAPIAsJSON(api *types.OASAPI, versionName string) error {
 	return encoder.Encode(result)
 }
 
-// reqproof:req REQ-API-006
+// Implements: SYS-REQ-006
 func outputUpdatedAPIAsHuman(api *types.OASAPI, versionName string) error {
 	green := color.New(color.FgGreen, color.Bold)
 	blue := color.New(color.FgBlue, color.Bold)
@@ -1272,7 +1272,7 @@ func outputUpdatedAPIAsHuman(api *types.OASAPI, versionName string) error {
 	return nil
 }
 
-// reqproof:req REQ-API-007
+// Implements: SYS-REQ-007
 func outputDeletedAPIAsJSON(apiID string) error {
 	result := map[string]interface{}{
 		"api_id":    apiID,
@@ -1285,7 +1285,7 @@ func outputDeletedAPIAsJSON(apiID string) error {
 	return encoder.Encode(result)
 }
 
-// reqproof:req REQ-API-007
+// Implements: SYS-REQ-007
 func outputDeletedAPIAsHuman(apiID, apiName string) error {
 	green := color.New(color.FgGreen, color.Bold)
 
@@ -1297,7 +1297,7 @@ func outputDeletedAPIAsHuman(apiID, apiName string) error {
 	return nil
 }
 
-// reqproof:req REQ-API-031
+// Implements: SYS-REQ-022
 func loadOASFromFile(filePath string) (map[string]interface{}, error) {
 	// Validate and read the OAS file
 	if !filepath.IsAbs(filePath) {
@@ -1322,7 +1322,7 @@ func loadOASFromFile(filePath string) (map[string]interface{}, error) {
 	return fileInfo.Content, nil
 }
 
-// reqproof:req REQ-API-031
+// Implements: SYS-REQ-022
 func loadOASFromURL(urlStr string) (map[string]interface{}, error) {
 	// Create HTTP client with timeout
 	client := &http.Client{
@@ -1361,7 +1361,7 @@ func loadOASFromURL(urlStr string) (map[string]interface{}, error) {
 	return oasData, nil
 }
 
-// reqproof:req REQ-API-003
+// Implements: SYS-REQ-003
 func runAPICreate(cmd *cobra.Command, args []string) error {
 	// Get flags
 	name, _ := cmd.Flags().GetString("name")
@@ -1389,7 +1389,7 @@ func runAPICreate(cmd *cobra.Command, args []string) error {
 
 	// Generate the OAS document with Tyk extensions
 	oasData, err := generateOASForCreate(name, description, versionName, upstreamURL, listenPath, customDomain)
-	if err != nil {
+	if err != nil { //mcdc:ignore generateOASForCreate builds a static map literal and unconditionally returns (oasDoc, nil); it has no error path
 		return fmt.Errorf("failed to generate OAS document: %w", err)
 	}
 
@@ -1422,7 +1422,7 @@ func runAPICreate(cmd *cobra.Command, args []string) error {
 	return outputCreatedAPIAsHuman(api, versionName)
 }
 
-// reqproof:req REQ-API-003
+// Implements: SYS-REQ-003
 func generateOASForCreate(name, description, version, upstreamURL, listenPath, customDomain string) (map[string]interface{}, error) {
 	// Create basic OAS structure
 	oasDoc := map[string]interface{}{
@@ -1472,7 +1472,7 @@ func generateOASForCreate(name, description, version, upstreamURL, listenPath, c
 	return oasDoc, nil
 }
 
-// reqproof:req REQ-API-003
+// Implements: SYS-REQ-003
 func outputCreatedAPIAsJSON(api *types.OASAPI, versionName string) error {
 	result := map[string]interface{}{
 		"api_id":          api.ID,
@@ -1495,7 +1495,7 @@ func outputCreatedAPIAsJSON(api *types.OASAPI, versionName string) error {
 	return encoder.Encode(result)
 }
 
-// reqproof:req REQ-API-003
+// Implements: SYS-REQ-003
 func outputCreatedAPIAsHuman(api *types.OASAPI, versionName string) error {
 	green := color.New(color.FgGreen, color.Bold)
 	blue := color.New(color.FgBlue, color.Bold)
@@ -1524,7 +1524,7 @@ func outputCreatedAPIAsHuman(api *types.OASAPI, versionName string) error {
 	return nil
 }
 
-// reqproof:req REQ-API-006
+// Implements: SYS-REQ-006
 func updateExistingAPIWithOAS(cmd *cobra.Command, config *types.Config, apiID string, oasData map[string]interface{}) error {
 	// Create client
 	c, err := client.NewClient(config)
@@ -1546,25 +1546,25 @@ func updateExistingAPIWithOAS(cmd *cobra.Command, config *types.Config, apiID st
 	}
 
 	// Preserve existing Tyk extensions by merging with new OAS
-	if existingAPI.OAS != nil {
-		if tykExt, exists := existingAPI.OAS["x-tyk-api-gateway"]; exists {
+	if existingAPI.OAS != nil { //mcdc:ignore parseOASDocumentToAPI always assigns OAS = oasDoc (client.go:474), so existingAPI.OAS is never nil when GetOASAPI returns success
+		if tykExt, exists := existingAPI.OAS["x-tyk-api-gateway"]; exists { //mcdc:ignore parseOASDocumentToAPI (client.go:439-442) required x-tyk-api-gateway to be present as map[string]interface{} for GetOASAPI to succeed, so it always exists here
 			oasData["x-tyk-api-gateway"] = tykExt
 		}
 	}
 
 	// If no Tyk extensions found, generate them for the clean OAS
-	if !oas.HasTykExtensions(oasData) {
+	if !oas.HasTykExtensions(oasData) { //mcdc:ignore the block above just set oasData["x-tyk-api-gateway"] from the existing API's tyk extensions (guaranteed present by parseOASDocumentToAPI), so HasTykExtensions is now always true
 		oasData, err = oas.AddTykExtensions(oasData)
-		if err != nil {
+		if err != nil { //mcdc:ignore inside a block that is itself structurally unreachable per the HasTykExtensions guarantee above
 			return &ExitError{Code: 2, Message: fmt.Sprintf("failed to generate Tyk extensions: %v", err)}
 		}
 	}
 
 	// Ensure the API ID matches in the extensions
-	if tykExt, exists := oasData["x-tyk-api-gateway"]; exists {
-		if tykExtMap, ok := tykExt.(map[string]interface{}); ok {
-			if info, exists := tykExtMap["info"]; exists {
-				if infoMap, ok := info.(map[string]interface{}); ok {
+	if tykExt, exists := oasData["x-tyk-api-gateway"]; exists { //mcdc:ignore oasData["x-tyk-api-gateway"] was unconditionally set above from existingAPI.OAS (parseOASDocumentToAPI requires it), so exists is always true
+		if tykExtMap, ok := tykExt.(map[string]interface{}); ok { //mcdc:ignore tykExt originates from JSON-unmarshaled existingAPI.OAS where parseOASDocumentToAPI (client.go:439) already asserted map[string]interface{}, so the assertion always succeeds
+			if info, exists := tykExtMap["info"]; exists { //mcdc:ignore parseOASDocumentToAPI (client.go:445-448) required tykExt["info"] to exist as map[string]interface{} for GetOASAPI to succeed
+				if infoMap, ok := info.(map[string]interface{}); ok { //mcdc:ignore parseOASDocumentToAPI (client.go:445) already asserted this exact info value as map[string]interface{}
 					infoMap["id"] = apiID
 				}
 			}
@@ -1573,7 +1573,7 @@ func updateExistingAPIWithOAS(cmd *cobra.Command, config *types.Config, apiID st
 
 	// Extract version name from OAS document
 	versionName := extractVersionFromOAS(oasData)
-	if versionName == "" {
+	if versionName == "" { //mcdc:ignore ValidateOASStructure at api.go:1166 (SYS-REQ-012) rejects any OAS whose info.version is missing or empty before this function is called
 		versionName = "v1" // fallback
 	}
 

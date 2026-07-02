@@ -1,27 +1,27 @@
 id: SW-REQ-006
 version: 1
-status: review
+status: approved
 priority: shall
 category: functional
 req_type: guarantee
-fretish: when valid_seconds_input the policy shall immediately satisfy format_parse_roundtrip_equal
+fretish: when valid_seconds_input the policy_data_model shall immediately satisfy format_parse_roundtrip_equal
 description: 'ParseDuration and FormatDuration roundtrip: ParseDuration(FormatDuration(n)) == n for any non-negative n expressible as an exact unit multiple'
 formalization_strategy: fretish
 informal_verification:
     method: ""
     evidence: ""
     verified: false
-parent: REQ-POL-010
-component: policy
+parent: SYS-REQ-031
+component: policy_data_model
 rationale: ""
 tags: []
 variables: []
 traces:
     satisfies:
-        - REQ-POL-010
-    reviewed_at: "2026-06-01T13:00:40.561204Z"
+        - SYS-REQ-031
+    reviewed_at: "2026-07-01T15:07:14.859511Z"
     reviewed_by: human:tombuchaillot
-    reviewed_fingerprint: sha256:3725231c8e0ee1dbf5d7c3c7954f52cd1e411e91bdd4f191d121e0144e12bf04
+    reviewed_fingerprint: sha256:80c94a91313ef02d22ce44279f6495da69494b41e38eef6ab7381c88318fcc89
 verification:
     assurance_level: E
     formalization_status: valid
@@ -35,21 +35,26 @@ verification:
           artifact: internal/policy/duration.go
           decision: no-authored-change
           reviewer: tombuchaillot
-          reason: 'Re-annotated existing production functions to declare implementation linkage for previously-unlinked requirements: FuzzySuggestions → SW-REQ-001/002/003; ParseDuration → SW-REQ-004/005/006; GenerateListenPath → SW-REQ-007/008/009; NewClient → REQ-CFG-007 (env timeout); classifyDashboardError → REQ-API-027/POL-022/POL-027; ExitCode enum → REQ-API-020/021, REQ-CFG-020/021, REQ-POL-020/021. No behavioural change — purely trace metadata.'
+          reason: 'Component rename to domain-oriented names (api → api_lifecycle/oas_transformer/api_versioning/dashboard_client, policy → policy_lifecycle/policy_data_model, config → environment_config; cli_exit_codes cross-cuts). FRETish sentences updated accordingly. Purely metadata; production behaviour unchanged.'
           base: origin/main
-          requirement_fingerprint: sha256:3725231c8e0ee1dbf5d7c3c7954f52cd1e411e91bdd4f191d121e0144e12bf04
-          approval_fingerprint: sha256:67a18827ca7d65d975e56405510f31f44c83bbde5ec3a96884f37e131941c47a
-          artifact_fingerprint: sha256:fd8bcbf1527e4d6655525f8d78249f7ccf483118f366209f0c721a71a9a15364
-          reviewed_at: "2026-06-02T13:56:27Z"
+          requirement_fingerprint: sha256:80c94a91313ef02d22ce44279f6495da69494b41e38eef6ab7381c88318fcc89
+          approval_fingerprint: sha256:c407decedd1bf4959b88ebf1f231561271fc5006e640d5dad4102f300491a13f
+          artifact_fingerprint: sha256:53121ff991ed113131f6bb71989c0b878d073600ef99397ed930919d333ea3b0
+          reviewed_at: "2026-07-01T15:10:09Z"
 history:
     created_by: human:cli
     created_at: "2026-06-01T12:53:43Z"
     last_modified_by: human:cli
-    last_modified_at: "2026-06-01T13:00:11Z"
+    last_modified_at: "2026-07-01T13:38:23Z"
 lifecycle:
     change_history:
         - date: "2026-06-01T13:00:11Z"
           from: draft
           to: review
+          reason: ""
+          changed_by: human:cli
+        - date: "2026-07-01T13:38:23Z"
+          from: review
+          to: approved
           reason: ""
           changed_by: human:cli

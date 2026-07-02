@@ -1,0 +1,14 @@
+component: api_versioning
+variables:
+    - name: no_dashboard_contact_made
+      type: bool
+      direction: output
+      description: whether the runner returned without issuing any Dashboard HTTP request
+    - name: placeholder_message_emitted
+      type: bool
+      direction: output
+      description: whether the runner emitted the documented placeholder message
+    - name: versions_subcommand_invoked
+      type: bool
+      direction: input
+      description: whether one of api versions list/create/switch-default was invoked

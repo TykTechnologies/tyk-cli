@@ -10,7 +10,7 @@ import (
 	"github.com/tyktech/tyk-cli/internal/cli"
 )
 
-// reqproof:req REQ-API-020
+// Verifies: SYS-REQ-013
 func TestClassifyExitError_NilErrorReturnsZero(t *testing.T) {
 	var buf bytes.Buffer
 	code := classifyExitError(nil, &buf)
@@ -18,7 +18,7 @@ func TestClassifyExitError_NilErrorReturnsZero(t *testing.T) {
 	assert.Empty(t, buf.String(), "nothing should be written to stderr when err is nil")
 }
 
-// reqproof:req REQ-API-020
+// Verifies: SYS-REQ-013
 func TestClassifyExitError_ExitErrorPreservesCodeAndMessage(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -46,7 +46,7 @@ func TestClassifyExitError_ExitErrorPreservesCodeAndMessage(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-API-020
+// Verifies: SYS-REQ-013
 func TestClassifyExitError_GenericErrorFallsBackToExitOne(t *testing.T) {
 	var buf bytes.Buffer
 	err := errors.New("some unexpected failure")
@@ -56,7 +56,7 @@ func TestClassifyExitError_GenericErrorFallsBackToExitOne(t *testing.T) {
 		"stderr must include the original error message")
 }
 
-// reqproof:req REQ-API-020
+// Verifies: SYS-REQ-013
 // classifyExitError must follow `errors.As` semantics: an ExitError wrapped
 // inside another error chain must still be detected.
 func TestClassifyExitError_WrappedExitErrorIsDetected(t *testing.T) {

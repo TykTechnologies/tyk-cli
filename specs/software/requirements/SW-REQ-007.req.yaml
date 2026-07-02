@@ -1,27 +1,27 @@
 id: SW-REQ-007
 version: 1
-status: review
+status: approved
 priority: shall
 category: functional
 req_type: guarantee
-fretish: when listen_path_generated the api shall immediately satisfy (result_has_slash_prefix_and_suffix & listen_path_valid)
+fretish: when listen_path_generated the oas_transformer shall immediately satisfy (result_has_slash_prefix_and_suffix & listen_path_valid)
 description: GenerateListenPath always returns a value that starts with '/' and ends with '/' and is valid as a listen path
 formalization_strategy: fretish
 informal_verification:
     method: ""
     evidence: ""
     verified: false
-parent: REQ-API-012
-component: api
+parent: SYS-REQ-010
+component: oas_transformer
 rationale: ""
 tags: []
 variables: []
 traces:
     satisfies:
-        - REQ-API-012
-    reviewed_at: "2026-06-01T13:00:40.563212Z"
+        - SYS-REQ-010
+    reviewed_at: "2026-07-01T15:07:14.861249Z"
     reviewed_by: human:tombuchaillot
-    reviewed_fingerprint: sha256:04b675a0b2eb0f0029820763ff38dab17c4c7efc62d58fdcc764e4da69a8c20d
+    reviewed_fingerprint: sha256:a05b1a8941cd477d7902fe5fd7ea6ac85e5b6ba6551a6aa0dcd00622d6ce31e4
 verification:
     assurance_level: E
     formalization_status: valid
@@ -30,28 +30,33 @@ verification:
         reviewer: tomas@tyk.io
         reviewed_at: "2026-06-01T13:01:57Z"
         ai_generated: false
-    gaps_reviewed_at: "2026-06-02T08:37:02.702664Z"
+    gaps_reviewed_at: "2026-07-01T13:40:30.377499Z"
     gaps_reviewed_by: tombuchaillot
     impact_reviews:
         - requirement: SW-REQ-007
           artifact: internal/oas/transform.go
           decision: no-authored-change
           reviewer: tombuchaillot
-          reason: 'Re-annotated existing production functions to declare implementation linkage for previously-unlinked requirements: FuzzySuggestions → SW-REQ-001/002/003; ParseDuration → SW-REQ-004/005/006; GenerateListenPath → SW-REQ-007/008/009; NewClient → REQ-CFG-007 (env timeout); classifyDashboardError → REQ-API-027/POL-022/POL-027; ExitCode enum → REQ-API-020/021, REQ-CFG-020/021, REQ-POL-020/021. No behavioural change — purely trace metadata.'
+          reason: 'Component rename to domain-oriented names (api → api_lifecycle/oas_transformer/api_versioning/dashboard_client, policy → policy_lifecycle/policy_data_model, config → environment_config; cli_exit_codes cross-cuts). FRETish sentences updated accordingly. Purely metadata; production behaviour unchanged.'
           base: origin/main
-          requirement_fingerprint: sha256:04b675a0b2eb0f0029820763ff38dab17c4c7efc62d58fdcc764e4da69a8c20d
-          approval_fingerprint: sha256:bbc1aa4c436fe7a616cd93580e145a8ccb14c3b90a54b2a791b8160f2358b20d
-          artifact_fingerprint: sha256:da8a3f7030071fd024311ff33bb2e172e68f109d6216ee1aa34e8d9221117ce1
-          reviewed_at: "2026-06-02T13:56:27Z"
+          requirement_fingerprint: sha256:a05b1a8941cd477d7902fe5fd7ea6ac85e5b6ba6551a6aa0dcd00622d6ce31e4
+          approval_fingerprint: sha256:d06924e1032176af28c2df40e3c0f0286c11e6f7291059fe9ddb0d099a94e8fd
+          artifact_fingerprint: sha256:72be4c854e4f8385d8b5969059cc329bd7c2379b606e91034eb5ecf2adb5652f
+          reviewed_at: "2026-07-01T15:10:09Z"
 history:
     created_by: human:cli
     created_at: "2026-06-01T12:53:43Z"
     last_modified_by: human:cli
-    last_modified_at: "2026-06-01T13:00:11Z"
+    last_modified_at: "2026-07-01T13:38:23Z"
 lifecycle:
     change_history:
         - date: "2026-06-01T13:00:11Z"
           from: draft
           to: review
+          reason: ""
+          changed_by: human:cli
+        - date: "2026-07-01T13:38:23Z"
+          from: review
+          to: approved
           reason: ""
           changed_by: human:cli

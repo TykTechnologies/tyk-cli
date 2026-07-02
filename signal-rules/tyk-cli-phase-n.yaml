@@ -1,0 +1,79 @@
+rules:
+  - id: go.deferred-close-on-possibly-nil
+    severity: WARNING
+    languages: [go]
+    message: |
+      `defer x.Close()` executed on a value that could still be nil when the
+      defer statement is reached (e.g. paired with `x, err := fn()` before the
+      `if err != nil` check). This can panic in the deferred path. Move the
+      defer AFTER the error check, or guard with `if x != nil { defer x.Close() }`.
+    metadata:
+      proof:
+        signal_id: reliability.deferred_close_on_possibly_nil
+        provider: opengrep
+        tags: [error_handling, panic_safety]
+        obligations: [error_handling]
+        confidence: medium
+    paths:
+      exclude:
+        - "*_test.go"
+        - "vendor/**"
+
+  - id: go.dial-return-without-close
+    severity: WARNING
+    languages: [go]
+    message: |
+      An HTTP response is returned without a matching `defer resp.Body.Close()`.
+      Leaks the connection and file descriptor.
+    metadata:
+      proof:
+        signal_id: reliability.http_response_not_closed
+        provider: opengrep
+        tags: [http_client, network_boundary]
+        obligations: [error_handling]
+        confidence: medium
+    paths:
+      exclude:
+        - "*_test.go"
+        - "vendor/**"
+
+  - id: go.deferred-defer-in-loop
+    severity: WARNING
+    languages: [go]
+    message: |
+      A `defer` statement inside a for-loop body queues the deferred call for the
+      enclosing function's return, not the end of each iteration. In long loops
+      this leaks resources (file handles, mutex unlocks) until the function
+      exits. Restructure to close within the iteration.
+    metadata:
+      proof:
+        signal_id: reliability.defer_in_loop
+        provider: opengrep
+        tags: [error_handling, panic_safety]
+        obligations: [error_handling]
+        confidence: medium
+    paths:
+      exclude:
+        - "*_test.go"
+        - "vendor/**"
+
+  - id: go.error-wrap-loss
+    severity: INFO
+    languages: [go]
+    message: |
+      `fmt.Errorf("...%v", err)` discards error wrapping semantics; callers can
+      no longer `errors.Is` or `errors.As` against the wrapped error type. Use
+      `%w` unless the concrete type must intentionally be hidden. This is
+      particularly important in tyk-cli where classifyDashboardError uses
+      `errors.As(*types.ErrorResponse)` to route exit codes.
+    metadata:
+      proof:
+        signal_id: reliability.error_wrap_loses_chain
+        provider: opengrep
+        tags: [error_handling]
+        obligations: [error_handling]
+        confidence: medium
+    paths:
+      exclude:
+        - "*_test.go"
+        - "vendor/**"

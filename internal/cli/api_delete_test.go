@@ -14,7 +14,7 @@ import (
 	"github.com/tyktech/tyk-cli/pkg/types"
 )
 
-// reqproof:req REQ-API-007
+// Verifies: SYS-REQ-007
 func executeAPIDeleteCmd(t *testing.T, serverURL string, outputFormat types.OutputFormat, apiID string, yes bool) error {
 	t.Helper()
 	deleteCmd := NewAPIDeleteCommand()
@@ -39,7 +39,7 @@ func executeAPIDeleteCmd(t *testing.T, serverURL string, outputFormat types.Outp
 	return deleteCmd.RunE(deleteCmd, []string{apiID})
 }
 
-// reqproof:req REQ-API-007
+// Verifies: SYS-REQ-007
 func TestAPIDelete_WithYes(t *testing.T) {
 	deleteCalled := false
 
@@ -71,7 +71,7 @@ func TestAPIDelete_WithYes(t *testing.T) {
 	assert.Contains(t, string(stdout), "Test API", "stdout should reference the deleted API name")
 }
 
-// reqproof:req REQ-API-007
+// Verifies: SYS-REQ-007
 func TestAPIDelete_WithYes_JSON(t *testing.T) {
 	deleteCalled := false
 
@@ -108,7 +108,7 @@ func TestAPIDelete_WithYes_JSON(t *testing.T) {
 	assert.Equal(t, "deleted", result["operation"])
 }
 
-// reqproof:req REQ-API-007
+// Verifies: SYS-REQ-007
 func TestAPIDelete_NotFound_OnVerify(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
@@ -125,7 +125,7 @@ func TestAPIDelete_NotFound_OnVerify(t *testing.T) {
 	assert.Contains(t, exitErr.Message, "not found")
 }
 
-// reqproof:req REQ-API-007
+// Verifies: SYS-REQ-007
 func TestAPIDelete_NotFound_OnDelete(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
@@ -153,7 +153,7 @@ func TestAPIDelete_NotFound_OnDelete(t *testing.T) {
 // MC/DC coverage for runAPIDelete confirmation prompt and edge cases
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-API-007
+// Verifies: SYS-REQ-007
 // withStdin temporarily replaces os.Stdin with a pipe containing `input` for
 // the duration of `body`.
 func withStdin(t *testing.T, input string, body func()) {
@@ -167,7 +167,7 @@ func withStdin(t *testing.T, input string, body func()) {
 	body()
 }
 
-// reqproof:req REQ-API-007
+// Verifies: SYS-REQ-007
 // TestAPIDelete_PromptCancelled covers L1207 !skipConfirmation=T plus L1211
 // response not in {y,yes}.
 func TestAPIDelete_PromptCancelled(t *testing.T) {
@@ -187,7 +187,7 @@ func TestAPIDelete_PromptCancelled(t *testing.T) {
 	require.NoError(t, err, "cancelling the prompt should not be an error")
 }
 
-// reqproof:req REQ-API-007
+// Verifies: SYS-REQ-007
 // TestAPIDelete_PromptConfirmedYes covers L1211 response=="y" (proves the
 // negated AND short-circuit on the "yes" half).
 func TestAPIDelete_PromptConfirmedYes(t *testing.T) {
@@ -210,7 +210,7 @@ func TestAPIDelete_PromptConfirmedYes(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// reqproof:req REQ-API-007
+// Verifies: SYS-REQ-007
 // TestAPIDelete_PromptConfirmedYesWord covers L1211 response=="yes" (proves
 // the full-word "yes" branch).
 func TestAPIDelete_PromptConfirmedYesWord(t *testing.T) {
@@ -233,7 +233,7 @@ func TestAPIDelete_PromptConfirmedYesWord(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// reqproof:req REQ-API-007
+// Verifies: SYS-REQ-007
 // TestAPIDelete_ServerErrorOnDelete covers L1219 err!=nil after Delete with
 // a non-404 wrap path (L1220 substring branches both false).
 func TestAPIDelete_ServerErrorOnDelete(t *testing.T) {
@@ -254,7 +254,7 @@ func TestAPIDelete_ServerErrorOnDelete(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-API-007
+// Verifies: SYS-REQ-007
 // TestAPIDelete_VerifyFails_NonNotFound covers L1197 substring branches both
 // false (classifyDashboardError handles), and confirms 500 maps to ExitError(8).
 func TestAPIDelete_VerifyFails_ServerError(t *testing.T) {
@@ -271,7 +271,7 @@ func TestAPIDelete_VerifyFails_ServerError(t *testing.T) {
 	assert.Equal(t, int(types.ExitServerError), exitErr.Code)
 }
 
-// reqproof:req REQ-API-007
+// Verifies: SYS-REQ-007
 // TestAPIDelete_DeleteNotFound_404OnlyMessage covers L1220 substring branch
 // where "404" matches but "not found" does not (on the DELETE call).
 func TestAPIDelete_DeleteNotFound_404OnlyMessage(t *testing.T) {
@@ -296,7 +296,7 @@ func TestAPIDelete_DeleteNotFound_404OnlyMessage(t *testing.T) {
 	assert.Equal(t, 3, exitErr.Code)
 }
 
-// reqproof:req REQ-API-007
+// Verifies: SYS-REQ-007
 // TestAPIDelete_VerifyFails_NonClassified covers L1200 cls!=nil=F branch
 // (non-404 non-classified error on GET).
 func TestAPIDelete_VerifyFails_NonClassified(t *testing.T) {
@@ -310,7 +310,7 @@ func TestAPIDelete_VerifyFails_NonClassified(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-API-007
+// Verifies: SYS-REQ-007
 // TestAPIDelete_VerifyNotFound_404OnlyMessage covers the L1197 substring branch
 // where "404" matches but "not found" doesn't.
 func TestAPIDelete_VerifyNotFound_404OnlyMessage(t *testing.T) {
@@ -330,7 +330,7 @@ func TestAPIDelete_VerifyNotFound_404OnlyMessage(t *testing.T) {
 	assert.Equal(t, 3, exitErr.Code)
 }
 
-// reqproof:req REQ-API-007
+// Verifies: SYS-REQ-007
 // TestAPIDelete_DeleteNotFound_404Only covers L1220 substring branch where the
 // DELETE wraps a message with "404" only.
 func TestAPIDelete_DeleteNotFound_404Only(t *testing.T) {
@@ -357,7 +357,7 @@ func TestAPIDelete_DeleteNotFound_404Only(t *testing.T) {
 	assert.Equal(t, 3, exitErr.Code)
 }
 
-// reqproof:req REQ-API-007
+// Verifies: SYS-REQ-007
 // TestAPIDelete_NewClientFails covers L1186 err!=nil from client.NewClient.
 func TestAPIDelete_NewClientFails(t *testing.T) {
 	cmd := NewAPIDeleteCommand()
@@ -368,7 +368,7 @@ func TestAPIDelete_NewClientFails(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-API-007
+// Verifies: SYS-REQ-007
 // TestAPIDelete_ConfigNil covers L1180 config==nil=T branch.
 func TestAPIDelete_ConfigNil(t *testing.T) {
 	cmd := NewAPIDeleteCommand()
@@ -380,7 +380,7 @@ func TestAPIDelete_ConfigNil(t *testing.T) {
 	assert.Contains(t, err.Error(), "configuration not found")
 }
 
-// reqproof:req REQ-API-007
+// Verifies: SYS-REQ-007
 // TestAPIDelete_JSONOutput_Yes covers L1229 outputFormat==OutputJSON path.
 // (Covered partially by TestAPIDelete_WithYes_JSON; explicit reqproof here.)
 func TestAPIDelete_JSONOutput_PromptCancelled_NoOutput(t *testing.T) {

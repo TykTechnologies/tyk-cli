@@ -28,7 +28,7 @@ var sampleOAS = map[string]interface{}{
 	},
 }
 
-// reqproof:req REQ-API-031
+// Verifies: SYS-REQ-022
 func TestValidateFilePath(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -57,7 +57,7 @@ func TestValidateFilePath(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-API-031
+// Verifies: SYS-REQ-022
 func TestGetFileType(t *testing.T) {
 	tests := []struct {
 		filePath    string
@@ -86,7 +86,7 @@ func TestGetFileType(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-API-031
+// Verifies: SYS-REQ-022
 func TestLoadFile_JSON(t *testing.T) {
 	// Create temporary JSON file
 	tmpDir, err := os.MkdirTemp("", "tyk-cli-test")
@@ -119,7 +119,7 @@ func TestLoadFile_JSON(t *testing.T) {
 	assert.Equal(t, "1.0.0", info["version"])
 }
 
-// reqproof:req REQ-API-031
+// Verifies: SYS-REQ-022
 func TestLoadFile_YAML(t *testing.T) {
 	// Create temporary YAML file
 	tmpDir, err := os.MkdirTemp("", "tyk-cli-test")
@@ -155,7 +155,7 @@ paths:
 	assert.Equal(t, "1.0.0", info["version"])
 }
 
-// reqproof:req REQ-API-031
+// Verifies: SYS-REQ-022
 func TestLoadFile_Errors(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "tyk-cli-test")
 	require.NoError(t, err)
@@ -220,7 +220,7 @@ func TestLoadFile_Errors(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-API-031
+// Verifies: SYS-REQ-022
 func TestLoadFileAsRawJSON(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "tyk-cli-test")
 	require.NoError(t, err)
@@ -253,7 +253,7 @@ info:
 	assert.Equal(t, "Test API", info["title"])
 }
 
-// reqproof:req REQ-API-031
+// Verifies: SYS-REQ-022
 // Covers error branches in LoadFileAsRawJSON that the happy-path test cannot
 // reach: the LoadFile failure path and the json.Marshal failure path.
 func TestLoadFileAsRawJSON_Errors(t *testing.T) {
@@ -281,7 +281,7 @@ func TestLoadFileAsRawJSON_Errors(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-POL-005
+// Verifies: SYS-REQ-028
 func TestSaveFile(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "tyk-cli-test")
 	require.NoError(t, err)
@@ -366,7 +366,7 @@ func TestSaveFile(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-API-013
+// Verifies: SYS-REQ-011
 func TestOASHelpers(t *testing.T) {
 	t.Run("GetOASVersion", func(t *testing.T) {
 		content1 := map[string]interface{}{"openapi": "3.0.0"}
@@ -425,7 +425,7 @@ func TestOASHelpers(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-API-031
+// Verifies: SYS-REQ-022
 func TestConvertToJSON(t *testing.T) {
 	jsonBytes, err := ConvertToJSON(sampleOAS)
 	require.NoError(t, err)
@@ -440,7 +440,7 @@ func TestConvertToJSON(t *testing.T) {
 	assert.Equal(t, "Test API", info["title"])
 }
 
-// reqproof:req REQ-API-031
+// Verifies: SYS-REQ-022
 func TestConvertToYAML(t *testing.T) {
 	yamlBytes, err := ConvertToYAML(sampleOAS)
 	require.NoError(t, err)
@@ -451,7 +451,7 @@ func TestConvertToYAML(t *testing.T) {
 	assert.Contains(t, string(yamlBytes), "title: Test API")
 }
 
-// reqproof:req REQ-API-031
+// Verifies: SYS-REQ-022
 func TestRealOASFiles(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "tyk-cli-test")
 	require.NoError(t, err)

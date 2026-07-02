@@ -1,0 +1,60 @@
+id: SYS-REQ-044
+version: 1
+status: approved
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when list_invoked_with_environments_present the environment_config shall immediately satisfy all_environments_rendered_with_active_marked
+description: tyk config list renders every configured environment and marks the active one; emits a friendly empty-state message when no environments are configured
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+parent: STK-REQ-003
+component: environment_config
+rationale: ""
+tags: []
+variables: []
+traces:
+    satisfies:
+        - STK-REQ-003
+    reviewed_at: "2026-07-01T15:07:15.430367Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:da5071a27234b48d9838c1f06ea2946c63e5dae0236f492a398b4cbe07746df2
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: approved
+        reviewer: tomas@tyk.io
+        reviewed_at: "2026-06-01T13:27:53Z"
+        ai_generated: false
+    impact_reviews:
+        - requirement: SYS-REQ-044
+          artifact: internal/cli/config.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Component rename to domain-oriented names (api → api_lifecycle/oas_transformer/api_versioning/dashboard_client, policy → policy_lifecycle/policy_data_model, config → environment_config; cli_exit_codes cross-cuts). FRETish sentences updated accordingly. Purely metadata; production behaviour unchanged.'
+          base: origin/main
+          requirement_fingerprint: sha256:da5071a27234b48d9838c1f06ea2946c63e5dae0236f492a398b4cbe07746df2
+          approval_fingerprint: sha256:2efa40d5101eb611d110d92a40d62433f8168185e07596f39ece9683ae5bdc4d
+          artifact_fingerprint: sha256:081612f8659e6f77b0d4653dec2ab586869910e3ba99f5fce79d445293e93be6
+          reviewed_at: "2026-07-01T15:10:09Z"
+history:
+    created_by: human:cli
+    created_at: "2026-06-01T13:27:08Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-07-01T13:38:22Z"
+lifecycle:
+    change_history:
+        - date: "2026-06-01T13:27:53Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:cli
+        - date: "2026-07-01T13:38:22Z"
+          from: review
+          to: approved
+          reason: ""
+          changed_by: human:cli

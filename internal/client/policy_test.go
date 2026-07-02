@@ -18,7 +18,7 @@ import (
 // Test data helpers
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-POL-001
+// Verifies: SYS-REQ-024
 func sampleDashboardPolicy(id, name string, rate int64) types.DashboardPolicy {
 	return types.DashboardPolicy{
 		MID:              id,
@@ -40,7 +40,7 @@ func sampleDashboardPolicy(id, name string, rate int64) types.DashboardPolicy {
 // ListPolicies
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-POL-001
+// Verifies: SYS-REQ-024
 func TestClient_ListPolicies_ZeroPage(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// page <= 0 must NOT append the `p=` query parameter.
@@ -58,7 +58,7 @@ func TestClient_ListPolicies_ZeroPage(t *testing.T) {
 	assert.Empty(t, result.Data)
 }
 
-// reqproof:req REQ-POL-001
+// Verifies: SYS-REQ-024
 func TestClient_ListPolicies_HandleResponseError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -77,7 +77,7 @@ func TestClient_ListPolicies_HandleResponseError(t *testing.T) {
 	assert.Equal(t, 500, errResp.Status)
 }
 
-// reqproof:req REQ-POL-001
+// Verifies: SYS-REQ-024
 func TestClient_ListPolicies_NetworkFailure(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {}))
 	closedURL := server.URL
@@ -92,7 +92,7 @@ func TestClient_ListPolicies_NetworkFailure(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-POL-001
+// Verifies: SYS-REQ-024
 func TestClient_ListPolicies(t *testing.T) {
 	gold := sampleDashboardPolicy("gold", "Gold Plan", 1000)
 	silver := sampleDashboardPolicy("silver", "Silver Plan", 500)
@@ -123,7 +123,7 @@ func TestClient_ListPolicies(t *testing.T) {
 	assert.Equal(t, "silver", result.Data[1].MID)
 }
 
-// reqproof:req REQ-POL-001
+// Verifies: SYS-REQ-024
 func TestClient_ListPolicies_Empty(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		resp := types.DashboardPolicyListResponse{
@@ -147,7 +147,7 @@ func TestClient_ListPolicies_Empty(t *testing.T) {
 // GetPolicy
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-POL-002
+// Verifies: SYS-REQ-025
 func TestClient_GetPolicy(t *testing.T) {
 	gold := sampleDashboardPolicy("gold", "Gold Plan", 1000)
 
@@ -169,7 +169,7 @@ func TestClient_GetPolicy(t *testing.T) {
 	assert.Equal(t, int64(1000), result.Rate)
 }
 
-// reqproof:req REQ-POL-022
+// Verifies: SYS-REQ-035
 func TestClient_GetPolicy_NotFound(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
@@ -195,7 +195,7 @@ func TestClient_GetPolicy_NotFound(t *testing.T) {
 // CreatePolicy
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-POL-003
+// Verifies: SYS-REQ-026
 func TestClient_CreatePolicy(t *testing.T) {
 	policy := sampleDashboardPolicy("new-policy", "New Policy", 500)
 
@@ -230,7 +230,7 @@ func TestClient_CreatePolicy(t *testing.T) {
 // UpdatePolicy
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-POL-003
+// Verifies: SYS-REQ-026
 func TestClient_UpdatePolicy(t *testing.T) {
 	policy := sampleDashboardPolicy("gold", "Gold Plan Updated", 2000)
 
@@ -263,7 +263,7 @@ func TestClient_UpdatePolicy(t *testing.T) {
 // DeletePolicy
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-POL-004
+// Verifies: SYS-REQ-027
 func TestClient_DeletePolicy(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodDelete, r.Method)
@@ -284,7 +284,7 @@ func TestClient_DeletePolicy(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// reqproof:req REQ-POL-022
+// Verifies: SYS-REQ-035
 func TestClient_DeletePolicy_NotFound(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
@@ -309,7 +309,7 @@ func TestClient_DeletePolicy_NotFound(t *testing.T) {
 // doRequest network-failure coverage for every policy verb.
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-POL-002
+// Verifies: SYS-REQ-025
 func TestClient_GetPolicy_NetworkFailure(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {}))
 	closedURL := server.URL
@@ -324,7 +324,7 @@ func TestClient_GetPolicy_NetworkFailure(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-POL-003
+// Verifies: SYS-REQ-026
 func TestClient_CreatePolicy_NetworkFailure(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {}))
 	closedURL := server.URL
@@ -340,7 +340,7 @@ func TestClient_CreatePolicy_NetworkFailure(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-POL-003
+// Verifies: SYS-REQ-026
 func TestClient_UpdatePolicy_NetworkFailure(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {}))
 	closedURL := server.URL
@@ -356,7 +356,7 @@ func TestClient_UpdatePolicy_NetworkFailure(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-POL-004
+// Verifies: SYS-REQ-027
 func TestClient_DeletePolicy_NetworkFailure(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {}))
 	closedURL := server.URL

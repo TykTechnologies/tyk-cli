@@ -1,0 +1,26 @@
+# proof.waivers.yaml — explicit project waivers.
+# Authored via `proof waive <check> --scope ... --reason ... --by ... --role ... --expires YYYY-MM-DD`.
+# See `proof help waive` for the schema.
+
+waivers:
+    - check: code_mcdc_coverage
+      scope: '*'
+      reason: 'internal/cli aggregate MC/DC hits 93.8% decisions / 93.9% conditions after honest annotations (26 //mcdc:ignore records for structurally-unreachable defensive plumbing). The remaining ~31 gaps are: (a) TTY/raw-mode paths in runInteractiveAPIList/readKey/selectEnvironmentInteractively that require terminal shim injection into production code; (b) FS-mockable paths (saveConfigToFile, readPolicyFile stdin) that would need dependency-injected io.Writer/io.Reader; (c) filepath.Abs err paths that only trip when os.Getwd() fails and are impractical to reproduce in unit tests. Closing the gap requires refactoring production for testability, tracked separately. Waiver caps at 2027-06-30 for annual review.'
+      by: tomas@tyk.io
+      role: lead_engineer
+      created_at: "2026-07-01"
+      expires: "2027-06-30"
+    - check: code_signal_obligations_reviewed
+      scope: '*'
+      reason: 'http_client_dependency signal fires on api.go:1328 and client.go:112 with obligation classes {external_call_concurrency_bounded, external_call_failure_observable, external_call_timeout_bounded, tls_required_for_secrets, upstream_budget_coordinated}. tyk-cli is a synchronous single-shot CLI, not a service: concurrency and upstream-budget obligations do not apply; timeout is bounded by SYS-REQ-047 (per-environment timeout override); TLS is delegated to the underlying stdlib http.Client (documented risk no-tls-verification-controls). Formalising these obligations into a dedicated signal-owning requirement would be misleading for a CLI shape. Waiver expires 2027-06-30.'
+      by: tomas@tyk.io
+      role: lead_engineer
+      created_at: "2026-07-01"
+      expires: "2027-06-30"
+    - check: mcdc_verifies_witnesses
+      scope: '*'
+      reason: '// Verifies: SYS-REQ-XXX annotations in *_test.go do not carry per-decision witness rows (e.g. // MCDC SYS-REQ-XXX: var_a=T, var_b=F => TRUE) as sink does. tyk-cli tests are integration-shaped (httptest.NewServer + cobra runner) rather than pure-boolean condition tables, so authoring per-row MCDC witness comments would duplicate the assertion machinery already in the test bodies. Test evidence remains bound via Verifies annotations. Waiver expires 2027-06-30 for annual review.'
+      by: tomas@tyk.io
+      role: lead_engineer
+      created_at: "2026-07-01"
+      expires: "2027-06-30"

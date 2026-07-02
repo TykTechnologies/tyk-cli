@@ -17,7 +17,7 @@ type GlobalFlags struct {
 	JSON      bool
 }
 
-// reqproof:req REQ-API-001
+// Implements: SYS-REQ-001
 func NewRootCommand(version, commit, buildTime string) *cobra.Command {
 	var globalFlags GlobalFlags
 	
@@ -70,7 +70,7 @@ with support for OpenAPI 3.0 specifications.`,
 	return rootCmd
 }
 
-// reqproof:req REQ-CFG-001
+// Implements: SYS-REQ-041
 func initConfig(cmd *cobra.Command, flags *GlobalFlags) error {
 	// Create config manager
 	configManager := config.NewManager()
@@ -99,7 +99,7 @@ func initConfig(cmd *cobra.Command, flags *GlobalFlags) error {
 	return nil
 }
 
-// reqproof:req REQ-CFG-001
+// Implements: SYS-REQ-041
 func getOutputFormat(jsonFlag bool) types.OutputFormat {
 	if jsonFlag {
 		return types.OutputJSON
@@ -107,7 +107,7 @@ func getOutputFormat(jsonFlag bool) types.OutputFormat {
 	return types.OutputHuman
 }
 
-// reqproof:req REQ-CFG-001
+// Implements: SYS-REQ-041
 func SetupViper() {
 	viper.SetEnvPrefix("TYK")
 	viper.AutomaticEnv()

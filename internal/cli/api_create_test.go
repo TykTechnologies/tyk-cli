@@ -14,7 +14,7 @@ import (
 	"github.com/tyktech/tyk-cli/pkg/types"
 )
 
-// reqproof:req REQ-API-003
+// Verifies: SYS-REQ-003
 func TestGenerateOASForCreate(t *testing.T) {
 	tests := []struct {
 		name         string
@@ -121,7 +121,7 @@ func TestGenerateOASForCreate(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-API-003
+// Verifies: SYS-REQ-003
 func TestNewAPICreateCommand(t *testing.T) {
 	cmd := NewAPICreateCommand()
 
@@ -155,7 +155,7 @@ func TestNewAPICreateCommand(t *testing.T) {
 // MC/DC coverage for runAPICreate branches
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-API-003
+// Verifies: SYS-REQ-003
 // executeAPICreate builds and runs a create command against a test server.
 // It returns the resulting error from RunE.
 func executeAPICreate(t *testing.T, serverURL string, format types.OutputFormat, args []string) error {
@@ -175,7 +175,7 @@ func executeAPICreate(t *testing.T, serverURL string, format types.OutputFormat,
 	return cmd.RunE(cmd, []string{})
 }
 
-// reqproof:req REQ-API-003
+// Verifies: SYS-REQ-003
 // TestRunAPICreate_AutoListenPathAndDescription covers L1375 listenPath==""=T
 // and L1380 description==""=T branches, plus L1418 outputFormat==OutputJSON=T
 // (with JSON output).
@@ -204,7 +204,7 @@ func TestRunAPICreate_AutoListenPathAndDescription_JSON(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// reqproof:req REQ-API-003
+// Verifies: SYS-REQ-003
 // TestRunAPICreate_AllFlagsSet covers L1375 listenPath==""=F and L1380
 // description==""=F branches.
 func TestRunAPICreate_AllFlagsSet(t *testing.T) {
@@ -232,7 +232,7 @@ func TestRunAPICreate_AllFlagsSet(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// reqproof:req REQ-API-003
+// Verifies: SYS-REQ-003
 // TestRunAPICreate_NewClientFails covers L1398 err!=nil from client.NewClient.
 func TestRunAPICreate_NewClientFails(t *testing.T) {
 	cmd := NewAPICreateCommand()
@@ -244,7 +244,7 @@ func TestRunAPICreate_NewClientFails(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-API-003
+// Verifies: SYS-REQ-003
 // TestRunAPICreate_ConfigNil covers L1386 config==nil=T branch.
 func TestRunAPICreate_ConfigNil(t *testing.T) {
 	cmd := NewAPICreateCommand()
@@ -257,7 +257,7 @@ func TestRunAPICreate_ConfigNil(t *testing.T) {
 	assert.Contains(t, err.Error(), "configuration not found")
 }
 
-// reqproof:req REQ-API-003
+// Verifies: SYS-REQ-003
 // TestRunAPICreate_ServerError covers L1412 fmt.Errorf wrap for non-conflict
 // dashboard errors.
 func TestRunAPICreate_ServerError(t *testing.T) {

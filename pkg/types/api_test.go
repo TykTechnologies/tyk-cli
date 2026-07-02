@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// reqproof:req REQ-API-022
+// Verifies: SYS-REQ-015
 func TestErrorResponse_Error(t *testing.T) {
 	t.Run("returns message verbatim", func(t *testing.T) {
 		e := &ErrorResponse{Status: 404, Message: "not found"}
@@ -31,7 +31,7 @@ func TestErrorResponse_Error(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-API-022
+// Verifies: SYS-REQ-015
 func TestErrorResponse_JSONRoundTrip(t *testing.T) {
 	original := ErrorResponse{
 		Status:  422,
@@ -52,7 +52,7 @@ func TestErrorResponse_JSONRoundTrip(t *testing.T) {
 	assert.Equal(t, original.Message, restored.Message)
 }
 
-// reqproof:req REQ-API-022
+// Verifies: SYS-REQ-015
 func TestErrorResponse_JSON_OmitsEmptyCode(t *testing.T) {
 	e := ErrorResponse{Status: 500, Message: "server error"}
 	data, err := json.Marshal(&e)

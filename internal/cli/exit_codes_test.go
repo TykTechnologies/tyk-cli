@@ -14,10 +14,10 @@ import (
 )
 
 // ---------------------------------------------------------------------------
-// REQ-API-023: api create / import-oas / apply exit 4 on HTTP 409
+// SYS-REQ-016: api create / import-oas / apply exit 4 on HTTP 409
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-API-023
+// Verifies: SYS-REQ-016
 func TestAPIImportOAS_ConflictReturnsExit4(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost && r.URL.Path == "/api/apis/oas" {
@@ -61,10 +61,10 @@ func TestAPIImportOAS_ConflictReturnsExit4(t *testing.T) {
 	require.Error(t, err)
 	exitErr, ok := err.(*ExitError)
 	require.True(t, ok, "expected ExitError, got %T: %v", err, err)
-	assert.Equal(t, int(types.ExitConflict), exitErr.Code, "REQ-API-023: HTTP 409 must map to exit code 4")
+	assert.Equal(t, int(types.ExitConflict), exitErr.Code, "SYS-REQ-016: HTTP 409 must map to exit code 4")
 }
 
-// reqproof:req REQ-API-023
+// Verifies: SYS-REQ-016
 func TestAPICreate_ConflictReturnsExit4(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost && r.URL.Path == "/api/apis/oas" {
@@ -102,14 +102,14 @@ func TestAPICreate_ConflictReturnsExit4(t *testing.T) {
 	require.Error(t, err)
 	exitErr, ok := err.(*ExitError)
 	require.True(t, ok, "expected ExitError, got %T: %v", err, err)
-	assert.Equal(t, int(types.ExitConflict), exitErr.Code, "REQ-API-023: HTTP 409 must map to exit code 4")
+	assert.Equal(t, int(types.ExitConflict), exitErr.Code, "SYS-REQ-016: HTTP 409 must map to exit code 4")
 }
 
 // ---------------------------------------------------------------------------
-// REQ-POL-023: policy apply exits 4 on HTTP 409
+// SYS-REQ-036: policy apply exits 4 on HTTP 409
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-POL-023
+// Verifies: SYS-REQ-036
 func TestPolicyApply_Create_ConflictReturnsExit4(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
@@ -137,10 +137,10 @@ func TestPolicyApply_Create_ConflictReturnsExit4(t *testing.T) {
 	require.Error(t, err)
 	exitErr, ok := err.(*ExitError)
 	require.True(t, ok, "expected ExitError, got %T: %v", err, err)
-	assert.Equal(t, int(types.ExitConflict), exitErr.Code, "REQ-POL-023: HTTP 409 on create must map to exit code 4")
+	assert.Equal(t, int(types.ExitConflict), exitErr.Code, "SYS-REQ-036: HTTP 409 on create must map to exit code 4")
 }
 
-// reqproof:req REQ-POL-023
+// Verifies: SYS-REQ-036
 func TestPolicyApply_Update_ConflictReturnsExit4(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
@@ -169,14 +169,14 @@ func TestPolicyApply_Update_ConflictReturnsExit4(t *testing.T) {
 	require.Error(t, err)
 	exitErr, ok := err.(*ExitError)
 	require.True(t, ok, "expected ExitError, got %T: %v", err, err)
-	assert.Equal(t, int(types.ExitConflict), exitErr.Code, "REQ-POL-023: HTTP 409 on update must map to exit code 4")
+	assert.Equal(t, int(types.ExitConflict), exitErr.Code, "SYS-REQ-036: HTTP 409 on update must map to exit code 4")
 }
 
 // ---------------------------------------------------------------------------
-// REQ-CFG-021 / REQ-POL-020: invalid args produce exit code 2 (ExitBadArgs)
+// SYS-REQ-050 / SYS-REQ-033: invalid args produce exit code 2 (ExitBadArgs)
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-CFG-021
+// Verifies: SYS-REQ-050
 func TestConfigAdd_MissingRequiredFieldReturnsExit2(t *testing.T) {
 	cmd := NewConfigAddCommand()
 	// Missing --auth-token and --org-id, only dashboard-url given.
@@ -194,8 +194,8 @@ func TestConfigAdd_MissingRequiredFieldReturnsExit2(t *testing.T) {
 		"validation error should explain which required field is missing")
 }
 
-// reqproof:req REQ-POL-020
-// REQ-POL-020 says "all policy subcommands exit 0 on success".
+// Verifies: SYS-REQ-033
+// SYS-REQ-033 says "all policy subcommands exit 0 on success".
 // This is a contract verified by every other successful policy test passing
 // without error. We add one explicit smoke assertion here so the requirement
 // has a direct verified_by link.
@@ -217,11 +217,11 @@ func TestPolicyList_SuccessReturnsNilError(t *testing.T) {
 	cmd.SetArgs([]string{})
 
 	err := cmd.RunE(cmd, []string{})
-	assert.NoError(t, err, "REQ-POL-020: policy list on a clean response must return nil (exit 0)")
+	assert.NoError(t, err, "SYS-REQ-033: policy list on a clean response must return nil (exit 0)")
 }
 
-// reqproof:req REQ-CFG-020
-// REQ-CFG-020 says "all config subcommands exit 0 on success". The config use
+// Verifies: SYS-REQ-049
+// SYS-REQ-049 says "all config subcommands exit 0 on success". The config use
 // / current tests in config_use_test.go already cover this; we add one
 // explicit smoke assertion against config current with a default env so the
 // requirement has a clear verified_by link.
@@ -231,15 +231,15 @@ func TestConfigCurrent_SuccessReturnsNilError(t *testing.T) {
 
 	cmd := NewConfigCurrentCommand()
 	err := cmd.RunE(cmd, []string{})
-	assert.NoError(t, err, "REQ-CFG-020: config current on a valid config must return nil (exit 0)")
+	assert.NoError(t, err, "SYS-REQ-049: config current on a valid config must return nil (exit 0)")
 }
 
 
 // ---------------------------------------------------------------------------
-// REQ-API-024 / REQ-POL-024: HTTP 401 → exit 5 (ExitAuthFailed)
+// SYS-REQ-017 / SYS-REQ-037: HTTP 401 → exit 5 (ExitAuthFailed)
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-API-024
+// Verifies: SYS-REQ-017, INT-REQ-002
 func TestAPIList_AuthFailedReturnsExit5(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -266,11 +266,11 @@ func TestAPIList_AuthFailedReturnsExit5(t *testing.T) {
 	exitErr, ok := err.(*ExitError)
 	require.True(t, ok, "expected ExitError, got %T: %v", err, err)
 	assert.Equal(t, int(types.ExitAuthFailed), exitErr.Code,
-		"REQ-API-024: HTTP 401 must map to exit code 5")
+		"SYS-REQ-017: HTTP 401 must map to exit code 5")
 	assert.Contains(t, exitErr.Message, "auth", "message must hint at auth failure")
 }
 
-// reqproof:req REQ-POL-024
+// Verifies: SYS-REQ-037
 func TestPolicyList_AuthFailedReturnsExit5(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -290,14 +290,14 @@ func TestPolicyList_AuthFailedReturnsExit5(t *testing.T) {
 	exitErr, ok := err.(*ExitError)
 	require.True(t, ok, "expected ExitError, got %T", err)
 	assert.Equal(t, int(types.ExitAuthFailed), exitErr.Code,
-		"REQ-POL-024: HTTP 401 must map to exit code 5")
+		"SYS-REQ-037: HTTP 401 must map to exit code 5")
 }
 
 // ---------------------------------------------------------------------------
-// REQ-API-027 / REQ-POL-027: HTTP 403 → exit 6 (ExitForbidden)
+// SYS-REQ-020 / SYS-REQ-040: HTTP 403 → exit 6 (ExitForbidden)
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-API-027
+// Verifies: SYS-REQ-020
 func TestAPIList_ForbiddenReturnsExit6(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
@@ -322,10 +322,10 @@ func TestAPIList_ForbiddenReturnsExit6(t *testing.T) {
 	exitErr, ok := err.(*ExitError)
 	require.True(t, ok, "expected ExitError")
 	assert.Equal(t, int(types.ExitForbidden), exitErr.Code,
-		"REQ-API-027: HTTP 403 must map to exit code 6")
+		"SYS-REQ-020: HTTP 403 must map to exit code 6")
 }
 
-// reqproof:req REQ-POL-027
+// Verifies: SYS-REQ-040
 func TestPolicyList_ForbiddenReturnsExit6(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
@@ -345,14 +345,14 @@ func TestPolicyList_ForbiddenReturnsExit6(t *testing.T) {
 	exitErr, ok := err.(*ExitError)
 	require.True(t, ok)
 	assert.Equal(t, int(types.ExitForbidden), exitErr.Code,
-		"REQ-POL-027: HTTP 403 must map to exit code 6")
+		"SYS-REQ-040: HTTP 403 must map to exit code 6")
 }
 
 // ---------------------------------------------------------------------------
-// REQ-API-025 / REQ-POL-025: HTTP 429 → exit 7 (ExitRateLimited)
+// SYS-REQ-018 / SYS-REQ-038: HTTP 429 → exit 7 (ExitRateLimited)
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-API-025
+// Verifies: SYS-REQ-018
 func TestAPIList_RateLimitedReturnsExit7(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusTooManyRequests)
@@ -377,10 +377,10 @@ func TestAPIList_RateLimitedReturnsExit7(t *testing.T) {
 	exitErr, ok := err.(*ExitError)
 	require.True(t, ok)
 	assert.Equal(t, int(types.ExitRateLimited), exitErr.Code,
-		"REQ-API-025: HTTP 429 must map to exit code 7")
+		"SYS-REQ-018: HTTP 429 must map to exit code 7")
 }
 
-// reqproof:req REQ-POL-025
+// Verifies: SYS-REQ-038
 func TestPolicyList_RateLimitedReturnsExit7(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusTooManyRequests)
@@ -400,14 +400,14 @@ func TestPolicyList_RateLimitedReturnsExit7(t *testing.T) {
 	exitErr, ok := err.(*ExitError)
 	require.True(t, ok)
 	assert.Equal(t, int(types.ExitRateLimited), exitErr.Code,
-		"REQ-POL-025: HTTP 429 must map to exit code 7")
+		"SYS-REQ-038: HTTP 429 must map to exit code 7")
 }
 
 // ---------------------------------------------------------------------------
-// REQ-API-026 / REQ-POL-026: HTTP 5xx → exit 8 (ExitServerError)
+// SYS-REQ-019 / SYS-REQ-039: HTTP 5xx → exit 8 (ExitServerError)
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-API-026
+// Verifies: SYS-REQ-019
 func TestAPIList_ServerErrorReturnsExit8(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -432,10 +432,10 @@ func TestAPIList_ServerErrorReturnsExit8(t *testing.T) {
 	exitErr, ok := err.(*ExitError)
 	require.True(t, ok)
 	assert.Equal(t, int(types.ExitServerError), exitErr.Code,
-		"REQ-API-026: HTTP 5xx must map to exit code 8")
+		"SYS-REQ-019: HTTP 5xx must map to exit code 8")
 }
 
-// reqproof:req REQ-POL-026
+// Verifies: SYS-REQ-039
 func TestPolicyList_ServerErrorReturnsExit8(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusServiceUnavailable)
@@ -455,5 +455,5 @@ func TestPolicyList_ServerErrorReturnsExit8(t *testing.T) {
 	exitErr, ok := err.(*ExitError)
 	require.True(t, ok)
 	assert.Equal(t, int(types.ExitServerError), exitErr.Code,
-		"REQ-POL-026: HTTP 5xx must map to exit code 8")
+		"SYS-REQ-039: HTTP 5xx must map to exit code 8")
 }

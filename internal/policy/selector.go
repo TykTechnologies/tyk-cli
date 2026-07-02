@@ -37,7 +37,7 @@ type FuzzySuggestion struct {
 	Distance int
 }
 
-// reqproof:req REQ-POL-011
+// Implements: SYS-REQ-032
 func ResolveByName(name string, apis []ResolverAPI) (ResolverAPI, error) {
 	var matches []ResolverAPI
 	for _, api := range apis {
@@ -71,7 +71,7 @@ func ResolveByName(name string, apis []ResolverAPI) (ResolverAPI, error) {
 	return matches[0], nil
 }
 
-// reqproof:req REQ-POL-011
+// Implements: SYS-REQ-032
 func ResolveByListenPath(path string, apis []ResolverAPI) (ResolverAPI, error) {
 	var matches []ResolverAPI
 	for _, api := range apis {
@@ -96,7 +96,7 @@ func ResolveByListenPath(path string, apis []ResolverAPI) (ResolverAPI, error) {
 	return matches[0], nil
 }
 
-// reqproof:req REQ-POL-011
+// Implements: SYS-REQ-032
 func ResolveByID(id string, apis []ResolverAPI) (ResolverAPI, error) {
 	for _, api := range apis {
 		if api.ID == id {
@@ -106,7 +106,7 @@ func ResolveByID(id string, apis []ResolverAPI) (ResolverAPI, error) {
 	return ResolverAPI{}, fmt.Errorf("no API found for id %q", id)
 }
 
-// reqproof:req REQ-POL-011
+// Implements: SYS-REQ-032
 func ResolveByTags(tags []string, apis []ResolverAPI) ([]ResolverAPI, error) {
 	var matches []ResolverAPI
 	for _, api := range apis {
@@ -122,7 +122,7 @@ func ResolveByTags(tags []string, apis []ResolverAPI) ([]ResolverAPI, error) {
 	return matches, nil
 }
 
-// reqproof:req REQ-POL-011
+// Implements: SYS-REQ-032
 func hasAllTags(apiTags, requiredTags []string) bool {
 	tagSet := make(map[string]struct{}, len(apiTags))
 	for _, t := range apiTags {
@@ -136,10 +136,7 @@ func hasAllTags(apiTags, requiredTags []string) bool {
 	return true
 }
 
-// reqproof:req REQ-POL-011
-// reqproof:req SW-REQ-001
-// reqproof:req SW-REQ-002
-// reqproof:req SW-REQ-003
+// Implements: SYS-REQ-032, SW-REQ-001, SW-REQ-002, SW-REQ-003
 func FuzzySuggestions(query string, apis []ResolverAPI, n int) []FuzzySuggestion {
 	type scored struct {
 		api      ResolverAPI
@@ -169,7 +166,7 @@ func FuzzySuggestions(query string, apis []ResolverAPI, n int) []FuzzySuggestion
 	return result
 }
 
-// reqproof:req REQ-POL-011
+// Implements: SYS-REQ-032
 func levenshtein(a, b string) int {
 	lenA, lenB := len(a), len(b)
 	if lenA == 0 {
@@ -202,7 +199,7 @@ func levenshtein(a, b string) int {
 
 // ResolveAccessEntries resolves a batch of access entry requests against an API list.
 // It collects all errors before returning. Successful resolutions and errors are returned separately.
-// reqproof:req REQ-POL-011
+// Implements: SYS-REQ-032
 func ResolveAccessEntries(requests []ResolveRequest, apis []ResolverAPI) ([]ResolvedAccess, []error) {
 	var resolved []ResolvedAccess
 	var errs []error

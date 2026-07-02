@@ -1,0 +1,58 @@
+component: oas_transformer
+variables:
+    - name: api_id_extractable
+      type: bool
+      direction: output
+      description: whether the utility could extract the API ID from x-tyk-api-gateway.info.id
+    - name: api_title_provided
+      type: bool
+      direction: input
+      description: whether a non-empty title string was supplied to GenerateListenPath
+    - name: dashboard_round_trip_aborted
+      type: bool
+      direction: output
+      description: whether the runner returned an ExitBadArgs error before issuing any Dashboard HTTP request
+    - name: extensions_added
+      type: bool
+      direction: output
+      description: whether x-tyk-api-gateway extensions have been injected
+    - name: id_present
+      type: bool
+      direction: input
+      description: whether the OAS document has a pre-existing API ID set
+    - name: id_stripped
+      type: bool
+      direction: output
+      description: whether the API ID has been removed before submission
+    - name: listen_path_valid
+      type: bool
+      direction: output
+      description: whether the generated listen path is a non-empty URL-safe string starting and ending with /
+    - name: oas_file_provided
+      type: bool
+      direction: input
+      description: whether a local file path was passed to the OAS loader
+    - name: oas_has_tyk_extensions
+      type: bool
+      direction: input
+      description: whether the OAS document has a non-empty x-tyk-api-gateway block
+    - name: oas_lacks_extensions
+      type: bool
+      direction: input
+      description: whether the OAS document has no x-tyk-api-gateway extension
+    - name: oas_missing_required_fields
+      type: bool
+      direction: input
+      description: whether the OAS document is missing openapi/info.title/info.version or has openapi != 3.x
+    - name: oas_url_provided
+      type: bool
+      direction: input
+      description: whether a URL was passed to the OAS loader
+    - name: parsed_oas_returned
+      type: bool
+      direction: output
+      description: whether the loader returned a non-nil map structure
+    - name: api_exit_bad_args
+      type: bool
+      direction: output
+      description: whether the api subcommand terminated with exit code 2 (ExitBadArgs)

@@ -1,9 +1,9 @@
 id: 5xx-no-client-retry
 title: HTTP client does not retry 5xx or transient network failures
-description: 'internal/client/client.go has no retry logic. A 503 Service Unavailable or momentary network blip aborts the operation with ExitError{Code: 8} (or 1 for non-HTTP errors). REQ-API-026/POL-026 only specify the exit-code mapping for 5xx; they do not require retry. CI runs in cold environments (cold-start Dashboards) fail more often than necessary.'
+description: 'internal/client/client.go has no retry logic. A 503 Service Unavailable or momentary network blip aborts the operation with ExitError{Code: 8} (or 1 for non-HTTP errors). SYS-REQ-019/POL-026 only specify the exit-code mapping for 5xx; they do not require retry. CI runs in cold environments (cold-start Dashboards) fail more often than necessary.'
 affected_requirements:
-    - REQ-API-030
-mitigation: Operators script retries externally (e.g. shell while-loop on exit 8). The 30s timeout (or configurable via REQ-CFG-007) is generous enough for steady-state Dashboards.
+    - SYS-REQ-021
+mitigation: Operators script retries externally (e.g. shell while-loop on exit 8). The 30s timeout (or configurable via SYS-REQ-047) is generous enough for steady-state Dashboards.
 customer_impact: Spurious failures during Dashboard restarts or transient network conditions; operators must rerun the command manually or wrap CLI invocations in their own retry logic.
 owner: tomas@tyk.io
 review_date: "2026-08-31"

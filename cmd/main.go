@@ -20,6 +20,7 @@ var (
 // writing the user-facing message to errOut. Returns 0 when err is nil.
 // Extracted so main()'s error-handling can be tested without spawning a
 // subprocess or wrapping os.Exit.
+// Implements: SYS-REQ-013
 func classifyExitError(err error, errOut io.Writer) int {
 	if err == nil {
 		return 0
@@ -33,6 +34,7 @@ func classifyExitError(err error, errOut io.Writer) int {
 	return 1
 }
 
+// Implements: SYS-REQ-013
 func main() {
 	rootCmd := cli.NewRootCommand(version, commit, buildTime)
 	os.Exit(classifyExitError(rootCmd.Execute(), os.Stderr))

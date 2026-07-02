@@ -18,7 +18,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// reqproof:req REQ-API-004
+// Verifies: SYS-REQ-004
 func mockCleanOAS() map[string]interface{} {
 	return map[string]interface{}{
 		"openapi": "3.0.3",
@@ -47,7 +47,7 @@ func mockCleanOAS() map[string]interface{} {
 	}
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 func mockTykEnhancedOAS() map[string]interface{} {
 	cleanOAS := mockCleanOAS()
 	cleanOAS["x-tyk-api-gateway"] = map[string]interface{}{
@@ -67,7 +67,7 @@ func mockTykEnhancedOAS() map[string]interface{} {
 	return cleanOAS
 }
 
-// reqproof:req REQ-API-003
+// Verifies: SYS-REQ-003
 func mockCreateAPIResponse() types.APIResponse {
 	return types.APIResponse{
 		ID:      "new-api-456",
@@ -75,7 +75,7 @@ func mockCreateAPIResponse() types.APIResponse {
 	}
 }
 
-// reqproof:req REQ-API-003
+// Verifies: SYS-REQ-003
 func mockCreatedOASAPI() *types.OASAPI {
 	return &types.OASAPI{
 		ID:             "new-api-456",
@@ -87,7 +87,7 @@ func mockCreatedOASAPI() *types.OASAPI {
 	}
 }
 
-// reqproof:req REQ-API-031
+// Verifies: SYS-REQ-022
 func createTempOASFile(t *testing.T, oasData map[string]interface{}) string {
 	// Create temp file
 	tmpDir := t.TempDir()
@@ -103,7 +103,7 @@ func createTempOASFile(t *testing.T, oasData map[string]interface{}) string {
 	return tmpFile
 }
 
-// reqproof:req REQ-API-004
+// Verifies: SYS-REQ-004
 func TestNewAPIImportOASCommand(t *testing.T) {
 	cmd := NewAPIImportOASCommand()
 
@@ -117,7 +117,7 @@ func TestNewAPIImportOASCommand(t *testing.T) {
 	assert.True(t, cmd.Flags().Lookup("url") != nil)
 }
 
-// reqproof:req REQ-API-004
+// Verifies: SYS-REQ-004
 func TestRunAPIImportOAS_WithFile(t *testing.T) {
 	// Create a mock server that simulates API creation
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -159,7 +159,7 @@ func TestRunAPIImportOAS_WithFile(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-// reqproof:req REQ-API-021
+// Verifies: SYS-REQ-014
 func TestRunAPIImportOAS_MissingInput(t *testing.T) {
 	cmd := NewAPIImportOASCommand()
 	config := &types.Config{
@@ -178,7 +178,7 @@ func TestRunAPIImportOAS_MissingInput(t *testing.T) {
 	assert.Contains(t, err.Error(), "Either --file or --url must be provided")
 }
 
-// reqproof:req REQ-API-021
+// Verifies: SYS-REQ-014
 func TestRunAPIImportOAS_BothInputs(t *testing.T) {
 	cmd := NewAPIImportOASCommand()
 	config := &types.Config{
@@ -200,7 +200,7 @@ func TestRunAPIImportOAS_BothInputs(t *testing.T) {
 	assert.Contains(t, err.Error(), "Cannot specify both --file and --url")
 }
 
-// reqproof:req REQ-API-006
+// Verifies: SYS-REQ-006
 func TestNewAPIUpdateOASCommand(t *testing.T) {
 	cmd := NewAPIUpdateOASCommand()
 
@@ -214,7 +214,7 @@ func TestNewAPIUpdateOASCommand(t *testing.T) {
 	assert.True(t, cmd.Flags().Lookup("url") != nil)
 }
 
-// reqproof:req REQ-API-006
+// Verifies: SYS-REQ-006
 func TestRunAPIUpdateOAS_Success(t *testing.T) {
 	testAPIID := "existing-api-123"
 	
@@ -259,7 +259,7 @@ func TestRunAPIUpdateOAS_Success(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-// reqproof:req REQ-API-021
+// Verifies: SYS-REQ-014
 func TestRunAPIUpdateOAS_MissingAPIID(t *testing.T) {
 	cmd := NewAPIUpdateOASCommand()
 	config := &types.Config{
@@ -278,7 +278,7 @@ func TestRunAPIUpdateOAS_MissingAPIID(t *testing.T) {
 	assert.Contains(t, err.Error(), "accepts 1 arg(s), received 0")
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 func TestNewAPIApplyCommand_Enhanced(t *testing.T) {
 	cmd := NewAPIApplyCommand()
 
@@ -293,7 +293,7 @@ func TestNewAPIApplyCommand_Enhanced(t *testing.T) {
     assert.Contains(t, cmd.Long, "tyk api update-oas")
 }
 
-// reqproof:req REQ-API-021
+// Verifies: SYS-REQ-014
 func TestRunAPIApply_PlainOASRejection(t *testing.T) {
 	// Create a temp file with clean (non-Tyk-enhanced) OAS
 	cleanOAS := mockCleanOAS()
@@ -322,7 +322,7 @@ func TestRunAPIApply_PlainOASRejection(t *testing.T) {
 	assert.Contains(t, err.Error(), "tyk api update-oas")
 }
 
-// reqproof:req REQ-API-010
+// Verifies: SYS-REQ-008
 func TestRunAPIApply_MissingIDCreatesAPI(t *testing.T) {
     // Create Tyk-enhanced OAS but without API ID
     enhancedOAS := mockTykEnhancedOAS()
@@ -366,7 +366,7 @@ func TestRunAPIApply_MissingIDCreatesAPI(t *testing.T) {
     assert.NoError(t, err)
 }
 
-// reqproof:req REQ-API-031
+// Verifies: SYS-REQ-022
 func TestLoadOASFromFile_Success(t *testing.T) {
 	// Create test OAS data
 	testOAS := mockCleanOAS()
@@ -381,7 +381,7 @@ func TestLoadOASFromFile_Success(t *testing.T) {
 	assert.Equal(t, "3.0.3", loadedOAS["openapi"])
 }
 
-// reqproof:req REQ-API-031
+// Verifies: SYS-REQ-022
 func TestLoadOASFromFile_NotFound(t *testing.T) {
 	// Test with non-existent file
 	_, err := loadOASFromFile("/nonexistent/path/api.yaml")
@@ -391,7 +391,7 @@ func TestLoadOASFromFile_NotFound(t *testing.T) {
 	assert.Contains(t, err.Error(), "file not found")
 }
 
-// reqproof:req REQ-API-031
+// Verifies: SYS-REQ-022
 func TestLoadOASFromURL_Success(t *testing.T) {
 	// Create a test server that serves OAS
 	testOAS := mockCleanOAS()
@@ -410,7 +410,7 @@ func TestLoadOASFromURL_Success(t *testing.T) {
 	assert.Equal(t, "3.0.3", loadedOAS["openapi"])
 }
 
-// reqproof:req REQ-API-031
+// Verifies: SYS-REQ-022
 func TestLoadOASFromURL_HTTPError(t *testing.T) {
 	// Create a test server that returns 404
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -426,7 +426,7 @@ func TestLoadOASFromURL_HTTPError(t *testing.T) {
 	assert.Contains(t, err.Error(), "HTTP 404")
 }
 
-// reqproof:req REQ-API-031
+// Verifies: SYS-REQ-022
 func TestLoadOASFromURL_InvalidJSON(t *testing.T) {
 	// Create a test server that returns invalid JSON
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -442,7 +442,7 @@ func TestLoadOASFromURL_InvalidJSON(t *testing.T) {
 	assert.Contains(t, err.Error(), "failed to parse OAS document")
 }
 
-// reqproof:req REQ-API-031
+// Verifies: SYS-REQ-022
 // TestLoadOASFromURL_YAMLContent covers L1356 yaml fallback err==nil after JSON
 // fails — drives the `if err :=` JSON branch =T and the YAML branch =F.
 func TestLoadOASFromURL_YAMLContent(t *testing.T) {
@@ -456,7 +456,7 @@ func TestLoadOASFromURL_YAMLContent(t *testing.T) {
 	assert.Equal(t, "3.0.3", oas["openapi"])
 }
 
-// reqproof:req REQ-API-031
+// Verifies: SYS-REQ-022
 // TestLoadOASFromURL_FetchError covers L1334 err!=nil from c.Get() — point
 // at an unreachable URL.
 func TestLoadOASFromURL_FetchError(t *testing.T) {
@@ -465,7 +465,7 @@ func TestLoadOASFromURL_FetchError(t *testing.T) {
 	assert.Contains(t, err.Error(), "failed to fetch URL")
 }
 
-// reqproof:req REQ-API-031
+// Verifies: SYS-REQ-022
 // TestLoadOASFromFile_AbsolutePath covers L1303 !filepath.IsAbs=F branch.
 func TestLoadOASFromFile_AbsolutePath(t *testing.T) {
 	tmpFile := createTempOASFile(t, mockCleanOAS())
@@ -475,7 +475,7 @@ func TestLoadOASFromFile_AbsolutePath(t *testing.T) {
 	assert.Equal(t, "3.0.3", out["openapi"])
 }
 
-// reqproof:req REQ-API-031
+// Verifies: SYS-REQ-022
 // TestLoadOASFromFile_RelativePath covers L1303 !filepath.IsAbs=T branch.
 func TestLoadOASFromFile_RelativePath(t *testing.T) {
 	tmpDir := t.TempDir()
@@ -493,7 +493,7 @@ func TestLoadOASFromFile_RelativePath(t *testing.T) {
 	assert.Equal(t, "3.0.3", out["openapi"])
 }
 
-// reqproof:req REQ-API-031
+// Verifies: SYS-REQ-022
 // TestLoadOASFromFile_LoadFailMalformed covers L1318 err!=nil from
 // filehandler.LoadFile (file exists but cannot be parsed).
 func TestLoadOASFromFile_LoadFailMalformed(t *testing.T) {
@@ -505,7 +505,7 @@ func TestLoadOASFromFile_LoadFailMalformed(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-API-014
+// Verifies: SYS-REQ-012, INT-REQ-003
 func TestAPIImportOAS_RejectsMalformedOASBeforeDashboard(t *testing.T) {
 	// Server that fails the test if reached — no network round-trip expected.
 	dashboardCalled := false
@@ -539,9 +539,9 @@ func TestAPIImportOAS_RejectsMalformedOASBeforeDashboard(t *testing.T) {
 	exitErr, ok := err.(*ExitError)
 	require.True(t, ok, "expected ExitError")
 	assert.Equal(t, int(types.ExitBadArgs), exitErr.Code,
-		"REQ-API-014: malformed OAS must map to exit code 2")
+		"SYS-REQ-012: malformed OAS must map to exit code 2")
 	assert.False(t, dashboardCalled,
-		"REQ-API-014: Dashboard must NOT be contacted when local validation fails")
+		"SYS-REQ-012: Dashboard must NOT be contacted when local validation fails")
 }
 
 // ---------------------------------------------------------------------------
@@ -549,7 +549,7 @@ func TestAPIImportOAS_RejectsMalformedOASBeforeDashboard(t *testing.T) {
 // updateExistingAPIWithOAS / runAPIImportOAS / runAPIUpdateOAS branches.
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // applyTestServer returns an httptest server with stub handlers for the dashboard
 // OAS endpoints, parameterised by per-route handlers so each test drives the
 // exact branch it cares about.
@@ -559,7 +559,7 @@ type applyTestServer struct {
 	updateAPI func(w http.ResponseWriter, r *http.Request, apiID string)
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 func newApplyTestServer(t *testing.T, h applyTestServer) *httptest.Server {
 	t.Helper()
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -590,7 +590,7 @@ func newApplyTestServer(t *testing.T, h applyTestServer) *httptest.Server {
 	}))
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // makeApplyCmd builds a NewAPIApplyCommand with the supplied config and
 // optional output format. Caller is responsible for setting the file arg.
 func makeApplyCmd(t *testing.T, serverURL string, format types.OutputFormat) *cobra.Command {
@@ -608,7 +608,7 @@ func makeApplyCmd(t *testing.T, serverURL string, format types.OutputFormat) *co
 	return cmd
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // runApplyOnFile runs api apply with --file=path and returns the resulting error.
 func runApplyOnFile(t *testing.T, cmd *cobra.Command, path string) error {
 	t.Helper()
@@ -617,7 +617,7 @@ func runApplyOnFile(t *testing.T, cmd *cobra.Command, path string) error {
 	return cmd.RunE(cmd, []string{})
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_UpdateExisting_Success drives the GetOASAPI=success path
 // through updateExistingAPI (apiID present, fetch ok, update ok). This covers
 // L1006 (err == nil) and the trailing update branches of updateExistingAPI.
@@ -637,7 +637,7 @@ func TestRunAPIApply_UpdateExisting_Success(t *testing.T) {
 	require.NoError(t, runApplyOnFile(t, cmd, tmpFile))
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_UpdateExisting_JSONOutput covers L1069 outputFormat==OutputJSON
 // in updateExistingAPI.
 func TestRunAPIApply_UpdateExisting_JSONOutput(t *testing.T) {
@@ -665,7 +665,7 @@ func TestRunAPIApply_UpdateExisting_JSONOutput(t *testing.T) {
 	assert.Contains(t, string(out), "\"operation\": \"updated\"")
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_UpdateExisting_404_FallsBackToCreate covers the not-found
 // upsert branch where GetOASAPI returns *types.ErrorResponse{Status:404} and we
 // fall through to CreateOASAPI. Closes L1010 (ok=T), L1012 (er.Status==404=T),
@@ -698,7 +698,7 @@ func TestRunAPIApply_UpdateExisting_404_FallsBackToCreate(t *testing.T) {
 	assert.True(t, createCalled, "404 on Get should trigger fallback create")
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_UpdateExisting_400_NotFoundMessage covers the 400+message
 // variant of the not-found heuristic (L1014 er.Status==400, L1016 substring
 // match on "could not retrieve api" / "not found").
@@ -730,7 +730,7 @@ func TestRunAPIApply_UpdateExisting_400_NotFoundMessage(t *testing.T) {
 	assert.True(t, createCalled, "400+could-not-retrieve message should fall back to create")
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_UpdateExisting_400_NotFoundOnly covers L1016 second OR
 // branch where "not found" matches but "could not retrieve api" does not.
 func TestRunAPIApply_UpdateExisting_400_NotFoundOnly(t *testing.T) {
@@ -758,7 +758,7 @@ func TestRunAPIApply_UpdateExisting_400_NotFoundOnly(t *testing.T) {
 	require.NoError(t, runApplyOnFile(t, cmd, tmpFile))
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_UpdateExisting_StringNotFoundFallback covers L1020 substring
 // branches both T (untyped error containing both "404" and "not found").
 func TestRunAPIApply_UpdateExisting_StringNotFoundFallback(t *testing.T) {
@@ -791,7 +791,7 @@ func TestRunAPIApply_UpdateExisting_StringNotFoundFallback(t *testing.T) {
 	require.NoError(t, runApplyOnFile(t, cmd, tmpFile))
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_UpdateExisting_500NotFallback covers L1014 er.Status==400=F
 // branch (server returns 500, the er.Status is neither 404 nor 400 so notFound
 // stays false and the error propagates).
@@ -813,7 +813,7 @@ func TestRunAPIApply_UpdateExisting_500NotFallback(t *testing.T) {
 	assert.Contains(t, err.Error(), "failed to verify API exists")
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_UpdateExisting_400_OtherMessage_NotFallback covers the
 // 400+other-message path: notFound stays false, the error bubbles up.
 func TestRunAPIApply_UpdateExisting_400_OtherMessage_NotFallback(t *testing.T) {
@@ -834,7 +834,7 @@ func TestRunAPIApply_UpdateExisting_400_OtherMessage_NotFallback(t *testing.T) {
 	assert.Contains(t, err.Error(), "failed to verify API exists")
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_UpdateExisting_404_CreateConflict covers L1035 isConflictError
 // path in the fallback-create branch.
 func TestRunAPIApply_UpdateExisting_404_CreateConflict(t *testing.T) {
@@ -859,7 +859,7 @@ func TestRunAPIApply_UpdateExisting_404_CreateConflict(t *testing.T) {
 	assert.Equal(t, int(types.ExitConflict), exitErr.Code)
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_UpdateExisting_404_ExplicitVersionName drives the
 // versionName!="" branch (L1026=F) in updateExistingAPI's not-found-fallback
 // path.
@@ -888,7 +888,7 @@ func TestRunAPIApply_UpdateExisting_404_ExplicitVersionName(t *testing.T) {
 	require.NoError(t, cmd.RunE(cmd, []string{}))
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_UpdateExisting_404_VersionNameFromOAS covers L1026
 // versionName=="" branch where versionName is populated from the OAS info.version
 // or falls back to v1.
@@ -921,7 +921,7 @@ func TestRunAPIApply_UpdateExisting_404_VersionNameFromOAS(t *testing.T) {
 	require.NoError(t, runApplyOnFile(t, cmd, tmpFile))
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_UpdateExisting_404_JSONOutput covers L1043 outputFormat==OutputJSON
 // path inside the fallback-create branch of updateExistingAPI.
 func TestRunAPIApply_UpdateExisting_404_JSONOutput(t *testing.T) {
@@ -953,7 +953,7 @@ func TestRunAPIApply_UpdateExisting_404_JSONOutput(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_UpdateExisting_StringError_NotFound covers the non-typed-error
 // fallback (L1020) where err.Error() contains "404"/"not found".
 func TestRunAPIApply_UpdateExisting_StringError_NotFound(t *testing.T) {
@@ -970,7 +970,7 @@ func TestRunAPIApply_UpdateExisting_StringError_NotFound(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_UpdateExisting_UpdateError covers the L1061 err!=nil branch
 // from UpdateOASAPI after a successful Get.
 func TestRunAPIApply_UpdateExisting_UpdateError(t *testing.T) {
@@ -992,7 +992,7 @@ func TestRunAPIApply_UpdateExisting_UpdateError(t *testing.T) {
 	assert.Contains(t, err.Error(), "failed to update API")
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_UpdateExisting_ExplicitVersionName drives the L1053
 // versionName!="" branch (the update success path with --version-name set).
 func TestRunAPIApply_UpdateExisting_ExplicitVersionName(t *testing.T) {
@@ -1013,7 +1013,7 @@ func TestRunAPIApply_UpdateExisting_ExplicitVersionName(t *testing.T) {
 	require.NoError(t, cmd.RunE(cmd, []string{}))
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_UpdateExisting_VersionNameFromFlag covers L1053 versionName==""
 // branch when the caller did NOT pass --version-name AND the OAS info.version is
 // empty (v1 fallback path).
@@ -1037,7 +1037,7 @@ func TestRunAPIApply_UpdateExisting_VersionNameMissing(t *testing.T) {
 	require.NoError(t, runApplyOnFile(t, cmd, tmpFile))
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_CreateNew_JSON covers createNewAPIViaApply with JSON output
 // and a missing version-name so the v1 fallback path is exercised.
 func TestRunAPIApply_CreateNew_JSON(t *testing.T) {
@@ -1074,7 +1074,7 @@ func TestRunAPIApply_CreateNew_JSON(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_CreateNew_ExplicitVersion covers L1091 versionName==""=F
 // branch in createNewAPIViaApply (--version-name passed explicitly).
 func TestRunAPIApply_CreateNew_ExplicitVersion(t *testing.T) {
@@ -1102,7 +1102,7 @@ func TestRunAPIApply_CreateNew_ExplicitVersion(t *testing.T) {
 	require.NoError(t, cmd.RunE(cmd, []string{}))
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_CreateNew_Conflict covers the L1111 isConflictError path in
 // createNewAPIViaApply.
 func TestRunAPIApply_CreateNew_Conflict(t *testing.T) {
@@ -1130,7 +1130,7 @@ func TestRunAPIApply_CreateNew_Conflict(t *testing.T) {
 	assert.Equal(t, int(types.ExitConflict), exitErr.Code)
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_CreateNew_ServerError covers the non-conflict error path in
 // createNewAPIViaApply (L1114).
 func TestRunAPIApply_CreateNew_ServerError(t *testing.T) {
@@ -1154,7 +1154,7 @@ func TestRunAPIApply_CreateNew_ServerError(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_Stdin_EmptyInput covers L944 stdin empty branch.
 func TestRunAPIApply_Stdin_EmptyInput(t *testing.T) {
 	// Pipe an empty stdin to the command.
@@ -1173,7 +1173,7 @@ func TestRunAPIApply_Stdin_EmptyInput(t *testing.T) {
 	assert.Contains(t, exitErr.Message, "no input")
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_Stdin_InvalidYAML covers L947 yaml.Unmarshal error path.
 func TestRunAPIApply_Stdin_InvalidYAML(t *testing.T) {
 	oldStdin := os.Stdin
@@ -1191,7 +1191,7 @@ func TestRunAPIApply_Stdin_InvalidYAML(t *testing.T) {
 	assert.Equal(t, 2, exitErr.Code)
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_Stdin_ValidYAML_NoTykExt covers the stdin happy path that
 // then fails on missing x-tyk-api-gateway (L974 branch true).
 func TestRunAPIApply_Stdin_ValidYAML_NoTykExt(t *testing.T) {
@@ -1209,7 +1209,7 @@ func TestRunAPIApply_Stdin_ValidYAML_NoTykExt(t *testing.T) {
 	assert.Contains(t, err.Error(), "lacks required x-tyk-api-gateway")
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_FileLoadFailure covers L967 err!=nil from filehandler.LoadFile
 // for an existing file with unsupported extension.
 func TestRunAPIApply_FileLoadFailure(t *testing.T) {
@@ -1222,7 +1222,7 @@ func TestRunAPIApply_FileLoadFailure(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_FileNotFound covers L961 os.IsNotExist branch.
 func TestRunAPIApply_FileNotFound(t *testing.T) {
 	cmd := makeApplyCmd(t, "http://unused", types.OutputHuman)
@@ -1234,7 +1234,7 @@ func TestRunAPIApply_FileNotFound(t *testing.T) {
 	assert.Contains(t, exitErr.Message, "file not found")
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_RelativePath drives L952 !filepath.IsAbs=T branch.
 func TestRunAPIApply_RelativePath(t *testing.T) {
 	server := newApplyTestServer(t, applyTestServer{
@@ -1265,7 +1265,7 @@ func TestRunAPIApply_RelativePath(t *testing.T) {
 	require.NoError(t, cmd.RunE(cmd, []string{}))
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_AbsPath drives L952 !filepath.IsAbs branch (false-side):
 // pass an absolute path so the abs-resolution branch is skipped.
 func TestRunAPIApply_AbsPath(t *testing.T) {
@@ -1286,7 +1286,7 @@ func TestRunAPIApply_AbsPath(t *testing.T) {
 	require.NoError(t, runApplyOnFile(t, cmd, tmpFile))
 }
 
-// reqproof:req REQ-API-006
+// Verifies: SYS-REQ-006
 // TestRunAPIUpdateOAS_Success_JSON covers updateExistingAPIWithOAS happy path
 // with JSON output (L1589 outputFormat==OutputJSON=T).
 func TestRunAPIUpdateOAS_Success_JSON(t *testing.T) {
@@ -1328,7 +1328,7 @@ func TestRunAPIUpdateOAS_Success_JSON(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// reqproof:req REQ-API-006
+// Verifies: SYS-REQ-006
 // TestRunAPIUpdateOAS_NotFound covers L1542 "404"/"not found" branch in
 // updateExistingAPIWithOAS.
 func TestRunAPIUpdateOAS_NotFound(t *testing.T) {
@@ -1358,7 +1358,7 @@ func TestRunAPIUpdateOAS_NotFound(t *testing.T) {
 	assert.Equal(t, 3, exitErr.Code)
 }
 
-// reqproof:req REQ-API-006
+// Verifies: SYS-REQ-006
 // TestRunAPIUpdateOAS_GetError_NonNotFound covers L1545 wrap-error branch.
 func TestRunAPIUpdateOAS_GetError_NonNotFound(t *testing.T) {
 	server := newApplyTestServer(t, applyTestServer{
@@ -1386,7 +1386,7 @@ func TestRunAPIUpdateOAS_GetError_NonNotFound(t *testing.T) {
 }
 
 
-// reqproof:req REQ-API-006
+// Verifies: SYS-REQ-006
 // TestRunAPIUpdateOAS_UpdateError covers the failed-update branch (L1583).
 func TestRunAPIUpdateOAS_UpdateError(t *testing.T) {
 	server := newApplyTestServer(t, applyTestServer{
@@ -1416,7 +1416,7 @@ func TestRunAPIUpdateOAS_UpdateError(t *testing.T) {
 	assert.Contains(t, err.Error(), "failed to update API")
 }
 
-// reqproof:req REQ-API-006
+// Verifies: SYS-REQ-006
 // TestRunAPIUpdateOAS_NonStandardError covers L1542 substring branches both
 // F (a *url.Error from a closed server doesn't include "404" or "not found").
 func TestRunAPIUpdateOAS_NonStandardError(t *testing.T) {
@@ -1435,7 +1435,7 @@ func TestRunAPIUpdateOAS_NonStandardError(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-API-006
+// Verifies: SYS-REQ-006
 // TestRunAPIUpdateOAS_OASWithVersion covers L1576 versionName==""=F branch
 // (the OAS info.version is set, so the v1 fallback is skipped).
 func TestRunAPIUpdateOAS_OASWithVersion(t *testing.T) {
@@ -1462,7 +1462,7 @@ func TestRunAPIUpdateOAS_OASWithVersion(t *testing.T) {
 	require.NoError(t, cmd.RunE(cmd, []string{"api-x"}))
 }
 
-// reqproof:req REQ-API-006
+// Verifies: SYS-REQ-006
 // TestRunAPIUpdateOAS_OASWithoutVersion covers L1576 versionName==""=T branch
 // (the v1 fallback path).
 func TestRunAPIUpdateOAS_OASWithoutVersion(t *testing.T) {
@@ -1499,7 +1499,7 @@ func TestRunAPIUpdateOAS_OASWithoutVersion(t *testing.T) {
 	_ = err
 }
 
-// reqproof:req REQ-API-006
+// Verifies: SYS-REQ-006
 // TestRunAPIUpdateOAS_BothFileAndURL covers L1140 filePath!="" && urlFlag!=""
 // short-circuit gap.
 func TestRunAPIUpdateOAS_BothFileAndURL(t *testing.T) {
@@ -1519,7 +1519,7 @@ func TestRunAPIUpdateOAS_BothFileAndURL(t *testing.T) {
 	assert.Contains(t, err.Error(), "Cannot specify both")
 }
 
-// reqproof:req REQ-API-006
+// Verifies: SYS-REQ-006
 // TestRunAPIUpdateOAS_FromURL covers the URL branch of runAPIUpdateOAS (L1157).
 func TestRunAPIUpdateOAS_FromURL(t *testing.T) {
 	oasServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -1552,7 +1552,7 @@ func TestRunAPIUpdateOAS_FromURL(t *testing.T) {
 	require.NoError(t, cmd.RunE(cmd, []string{apiID}))
 }
 
-// reqproof:req REQ-API-004
+// Verifies: SYS-REQ-004
 // TestRunAPIImportOAS_FromURL covers L799 url branch (filePath=="").
 func TestRunAPIImportOAS_FromURL(t *testing.T) {
 	oasServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -1587,7 +1587,7 @@ func TestRunAPIImportOAS_FromURL(t *testing.T) {
 	require.NoError(t, cmd.RunE(cmd, []string{}))
 }
 
-// reqproof:req REQ-API-004
+// Verifies: SYS-REQ-004
 // TestRunAPIImportOAS_AlreadyHasTykExt covers L813 oas.HasTykExtensions==T
 // (skip AddTykExtensions), and L825 versionName!="" branch.
 func TestRunAPIImportOAS_AlreadyHasTykExt(t *testing.T) {
@@ -1633,7 +1633,7 @@ func TestRunAPIImportOAS_AlreadyHasTykExt(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// reqproof:req REQ-API-004
+// Verifies: SYS-REQ-004
 // TestRunAPIImportOAS_AuthError covers L845 cls!=nil=T branch (401 from POST).
 func TestRunAPIImportOAS_AuthError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -1661,7 +1661,7 @@ func TestRunAPIImportOAS_AuthError(t *testing.T) {
 	assert.Equal(t, int(types.ExitAuthFailed), exitErr.Code)
 }
 
-// reqproof:req REQ-API-004
+// Verifies: SYS-REQ-004
 // TestRunAPIImportOAS_FromOASWithoutVersion drives the L825 versionName==""=T
 // branch where extractVersionFromOAS returns "" so the v1 fallback applies.
 func TestRunAPIImportOAS_FromOASWithoutVersion(t *testing.T) {
@@ -1695,7 +1695,7 @@ func TestRunAPIImportOAS_FromOASWithoutVersion(t *testing.T) {
 	_ = cmd.RunE(cmd, []string{})
 }
 
-// reqproof:req REQ-API-004
+// Verifies: SYS-REQ-004
 // TestRunAPIImportOAS_NonClassified covers L845 cls!=nil=F branch (a 400 error
 // from CreateOASAPI bubbles to the non-classified path).
 func TestRunAPIImportOAS_NonClassified(t *testing.T) {
@@ -1722,7 +1722,7 @@ func TestRunAPIImportOAS_NonClassified(t *testing.T) {
 	assert.Contains(t, err.Error(), "failed to import API")
 }
 
-// reqproof:req REQ-API-004
+// Verifies: SYS-REQ-004
 // TestRunAPIImportOAS_DashboardError covers the non-conflict error branch
 // (L848 fallback wrap).
 func TestRunAPIImportOAS_DashboardError(t *testing.T) {
@@ -1754,12 +1754,12 @@ func TestRunAPIImportOAS_DashboardError(t *testing.T) {
 }
 
 // readAllBytes is a tiny helper to read until EOF from an *os.File.
-// reqproof:req REQ-API-004
+// Verifies: SYS-REQ-004
 func readAllBytes(r *os.File) ([]byte, error) {
 	return io.ReadAll(r)
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // brokenConfig returns a config whose default_environment does not exist in
 // Environments; this makes client.NewClient fail with "no active environment".
 func brokenConfig() *types.Config {
@@ -1771,7 +1771,7 @@ func brokenConfig() *types.Config {
 	}
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_NewClientFails drives the L996 err!=nil branch where
 // client.NewClient fails inside updateExistingAPI. We force this by
 // providing a config with apply path but missing default env mapping after
@@ -1786,7 +1786,7 @@ func TestRunAPIApply_NewClientFails(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_CreateNew_NewClientFails drives the L1099 err!=nil branch
 // inside createNewAPIViaApply via brokenConfig + no-ID OAS so apply routes to
 // the create path.
@@ -1807,7 +1807,7 @@ func TestRunAPIApply_CreateNew_NewClientFails(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_ConfigNil covers L933 config==nil=T.
 func TestRunAPIApply_ConfigNil(t *testing.T) {
 	cmd := NewAPIApplyCommand()
@@ -1819,7 +1819,7 @@ func TestRunAPIApply_ConfigNil(t *testing.T) {
 	assert.Contains(t, err.Error(), "configuration not found")
 }
 
-// reqproof:req REQ-API-004
+// Verifies: SYS-REQ-004
 // TestRunAPIImportOAS_ConfigNil covers L788 config==nil=T.
 func TestRunAPIImportOAS_ConfigNil(t *testing.T) {
 	cmd := NewAPIImportOASCommand()
@@ -1831,7 +1831,7 @@ func TestRunAPIImportOAS_ConfigNil(t *testing.T) {
 	assert.Contains(t, err.Error(), "configuration not found")
 }
 
-// reqproof:req REQ-API-004
+// Verifies: SYS-REQ-004
 // TestRunAPIImportOAS_NewClientFails covers L831 err!=nil from client.NewClient.
 func TestRunAPIImportOAS_NewClientFails(t *testing.T) {
 	tmpFile := createTempOASFile(t, mockCleanOAS())
@@ -1843,7 +1843,7 @@ func TestRunAPIImportOAS_NewClientFails(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-API-006
+// Verifies: SYS-REQ-006
 // TestRunAPIUpdateOAS_NewClientFails drives the L1530 err!=nil branch from
 // client.NewClient inside updateExistingAPIWithOAS.
 func TestRunAPIUpdateOAS_NewClientFails(t *testing.T) {
@@ -1856,7 +1856,7 @@ func TestRunAPIUpdateOAS_NewClientFails(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-API-006
+// Verifies: SYS-REQ-006
 // TestRunAPIUpdateOAS_ConfigNil covers L1146 config==nil=T.
 func TestRunAPIUpdateOAS_ConfigNil(t *testing.T) {
 	cmd := NewAPIUpdateOASCommand()
@@ -1868,7 +1868,7 @@ func TestRunAPIUpdateOAS_ConfigNil(t *testing.T) {
 	assert.Contains(t, err.Error(), "configuration not found")
 }
 
-// reqproof:req REQ-API-006
+// Verifies: SYS-REQ-006
 // TestRunAPIUpdateOAS_MissingInputBoth covers L1137 filePath==""&&urlFlag==""
 // short-circuit gap (both halves true).
 func TestRunAPIUpdateOAS_MissingInputBoth(t *testing.T) {
@@ -1884,7 +1884,7 @@ func TestRunAPIUpdateOAS_MissingInputBoth(t *testing.T) {
 	assert.Contains(t, err.Error(), "Either --file or --url")
 }
 
-// reqproof:req REQ-API-006
+// Verifies: SYS-REQ-006
 // TestRunAPIUpdateOAS_LoadOASFails covers L1161 err!=nil after file load failure.
 func TestRunAPIUpdateOAS_LoadOASFails(t *testing.T) {
 	cmd := NewAPIUpdateOASCommand()
@@ -1899,7 +1899,7 @@ func TestRunAPIUpdateOAS_LoadOASFails(t *testing.T) {
 	assert.Contains(t, err.Error(), "file not found")
 }
 
-// reqproof:req REQ-API-006
+// Verifies: SYS-REQ-006
 // TestRunAPIUpdateOAS_MalformedOAS covers L1166 vErr!=nil structural validation
 // failure.
 func TestRunAPIUpdateOAS_MalformedOAS(t *testing.T) {
@@ -1922,7 +1922,7 @@ func TestRunAPIUpdateOAS_MalformedOAS(t *testing.T) {
 	assert.Equal(t, int(types.ExitBadArgs), exitErr.Code)
 }
 
-// reqproof:req REQ-API-004
+// Verifies: SYS-REQ-004
 // TestRunAPIImportOAS_LoadOASFails covers L803 err!=nil after URL fetch failure.
 func TestRunAPIImportOAS_LoadOASFromBadURL(t *testing.T) {
 	cmd := NewAPIImportOASCommand()
@@ -1936,7 +1936,7 @@ func TestRunAPIImportOAS_LoadOASFromBadURL(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-API-006
+// Verifies: SYS-REQ-006
 // TestRunAPIUpdateOAS_OASAlreadyHasTykExt covers L1556 !HasTykExtensions = F.
 // Submitted OAS already carries x-tyk-api-gateway, so the AddTykExtensions
 // branch is skipped.
@@ -1962,7 +1962,7 @@ func TestRunAPIUpdateOAS_OASAlreadyHasTykExt(t *testing.T) {
 	require.NoError(t, cmd.RunE(cmd, []string{"some-id"}))
 }
 
-// reqproof:req REQ-API-006
+// Verifies: SYS-REQ-006
 // TestRunAPIUpdateOAS_VersionPresent covers L1576 versionName == "" = F.
 // The OAS document carries an info.version, so the fallback to "v1" is skipped.
 func TestRunAPIUpdateOAS_VersionPresent(t *testing.T) {
@@ -1993,7 +1993,7 @@ func TestRunAPIUpdateOAS_VersionPresent(t *testing.T) {
 	require.NoError(t, cmd.RunE(cmd, []string{"some-id"}))
 }
 
-// reqproof:req REQ-API-004
+// Verifies: SYS-REQ-004
 // TestRunAPIImportOAS_VersionPresent covers L825 versionName == "" = F in
 // runAPIImportOAS — the OAS document already carries a version.
 func TestRunAPIImportOAS_VersionPresent(t *testing.T) {
@@ -2027,7 +2027,7 @@ func TestRunAPIImportOAS_VersionPresent(t *testing.T) {
 	require.NoError(t, cmd.RunE(cmd, []string{}))
 }
 
-// reqproof:req REQ-API-005
+// Verifies: SYS-REQ-005
 // TestRunAPIApply_CreateFallback_OASHasTykExt covers
 // createNewAPIViaApply L1079 oas.HasTykExtensions(oasData) = T (existing
 // extensions already present, AddTykExtensions skipped).
@@ -2061,7 +2061,7 @@ func TestRunAPIApply_CreateFallback_OASHasTykExt(t *testing.T) {
 	require.NoError(t, runApplyOnFile(t, cmd, tmpFile))
 }
 
-// reqproof:req REQ-API-006
+// Verifies: SYS-REQ-006
 // TestRunAPIUpdateOAS_UpdateError_NonClassified covers L1582 UpdateOASAPI
 // non-classified error wrap (not 401/403/404/409/429/5xx).
 func TestRunAPIUpdateOAS_UpdateError_NonClassified(t *testing.T) {

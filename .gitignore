@@ -7,3 +7,15 @@ docs/.jekyll-cache/
 docs/.jekyll-metadata
 docs/vendor/
 docs/_includes/
+
+# ReqProof — ignore all .proof/ by default, allowlist authored evidence
+.proof/*
+!.proof/.gitignore
+!.proof/known-issues/
+!.proof/known-issues/**
+!.proof/risks/
+!.proof/risks/**
+!.proof/evidence/
+!.proof/evidence/**
+!.proof/mcdc/
+!.proof/mcdc/**

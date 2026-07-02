@@ -13,7 +13,7 @@ import (
 	"github.com/tyktech/tyk-cli/pkg/types"
 )
 
-// reqproof:req REQ-API-001
+// Verifies: SYS-REQ-001
 func TestAPIList_JSONOutput(t *testing.T) {
 	mockAPIs := []*types.OASAPI{{ID: "id1", Name: "Name1"}}
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -37,7 +37,7 @@ func TestAPIList_JSONOutput(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// reqproof:req REQ-API-001
+// Verifies: SYS-REQ-001
 func TestAPIList_HumanOutput_NoAPIs(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(types.OASAPIListResponse{APIs: []*types.OASAPI{}})
@@ -69,7 +69,7 @@ func TestAPIList_HumanOutput_NoAPIs(t *testing.T) {
 // MC/DC coverage for runAPIList branches
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-API-001
+// Verifies: SYS-REQ-001
 // TestRunAPIList_PageZeroDefaultsToOne covers L399 page<=0=T branch.
 func TestRunAPIList_PageZeroDefaultsToOne(t *testing.T) {
 	gotPage := ""
@@ -93,7 +93,7 @@ func TestRunAPIList_PageZeroDefaultsToOne(t *testing.T) {
 	assert.Equal(t, "1", gotPage)
 }
 
-// reqproof:req REQ-API-001
+// Verifies: SYS-REQ-001
 // TestRunAPIList_ConfigNil covers L405 config==nil=T branch.
 func TestRunAPIList_ConfigNil(t *testing.T) {
 	cmd := NewAPIListCommand()
@@ -105,7 +105,7 @@ func TestRunAPIList_ConfigNil(t *testing.T) {
 	assert.Contains(t, err.Error(), "configuration not found")
 }
 
-// reqproof:req REQ-API-001
+// Verifies: SYS-REQ-001
 // TestRunAPIList_InteractiveJSONIncompat covers L419 interactive=T AND L420
 // outputFormat==OutputJSON=T combined branch.
 func TestRunAPIList_InteractiveJSONIncompatible(t *testing.T) {
@@ -122,7 +122,7 @@ func TestRunAPIList_InteractiveJSONIncompatible(t *testing.T) {
 	assert.Contains(t, err.Error(), "interactive mode is not compatible")
 }
 
-// reqproof:req REQ-API-001
+// Verifies: SYS-REQ-001
 // TestRunAPIList_NonClassifiedError covers L434 cls!=nil=F branch.
 func TestRunAPIList_NonClassifiedError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -142,7 +142,7 @@ func TestRunAPIList_NonClassifiedError(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-API-001
+// Verifies: SYS-REQ-001
 // TestRunAPIList_NewClientFails covers L411 err!=nil from client.NewClient.
 func TestRunAPIList_NewClientFails(t *testing.T) {
 	cmd := NewAPIListCommand()
@@ -152,7 +152,7 @@ func TestRunAPIList_NewClientFails(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-API-001
+// Verifies: SYS-REQ-001
 // TestRunAPIList_HumanOutput_PageHasAPIs covers L440 outputFormat==OutputJSON=F
 // (the human-output branch) and ensures displayAPIPage prints rows.
 func TestRunAPIList_HumanOutput_WithAPIs(t *testing.T) {
@@ -178,7 +178,7 @@ func TestRunAPIList_HumanOutput_WithAPIs(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// reqproof:req REQ-API-001
+// Verifies: SYS-REQ-001
 // TestRunAPIList_HumanOutput covers L420 outputFormat == OutputJSON = F by
 // exercising the default Human output path (renders a table to stdout).
 func TestRunAPIList_HumanOutput(t *testing.T) {

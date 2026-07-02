@@ -10,7 +10,7 @@ import (
 	"github.com/tyktech/tyk-cli/pkg/types"
 )
 
-// reqproof:req REQ-CFG-010
+// Verifies: SYS-REQ-048
 func TestConfigValidation(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -112,7 +112,7 @@ func TestConfigValidation(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-CFG-030
+// Verifies: SYS-REQ-051
 func TestManagerLoadFromEnvironmentVariables(t *testing.T) {
 	// Clean up environment
 	originalEnv := map[string]string{
@@ -159,7 +159,7 @@ func TestManagerLoadFromEnvironmentVariables(t *testing.T) {
 	assert.Equal(t, testOrgID, activeEnv.OrgID)
 }
 
-// reqproof:req REQ-CFG-001
+// Verifies: SYS-REQ-041
 func TestManagerFlagsOverrideEnvironment(t *testing.T) {
 	// Set environment variables
 	os.Setenv(EnvDashURL, "http://env-dashboard:3000")
@@ -192,7 +192,7 @@ func TestManagerFlagsOverrideEnvironment(t *testing.T) {
 	assert.Equal(t, flagOrgID, activeEnv.OrgID)
 }
 
-// reqproof:req REQ-CFG-001
+// Verifies: SYS-REQ-041
 func TestManagerPartialFlagOverride(t *testing.T) {
 	// Start with an existing environment
 	manager := NewManager()
@@ -221,7 +221,7 @@ func TestManagerPartialFlagOverride(t *testing.T) {
 	assert.Equal(t, "base-org-id", activeEnv.OrgID)         // Should remain from base
 }
 
-// reqproof:req REQ-CFG-031
+// Verifies: SYS-REQ-052
 func TestManagerEnvironmentOperations(t *testing.T) {
 	manager := NewManager()
 
@@ -280,7 +280,7 @@ func TestManagerEnvironmentOperations(t *testing.T) {
 // clears the env vars that LoadConfig would otherwise pick up from the
 // developer's shell. The returned path is the simulated user-config-dir root
 // (i.e. the parent of the "tyk" subdirectory).
-// reqproof:req REQ-CFG-030
+// Verifies: SYS-REQ-051
 func withIsolatedConfigDir(t *testing.T) string {
 	t.Helper()
 	dir := t.TempDir()
@@ -298,7 +298,7 @@ func withIsolatedConfigDir(t *testing.T) string {
 }
 
 // userConfigTykDir returns the directory LoadConfig actually probes for cli.toml.
-// reqproof:req REQ-CFG-030
+// Verifies: SYS-REQ-051
 func userConfigTykDir(t *testing.T) string {
 	t.Helper()
 	configDir, err := os.UserConfigDir()
@@ -306,7 +306,7 @@ func userConfigTykDir(t *testing.T) string {
 	return filepath.Join(configDir, "tyk")
 }
 
-// reqproof:req REQ-CFG-030
+// Verifies: SYS-REQ-051
 func TestManagerLoadConfig_EnvVarFallback(t *testing.T) {
 	// Each subtest exercises a different combination of env vars driving the
 	// "no environments configured" fallback in LoadConfig at line 77:
@@ -373,7 +373,7 @@ func TestManagerLoadConfig_EnvVarFallback(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-CFG-030
+// Verifies: SYS-REQ-051
 func TestManagerLoadConfig_MalformedConfigFile(t *testing.T) {
 	// Force the !ok branch at line 59: ReadInConfig returns a non
 	// ConfigFileNotFoundError (parse error), so LoadConfig must surface it.
@@ -388,7 +388,7 @@ func TestManagerLoadConfig_MalformedConfigFile(t *testing.T) {
 	assert.Error(t, err, "malformed config should bubble up as a non-not-found error")
 }
 
-// reqproof:req REQ-CFG-030
+// Verifies: SYS-REQ-051
 func TestManagerLoadConfig_UserConfigDirError(t *testing.T) {
 	// Force os.UserConfigDir to fail by unsetting HOME (and XDG vars).
 	// LoadConfig should still succeed because the config-file lookup is best
@@ -405,7 +405,7 @@ func TestManagerLoadConfig_UserConfigDirError(t *testing.T) {
 	assert.Empty(t, manager.GetConfig().Environments)
 }
 
-// reqproof:req REQ-CFG-030
+// Verifies: SYS-REQ-051
 func TestManagerLoadConfig_UnmarshalError(t *testing.T) {
 	// Drive the err != nil branch at line 66. Inject an incompatible type
 	// for the "environments" field directly into viper so mapstructure
@@ -419,7 +419,7 @@ func TestManagerLoadConfig_UnmarshalError(t *testing.T) {
 	assert.Error(t, err, "incompatible viper value should bubble up from Unmarshal")
 }
 
-// reqproof:req REQ-CFG-030
+// Verifies: SYS-REQ-051
 func TestManagerLoadConfig_ValidConfigFile(t *testing.T) {
 	// Drives the err == nil = T && ok = T (file-found) path and the
 	// "len(Environments) != 0" branch at line 72 so the env-var fallback is
@@ -451,7 +451,7 @@ org_id = "file-org"
 	assert.Equal(t, "http://from-file:3000", cfg.Environments["dev"].DashboardURL)
 }
 
-// reqproof:req REQ-CFG-001
+// Verifies: SYS-REQ-041
 func TestManagerSetFromFlags_EmptyDashURL(t *testing.T) {
 	// Drives line 116 (dashURL != "") to false while still entering
 	// SetFromFlags with an active environment available, so the existing
@@ -478,7 +478,7 @@ func TestManagerSetFromFlags_EmptyDashURL(t *testing.T) {
 	assert.NotContains(t, manager.ListEnvironments(), "temp")
 }
 
-// reqproof:req REQ-CFG-001
+// Verifies: SYS-REQ-041
 func TestManagerSetFromFlags_NoActiveEnvCreatesTemp(t *testing.T) {
 	// GetActiveEnvironment returns an error (no environments at all), so
 	// the line 108 err != nil branch is taken and a "temp" env is created
@@ -492,7 +492,7 @@ func TestManagerSetFromFlags_NoActiveEnvCreatesTemp(t *testing.T) {
 	assert.Equal(t, "http://x:3000", active.DashboardURL)
 }
 
-// reqproof:req REQ-CFG-031
+// Verifies: SYS-REQ-052
 func TestManagerSaveEnvironment_DefaultEnvironmentBranches(t *testing.T) {
 	// Exercises the line 140 short-circuit:
 	//   setAsDefault || m.config.DefaultEnvironment == ""
@@ -523,7 +523,7 @@ func TestManagerSaveEnvironment_DefaultEnvironmentBranches(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-CFG-031
+// Verifies: SYS-REQ-052
 func TestManagerGetEnvironment_NilEnvironmentsMap(t *testing.T) {
 	// A freshly constructed Manager has a Config{} with a nil
 	// Environments map: drives the line 149 (Environments == nil) branch to
@@ -537,7 +537,7 @@ func TestManagerGetEnvironment_NilEnvironmentsMap(t *testing.T) {
 	assert.Contains(t, err.Error(), "no environments configured")
 }
 
-// reqproof:req REQ-CFG-031
+// Verifies: SYS-REQ-052
 func TestManagerGetEnvironment_NotFound(t *testing.T) {
 	// Populate environments so the line 149 (Environments == nil) branch is
 	// false, then look up a missing name to drive the line 153 not-found
@@ -551,7 +551,7 @@ func TestManagerGetEnvironment_NotFound(t *testing.T) {
 	assert.Contains(t, err.Error(), "missing")
 }
 
-// reqproof:req REQ-CFG-031
+// Verifies: SYS-REQ-052
 func TestManagerSetDefaultEnvironment_Branches(t *testing.T) {
 	// Drives every combination of the OR at line 171:
 	//   m.config.Environments == nil || m.config.Environments[name] == nil
@@ -578,7 +578,7 @@ func TestManagerSetDefaultEnvironment_Branches(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-CFG-031
+// Verifies: SYS-REQ-052
 func TestManagerListEnvironments_NilMap(t *testing.T) {
 	// Ensures the nil-map branch in ListEnvironments returns a fresh empty
 	// map rather than nil.
@@ -589,7 +589,7 @@ func TestManagerListEnvironments_NilMap(t *testing.T) {
 	assert.Empty(t, got)
 }
 
-// reqproof:req REQ-CFG-030
+// Verifies: SYS-REQ-051
 func TestLiveEnvironmentConfig(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test in short mode")

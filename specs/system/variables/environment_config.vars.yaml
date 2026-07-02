@@ -1,0 +1,90 @@
+component: environment_config
+variables:
+    - name: all_environments_rendered_with_active_marked
+      type: bool
+      direction: output
+      description: whether every configured environment was rendered and the default was marked as active
+    - name: config_loaded_from_toml
+      type: bool
+      direction: output
+      description: whether LoadConfig populated the manager from the TOML file
+    - name: crud_op_invoked
+      type: bool
+      direction: input
+      description: whether a CRUD method (add/set/remove/set-default) was called
+    - name: dashboard_url_empty
+      type: bool
+      direction: input
+      description: whether dashboard URL is absent from all config sources
+    - name: default_env_switched
+      type: bool
+      direction: output
+      description: whether DefaultEnvironment was updated in memory
+    - name: default_environment_set
+      type: bool
+      direction: output
+      description: whether default_environment was set in the persisted TOML
+    - name: effective_value_from_flag
+      type: bool
+      direction: output
+      description: whether GetEffectiveConfig used the flag value rather than env var or TOML
+    - name: flag_value_provided
+      type: bool
+      direction: input
+      description: whether a CLI flag override was passed for this configuration field
+    - name: init_wizard_completed
+      type: bool
+      direction: input
+      description: whether the init wizard finished collecting all required inputs
+    - name: list_invoked_with_environments_present
+      type: bool
+      direction: input
+      description: whether config list was invoked with at least one environment configured
+    - name: remove_last_environment_rejected
+      type: bool
+      direction: output
+      description: whether the runner refused with 'cannot remove the last environment' and left the TOML untouched
+    - name: remove_targets_only_environment
+      type: bool
+      direction: input
+      description: whether config remove targets the sole remaining environment in the config
+    - name: remove_targets_unknown_environment
+      type: bool
+      direction: input
+      description: whether config remove was called with an environment name that does not exist
+    - name: remove_unknown_environment_rejected
+      type: bool
+      direction: output
+      description: whether the runner refused with 'environment X not found' and left the TOML untouched
+    - name: set_invoked_with_no_flags
+      type: bool
+      direction: input
+      description: whether config set was called with none of --dashboard-url, --auth-token, --org-id
+    - name: set_no_flags_rejected_with_bad_args
+      type: bool
+      direction: output
+      description: whether the runner returned an error citing 'at least one configuration value' before touching the config
+    - name: toml_file_exists
+      type: bool
+      direction: input
+      description: whether cli.toml is present in the XDG config directory
+    - name: toml_file_written
+      type: bool
+      direction: output
+      description: whether cli.toml was written to the XDG config directory
+    - name: toml_persisted
+      type: bool
+      direction: output
+      description: whether the change was serialised to cli.toml on disk
+    - name: toml_persisted_with_new_default
+      type: bool
+      direction: output
+      description: whether cli.toml on disk reflects the new default_environment
+    - name: use_invoked_with_valid_env
+      type: bool
+      direction: input
+      description: whether config use was called with a known environment name
+    - name: validate_error_returned
+      type: bool
+      direction: output
+      description: whether Validate() returns a non-nil error

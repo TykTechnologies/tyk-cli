@@ -1,0 +1,60 @@
+id: SYS-REQ-047
+version: 1
+status: approved
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when timeout_seconds_set_on_environment the dashboard_client shall immediately satisfy http_client_uses_environment_timeout
+description: Environments may declare a positive timeout_seconds; when set, the HTTP client uses that timeout instead of the 30s default, allowing operators to extend the deadline for slow Dashboards
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+parent: STK-REQ-003
+component: dashboard_client
+rationale: ""
+tags: []
+variables: []
+traces:
+    satisfies:
+        - STK-REQ-003
+    reviewed_at: "2026-07-01T15:07:15.437198Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:d73d642707dfc7aa02d3e90d4c6baa4d883131c43d6c6e3320fc31ad849ceb7f
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: approved
+        reviewer: tomas@tyk.io
+        reviewed_at: "2026-06-02T08:06:10Z"
+        ai_generated: false
+    impact_reviews:
+        - requirement: SYS-REQ-047
+          artifact: internal/client/client.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Component rename to domain-oriented names (api → api_lifecycle/oas_transformer/api_versioning/dashboard_client, policy → policy_lifecycle/policy_data_model, config → environment_config; cli_exit_codes cross-cuts). FRETish sentences updated accordingly. Purely metadata; production behaviour unchanged.'
+          base: origin/main
+          requirement_fingerprint: sha256:d73d642707dfc7aa02d3e90d4c6baa4d883131c43d6c6e3320fc31ad849ceb7f
+          approval_fingerprint: sha256:55f4f7a8e1593fe725bc2368292bd207856c54dba13fdd74b9431394093e663c
+          artifact_fingerprint: sha256:9927022e3be6fe6c2809caa5c2be93ca188c72f29147972de9bbbd60d5c0cf38
+          reviewed_at: "2026-07-01T15:10:09Z"
+history:
+    created_by: human:cli
+    created_at: "2026-06-02T08:06:10Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-07-01T13:38:22Z"
+lifecycle:
+    change_history:
+        - date: "2026-06-02T08:06:10Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:cli
+        - date: "2026-07-01T13:38:22Z"
+          from: review
+          to: approved
+          reason: ""
+          changed_by: human:cli

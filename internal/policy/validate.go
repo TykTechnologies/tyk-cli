@@ -9,7 +9,7 @@ import (
 
 var friendlyIDPattern = regexp.MustCompile(`^[a-z0-9][a-z0-9._-]*$`)
 
-// reqproof:req REQ-POL-006
+// Implements: SYS-REQ-029
 func ValidatePolicy(pf types.PolicyFile) types.ValidationErrors {
 	var errs types.ValidationErrors
 
@@ -78,7 +78,7 @@ func ValidatePolicy(pf types.PolicyFile) types.ValidationErrors {
 	return errs
 }
 
-// reqproof:req REQ-POL-006
+// Implements: SYS-REQ-029
 func validateFriendlyID(id string) *types.ValidationError {
 	if len(id) > 64 {
 		return &types.ValidationError{Field: "id", Message: "must be 64 characters or fewer", Kind: "schema"}
@@ -100,7 +100,7 @@ func validateFriendlyID(id string) *types.ValidationError {
 	return nil
 }
 
-// reqproof:req REQ-POL-006
+// Implements: SYS-REQ-029
 func isObjectIDFormat(s string) bool {
 	if len(s) != 24 {
 		return false
@@ -113,7 +113,7 @@ func isObjectIDFormat(s string) bool {
 	return true
 }
 
-// reqproof:req REQ-POL-006
+// Implements: SYS-REQ-029
 func selectorCount(e types.AccessEntry) int {
 	count := 0
 	if e.ID != "" {

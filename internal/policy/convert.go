@@ -7,7 +7,7 @@ import (
 	"github.com/tyktech/tyk-cli/pkg/types"
 )
 
-// reqproof:req REQ-POL-007
+// Implements: SYS-REQ-030
 func CLIToWire(pf types.PolicyFile, resolved []ResolvedAccess, orgID string) (types.DashboardPolicy, error) {
 	dp := types.DashboardPolicy{
 		// MID intentionally left empty — caller sets it after resolution
@@ -67,7 +67,7 @@ func CLIToWire(pf types.PolicyFile, resolved []ResolvedAccess, orgID string) (ty
 	return dp, nil
 }
 
-// reqproof:req REQ-POL-007
+// Implements: SYS-REQ-030
 func WireToCLI(dp types.DashboardPolicy, apis []ResolverAPI) types.PolicyFile {
 	friendlyID := dp.ID
 	if friendlyID == "" {

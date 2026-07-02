@@ -1,0 +1,64 @@
+id: SYS-REQ-021
+version: 1
+status: approved
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when dashboard_request_sent the dashboard_client shall immediately satisfy (authorization_header_set & org_id_header_set)
+description: api commands communicate with the Tyk Dashboard via an authenticated HTTP client that sets Authorization and x-org-id headers on every request
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+component: dashboard_client
+rationale: ""
+tags: []
+variables:
+    - dashboard_request_sent
+    - authorization_header_set
+    - org_id_header_set
+traces:
+    satisfies:
+        - STK-REQ-001
+    reviewed_at: "2026-07-01T15:07:15.127309Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:394fc19c41c6f7b3536a36090c77e112505aeaa626a7dd7aef16656dc8b84a91
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: approved
+        reviewer: tomas@tyk.io
+        reviewed_at: "2026-07-01T13:38:54Z"
+        ai_generated: false
+    gaps_reviewed_at: "2026-07-01T14:19:46.6271Z"
+    gaps_reviewed_by: tombuchaillot
+    impact_reviews:
+        - requirement: SYS-REQ-021
+          artifact: internal/client/client.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Component rename to domain-oriented names (api → api_lifecycle/oas_transformer/api_versioning/dashboard_client, policy → policy_lifecycle/policy_data_model, config → environment_config; cli_exit_codes cross-cuts). FRETish sentences updated accordingly. Purely metadata; production behaviour unchanged.'
+          base: origin/main
+          requirement_fingerprint: sha256:394fc19c41c6f7b3536a36090c77e112505aeaa626a7dd7aef16656dc8b84a91
+          approval_fingerprint: sha256:e95a73fb9e37209920a8d8d4a34659ab58d59d3350d991cf1a498f9f156ee88b
+          artifact_fingerprint: sha256:9927022e3be6fe6c2809caa5c2be93ca188c72f29147972de9bbbd60d5c0cf38
+          reviewed_at: "2026-07-01T15:10:09Z"
+history:
+    created_by: human:cli
+    created_at: "2026-05-29T16:11:34Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-07-01T13:38:39Z"
+lifecycle:
+    change_history:
+        - date: "2026-07-01T13:38:39Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:cli
+        - date: "2026-07-01T13:38:39Z"
+          from: review
+          to: approved
+          reason: ""
+          changed_by: human:cli

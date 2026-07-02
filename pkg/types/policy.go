@@ -45,7 +45,7 @@ type AccessEntry struct {
 // as the string representation.
 type Duration string
 
-// reqproof:req REQ-POL-010
+// Implements: SYS-REQ-031
 func (d *Duration) UnmarshalYAML(value *yaml.Node) error {
 	*d = Duration(value.Value)
 	return nil
@@ -106,7 +106,7 @@ type ValidationError struct {
 	Kind    string `json:"kind"` // "schema", "duration", or "selector"
 }
 
-// reqproof:req REQ-POL-006
+// Implements: SYS-REQ-029
 func (e *ValidationError) Error() string {
 	return fmt.Sprintf("%s: %s (%s)", e.Field, e.Message, e.Kind)
 }
@@ -114,7 +114,7 @@ func (e *ValidationError) Error() string {
 // ValidationErrors collects multiple validation failures.
 type ValidationErrors []ValidationError
 
-// reqproof:req REQ-POL-006
+// Implements: SYS-REQ-029
 func (ve ValidationErrors) Error() string {
 	if len(ve) == 0 {
 		return "no validation errors"
@@ -125,7 +125,7 @@ func (ve ValidationErrors) Error() string {
 	return fmt.Sprintf("%d validation errors: %s (and %d more)", len(ve), ve[0].Error(), len(ve)-1)
 }
 
-// reqproof:req REQ-POL-007
+// Implements: SYS-REQ-030
 func (ar *AccessRight) MarshalJSON() ([]byte, error) {
 	type Alias AccessRight
 	a := &struct {

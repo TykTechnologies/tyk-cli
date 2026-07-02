@@ -1,0 +1,69 @@
+id: SYS-REQ-032
+version: 1
+status: approved
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when ambiguous_selector the policy_data_model shall immediately satisfy resolve_error_returned
+description: ResolveAccessEntries resolves policy access entries by API name, listen path, or tag against the live API list; returns an error for any selector that matches zero or more than one API
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+component: policy_data_model
+rationale: ""
+tags: []
+variables: []
+traces:
+    satisfies:
+        - STK-REQ-002
+    reviewed_at: "2026-07-01T15:07:15.245402Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:1b14c806282f3f213a5e33ace3db4afc7aa6fb5ea652e5da73a0858f36fb14d6
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: approved
+        reviewer: tomas@tyk.io
+        reviewed_at: "2026-07-01T13:38:54Z"
+        ai_generated: false
+    impact_reviews:
+        - requirement: SYS-REQ-032
+          artifact: internal/cli/policy.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Component rename to domain-oriented names (api → api_lifecycle/oas_transformer/api_versioning/dashboard_client, policy → policy_lifecycle/policy_data_model, config → environment_config; cli_exit_codes cross-cuts). FRETish sentences updated accordingly. Purely metadata; production behaviour unchanged.'
+          base: origin/main
+          requirement_fingerprint: sha256:1b14c806282f3f213a5e33ace3db4afc7aa6fb5ea652e5da73a0858f36fb14d6
+          approval_fingerprint: sha256:e8b606d8bccc4998e7b833d92726ef614ea4772a05e924ab445b150eb71fe00c
+          artifact_fingerprint: sha256:e6de1560a03e13789ffefb649d9baf828e55490b27ebb2df7e26dc190084c82b
+          reviewed_at: "2026-07-01T15:10:09Z"
+        - requirement: SYS-REQ-032
+          artifact: internal/policy/selector.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Component rename to domain-oriented names (api → api_lifecycle/oas_transformer/api_versioning/dashboard_client, policy → policy_lifecycle/policy_data_model, config → environment_config; cli_exit_codes cross-cuts). FRETish sentences updated accordingly. Purely metadata; production behaviour unchanged.'
+          base: origin/main
+          requirement_fingerprint: sha256:1b14c806282f3f213a5e33ace3db4afc7aa6fb5ea652e5da73a0858f36fb14d6
+          approval_fingerprint: sha256:e8b606d8bccc4998e7b833d92726ef614ea4772a05e924ab445b150eb71fe00c
+          artifact_fingerprint: sha256:90bde213c6afc69dcc458ba0928e095c25f3e444572b5576b71bfd3d48ae2815
+          reviewed_at: "2026-07-01T15:10:09Z"
+history:
+    created_by: human:cli
+    created_at: "2026-05-29T15:42:31Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-07-01T13:38:40Z"
+lifecycle:
+    change_history:
+        - date: "2026-07-01T13:38:40Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:cli
+        - date: "2026-07-01T13:38:40Z"
+          from: review
+          to: approved
+          reason: ""
+          changed_by: human:cli

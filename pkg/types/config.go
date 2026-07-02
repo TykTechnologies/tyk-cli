@@ -26,7 +26,7 @@ type Environment struct {
 }
 
 // Validate checks if the configuration is valid
-// reqproof:req REQ-CFG-010
+// Implements: SYS-REQ-048
 func (c *Config) Validate() error {
 	// Must have at least one environment
 	if len(c.Environments) == 0 {
@@ -48,7 +48,7 @@ func (c *Config) Validate() error {
 	return env.Validate()
 }
 
-// reqproof:req REQ-CFG-030
+// Implements: SYS-REQ-051
 func (c *Config) GetActiveEnvironment() (*Environment, error) {
 	if c.DefaultEnvironment == "" || len(c.Environments) == 0 {
 		return nil, errors.New("no environments configured or no default environment set")
@@ -62,7 +62,7 @@ func (c *Config) GetActiveEnvironment() (*Environment, error) {
 	return env, nil
 }
 
-// reqproof:req REQ-CFG-001
+// Implements: SYS-REQ-041
 func (c *Config) GetEffectiveConfig() (string, string, string, error) {
 	env, err := c.GetActiveEnvironment()
 	if err != nil {
@@ -71,7 +71,7 @@ func (c *Config) GetEffectiveConfig() (string, string, string, error) {
 	return env.DashboardURL, env.AuthToken, env.OrgID, nil
 }
 
-// reqproof:req REQ-CFG-010
+// Implements: SYS-REQ-048
 func (e *Environment) Validate() error {
 	if e.Name == "" {
 		return errors.New("environment name is required")
@@ -100,12 +100,7 @@ func (e *Environment) Validate() error {
 
 // ExitCode represents different types of CLI exit codes
 //
-// reqproof:req REQ-API-020
-// reqproof:req REQ-API-021
-// reqproof:req REQ-CFG-020
-// reqproof:req REQ-CFG-021
-// reqproof:req REQ-POL-020
-// reqproof:req REQ-POL-021
+// Implements: SYS-REQ-013, SYS-REQ-014, SYS-REQ-049, SYS-REQ-050, SYS-REQ-033, SYS-REQ-034
 type ExitCode int
 
 const (

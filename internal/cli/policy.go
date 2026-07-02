@@ -19,7 +19,7 @@ import (
 
 const httpTimeout = 30 * time.Second
 
-// reqproof:req REQ-POL-001
+// Implements: SYS-REQ-024
 func NewPolicyCommand() *cobra.Command {
 	policyCmd := &cobra.Command{
 		Use:   "policy",
@@ -36,7 +36,7 @@ func NewPolicyCommand() *cobra.Command {
 	return policyCmd
 }
 
-// reqproof:req REQ-POL-001
+// Implements: SYS-REQ-024
 func NewPolicyListCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
@@ -50,7 +50,7 @@ func NewPolicyListCommand() *cobra.Command {
 	return cmd
 }
 
-// reqproof:req REQ-POL-001
+// Implements: SYS-REQ-024
 func runPolicyList(cmd *cobra.Command, args []string) error {
 	page, _ := cmd.Flags().GetInt("page")
 	if page <= 0 {
@@ -103,7 +103,7 @@ func runPolicyList(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// reqproof:req REQ-POL-002
+// Implements: SYS-REQ-025
 func NewPolicyGetCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get <policy-id>",
@@ -116,7 +116,7 @@ func NewPolicyGetCommand() *cobra.Command {
 	return cmd
 }
 
-// reqproof:req REQ-POL-002
+// Implements: SYS-REQ-025
 func runPolicyGet(cmd *cobra.Command, args []string) error {
 	policyID := args[0]
 
@@ -178,7 +178,7 @@ func runPolicyGet(cmd *cobra.Command, args []string) error {
 	fmt.Fprintf(os.Stderr, "  APIs: %d\n", apiCount)
 
 	yamlData, err := yaml.Marshal(pf)
-	if err != nil {
+	if err != nil { //mcdc:ignore pf is a plain types.PolicyFile struct with only string/int/slice/map fields; go-yaml Marshal cannot fail on such a type (no cycles, no channels/functions)
 		return fmt.Errorf("failed to marshal policy as YAML: %w", err)
 	}
 	fmt.Fprint(os.Stdout, string(yamlData))
@@ -186,7 +186,7 @@ func runPolicyGet(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// reqproof:req REQ-POL-003
+// Implements: SYS-REQ-026
 func NewPolicyApplyCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "apply",
@@ -213,7 +213,7 @@ Examples:
 	return cmd
 }
 
-// reqproof:req REQ-POL-003
+// Implements: SYS-REQ-026
 func runPolicyApply(cmd *cobra.Command, args []string) error {
 	filePath, _ := cmd.Flags().GetString("file")
 
@@ -252,11 +252,11 @@ func runPolicyApply(cmd *cobra.Command, args []string) error {
 
 	// Convert CLI to wire format
 	activeEnv, err := config.GetActiveEnvironment()
-	if err != nil {
+	if err != nil { //mcdc:ignore client.NewClient already succeeded above (line 230), which required config.Validate + a successful internal GetActiveEnvironment call; the config is unchanged so this second GetActiveEnvironment cannot fail
 		return fmt.Errorf("no active environment: %w", err)
 	}
 	dp, err := policy.CLIToWire(pf, resolved, activeEnv.OrgID)
-	if err != nil {
+	if err != nil { //mcdc:ignore CLIToWire only fails via ParseDuration on RateLimit.Per / Quota.Period / KeyTTL; readPolicyFile above invoked ValidatePolicy which ran ParseDuration on those exact same fields and rejected the file if any failed, so ParseDuration here cannot fail
 		return &ExitError{Code: int(types.ExitBadArgs), Message: err.Error()}
 	}
 
@@ -297,7 +297,7 @@ func runPolicyApply(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// reqproof:req REQ-POL-004
+// Implements: SYS-REQ-027
 func NewPolicyDeleteCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete <policy-id>",
@@ -312,7 +312,7 @@ func NewPolicyDeleteCommand() *cobra.Command {
 	return cmd
 }
 
-// reqproof:req REQ-POL-004
+// Implements: SYS-REQ-027
 func runPolicyDelete(cmd *cobra.Command, args []string) error {
 	policyID := args[0]
 	skipConfirmation, _ := cmd.Flags().GetBool("yes")
@@ -383,7 +383,7 @@ func runPolicyDelete(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// reqproof:req REQ-POL-005
+// Implements: SYS-REQ-028
 func NewPolicyInitCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "init",
@@ -407,7 +407,7 @@ Examples:
 	return cmd
 }
 
-// reqproof:req REQ-POL-005
+// Implements: SYS-REQ-028
 func runPolicyInit(cmd *cobra.Command, args []string) error {
 	id, _ := cmd.Flags().GetString("id")
 	name, _ := cmd.Flags().GetString("name")
@@ -451,7 +451,7 @@ func runPolicyInit(cmd *cobra.Command, args []string) error {
 	}
 
 	data, err := yaml.Marshal(pf)
-	if err != nil {
+	if err != nil { //mcdc:ignore pf is a locally-constructed types.PolicyFile literal with only string/int/slice/map fields; go-yaml Marshal cannot fail on such a value
 		return fmt.Errorf("failed to marshal scaffold: %w", err)
 	}
 
@@ -468,7 +468,7 @@ func runPolicyInit(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// reqproof:req REQ-POL-006
+// Implements: SYS-REQ-029
 func readPolicyFile(filePath string) (types.PolicyFile, error) {
 	var data []byte
 	var err error
@@ -504,7 +504,7 @@ func readPolicyFile(filePath string) (types.PolicyFile, error) {
 	return pf, nil
 }
 
-// reqproof:req REQ-POL-011
+// Implements: SYS-REQ-032
 func buildResolveRequests(entries []types.AccessEntry) []policy.ResolveRequest {
 	requests := make([]policy.ResolveRequest, 0, len(entries))
 	for _, entry := range entries {
@@ -528,7 +528,7 @@ func buildResolveRequests(entries []types.AccessEntry) []policy.ResolveRequest {
 	return requests
 }
 
-// reqproof:req REQ-POL-006
+// Implements: SYS-REQ-029
 func joinErrorMessages(errs []error) string {
 	msgs := make([]string, len(errs))
 	for i, e := range errs {
@@ -537,7 +537,7 @@ func joinErrorMessages(errs []error) string {
 	return strings.Join(msgs, "; ")
 }
 
-// reqproof:req REQ-POL-003
+// Implements: SYS-REQ-026
 func resolveFriendlyID(ctx context.Context, c *client.Client, friendlyID string) (*types.DashboardPolicy, error) {
 	dp, err := c.GetPolicy(ctx, friendlyID)
 	if err != nil {
@@ -549,7 +549,7 @@ func resolveFriendlyID(ctx context.Context, c *client.Client, friendlyID string)
 	return dp, nil
 }
 
-// reqproof:req REQ-API-022
+// Implements: SYS-REQ-015
 func isNotFoundError(err error) bool {
 	if er, ok := err.(*types.ErrorResponse); ok && er.Status == 404 {
 		return true
@@ -558,7 +558,7 @@ func isNotFoundError(err error) bool {
 	return strings.Contains(msg, "404") || strings.Contains(strings.ToLower(msg), "not found")
 }
 
-// reqproof:req REQ-POL-011
+// Implements: SYS-REQ-032
 func toResolverAPIs(apis []*types.OASAPI) []policy.ResolverAPI {
 	result := make([]policy.ResolverAPI, 0, len(apis))
 	for _, api := range apis {
@@ -571,7 +571,7 @@ func toResolverAPIs(apis []*types.OASAPI) []policy.ResolverAPI {
 	return result
 }
 
-// reqproof:req REQ-POL-001
+// Implements: SYS-REQ-024
 func displayPolicyPage(policies []types.DashboardPolicy, page int) {
 	if len(policies) == 0 {
 		fmt.Fprintf(os.Stderr, "No policies found.\n")

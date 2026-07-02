@@ -14,12 +14,12 @@ const (
 	outputFormatKey contextKey = "outputFormat"
 )
 
-// reqproof:req REQ-CFG-001
+// Implements: SYS-REQ-041
 func withConfig(ctx context.Context, config *types.Config) context.Context {
 	return context.WithValue(ctx, configKey, config)
 }
 
-// reqproof:req REQ-CFG-001
+// Implements: SYS-REQ-041
 func GetConfigFromContext(ctx context.Context) *types.Config {
 	if config, ok := ctx.Value(configKey).(*types.Config); ok {
 		return config
@@ -27,12 +27,12 @@ func GetConfigFromContext(ctx context.Context) *types.Config {
 	return nil
 }
 
-// reqproof:req REQ-CFG-001
+// Implements: SYS-REQ-041
 func withOutputFormat(ctx context.Context, format types.OutputFormat) context.Context {
 	return context.WithValue(ctx, outputFormatKey, format)
 }
 
-// reqproof:req REQ-CFG-001
+// Implements: SYS-REQ-041
 func GetOutputFormatFromContext(ctx context.Context) types.OutputFormat {
 	if format, ok := ctx.Value(outputFormatKey).(types.OutputFormat); ok {
 		return format

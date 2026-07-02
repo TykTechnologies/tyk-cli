@@ -1,0 +1,28 @@
+schema_version: proof.evidence_profile.v1
+results:
+    - profile: known_issue_reproducer
+      requirement: SYS-REQ-018
+      status: pass
+      observed_result: known_issue_reproduced
+      known_issues:
+          - rate-limit-no-client-backoff
+      input_set:
+          - rate-limit-no-client-backoff source review
+          - internal/client/client.go:doRequest
+          - internal/cli/errors.go:isRateLimitError
+          - internal/cli/errors.go:classifyDashboardError
+          - internal/cli/exit_codes_test.go:TestAPIList_RateLimitedReturnsExit7
+      summary: >
+          internal/client/client.go does not read the Retry-After header on
+          HTTP 429 responses and does not sleep before returning. isRateLimitError
+          identifies the class and classifyDashboardError maps 429 to
+          ExitError{Code: 7} (SYS-REQ-018), but there is no cool-down or
+          adaptive back-pressure in the client. Operators must throttle CLI
+          invocations externally. TestAPIList_RateLimitedReturnsExit7 verifies
+          exit-code mapping only.
+      freshness_hashes:
+          internal/client/client.go: sha256:9927022e3be6fe6c2809caa5c2be93ca188c72f29147972de9bbbd60d5c0cf38
+          internal/cli/errors.go: sha256:8cfd8d8bf4496e4e548c0fef3ed990536e14d17d4dcaedff29360217aa34fefb
+          internal/cli/exit_codes_test.go: sha256:c55180b542a0759cc9100d2b9d4f57e42c47c285e18df85017443fca45f9ff3d
+          specs/system/requirements/SYS-REQ-018.req.yaml: sha256:e3b0dcc479ea9ade9fe46390da20b0f394b0a372ea36d3422bad3ebb30d38e3b
+          specs/system/requirements/SYS-REQ-038.req.yaml: sha256:6036395792dda3e7d8050d4ee0a7e1106bbaa7d50959838bed9e10d7c2417efe

@@ -9,13 +9,13 @@ import (
 // TykExtensionKey is the key for Tyk-specific extensions in OAS documents
 const TykExtensionKey = "x-tyk-api-gateway"
 
-// reqproof:req REQ-API-013
+// Implements: SYS-REQ-011
 func HasTykExtensions(oasDoc map[string]interface{}) bool {
 	_, exists := oasDoc[TykExtensionKey]
 	return exists
 }
 
-// reqproof:req REQ-API-013
+// Implements: SYS-REQ-011
 func ExtractAPIIDFromTykExtensions(oasDoc map[string]interface{}) (string, bool) {
 	if !HasTykExtensions(oasDoc) {
 		return "", false
@@ -40,7 +40,7 @@ func ExtractAPIIDFromTykExtensions(oasDoc map[string]interface{}) (string, bool)
 }
 
 // AddTykExtensions adds minimal x-tyk-api-gateway extensions to a plain OAS document
-// reqproof:req REQ-API-011
+// Implements: SYS-REQ-009
 func AddTykExtensions(oasDoc map[string]interface{}) (map[string]interface{}, error) {
 	if HasTykExtensions(oasDoc) {
 		return oasDoc, nil // Already has extensions
@@ -94,7 +94,7 @@ func AddTykExtensions(oasDoc map[string]interface{}) (map[string]interface{}, er
 	return result, nil
 }
 
-// reqproof:req REQ-API-011
+// Implements: SYS-REQ-009
 func extractUpstreamURL(oasDoc map[string]interface{}) string {
 	servers, ok := oasDoc["servers"].([]interface{})
 	if !ok || len(servers) == 0 {
@@ -116,10 +116,7 @@ func extractUpstreamURL(oasDoc map[string]interface{}) string {
 
 // GenerateListenPath creates a listen path from API title
 // Examples: "My API" -> "/my-api/", "Swagger Petstore" -> "/swagger-petstore/"
-// reqproof:req REQ-API-012
-// reqproof:req SW-REQ-007
-// reqproof:req SW-REQ-008
-// reqproof:req SW-REQ-009
+// Implements: SYS-REQ-010, SW-REQ-007, SW-REQ-008, SW-REQ-009
 func GenerateListenPath(title string) string {
 	// Convert to lowercase and replace spaces/special chars with hyphens
 	slug := strings.ToLower(title)
@@ -132,7 +129,7 @@ func GenerateListenPath(title string) string {
 	slug = strings.Trim(slug, "-")
 	
 	// Ensure it doesn't start with a number (invalid path)
-	if len(slug) > 0 && slug[0] >= '0' && slug[0] <= '9' {
+	if len(slug) > 0 && slug[0] >= '0' && slug[0] <= '9' { //mcdc:ignore after the [^a-z0-9]+ replace and Trim("-") above, slug's first byte is guaranteed to be in [a-z0-9] (ASCII 0x30-0x39, 0x61-0x7A); slug[0] >= '0' can never be false when len(slug)>0, so that condition cannot be independently proven
 		slug = "api-" + slug
 	}
 	
@@ -151,7 +148,7 @@ func GenerateListenPath(title string) string {
 // catch obvious authoring errors locally and surface a clear message before
 // any network round-trip.
 //
-// reqproof:req REQ-API-014
+// Implements: SYS-REQ-012, INT-REQ-003
 func ValidateOASStructure(oasDoc map[string]interface{}) error {
 	if oasDoc == nil {
 		return fmt.Errorf("OAS document is empty")

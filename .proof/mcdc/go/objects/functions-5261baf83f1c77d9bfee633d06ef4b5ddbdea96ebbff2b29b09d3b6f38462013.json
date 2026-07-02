@@ -1,0 +1,3212 @@
+{
+  "generated_at": "2026-07-01T15:29:52.86288Z",
+  "engine": "go",
+  "pattern": "./...",
+  "functions": [
+    {
+      "id": "github.com/tyktech/tyk-cli/cmd:main.go:classifyExitError",
+      "package": "github.com/tyktech/tyk-cli/cmd",
+      "file": "main.go",
+      "function": "classifyExitError",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 2,
+        "covered_conditions": 2,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:api.go:computeTableLayout",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "api.go",
+      "function": "computeTableLayout",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 6,
+        "covered_decisions": 5,
+        "decision_percent": 83.33333333333333,
+        "condition_count": 6,
+        "covered_conditions": 5,
+        "condition_percent": 83.33333333333333,
+        "incomplete_decisions": 1,
+        "missing_condition_count": 1
+      },
+      "decision_count": 6,
+      "fully_covered": 5,
+      "partially_covered": 1,
+      "hotspots": [
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/cli",
+          "file": "api.go",
+          "function": "computeTableLayout",
+          "line": 86,
+          "kind": "if",
+          "expression": "over \u003e 0",
+          "samples": 1,
+          "missing_conditions": [
+            "over \u003e 0"
+          ],
+          "example_row": "over \u003e 0=F =\u003e F"
+        }
+      ]
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:api.go:createNewAPIViaApply",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "api.go",
+      "function": "createNewAPIViaApply",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 6,
+        "covered_decisions": 6,
+        "decision_percent": 100,
+        "condition_count": 6,
+        "covered_conditions": 6,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 6,
+      "fully_covered": 6,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:api.go:displayAPIPage",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "api.go",
+      "function": "displayAPIPage",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 5,
+        "covered_decisions": 3,
+        "decision_percent": 60,
+        "condition_count": 6,
+        "covered_conditions": 3,
+        "condition_percent": 50,
+        "incomplete_decisions": 2,
+        "missing_condition_count": 3
+      },
+      "decision_count": 5,
+      "fully_covered": 3,
+      "partially_covered": 2,
+      "hotspots": [
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/cli",
+          "file": "api.go",
+          "function": "displayAPIPage",
+          "line": 479,
+          "kind": "if",
+          "expression": "err == nil \u0026\u0026 w \u003e 0",
+          "samples": 1,
+          "missing_conditions": [
+            "err == nil",
+            "w \u003e 0"
+          ],
+          "example_row": "err == nil=F, [w \u003e 0=- skipped] =\u003e F"
+        },
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/cli",
+          "file": "api.go",
+          "function": "displayAPIPage",
+          "line": 490,
+          "kind": "if",
+          "expression": "stacked",
+          "samples": 1,
+          "missing_conditions": [
+            "stacked"
+          ],
+          "example_row": "stacked=F =\u003e F"
+        }
+      ]
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:api.go:extractVersionFromOAS",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "api.go",
+      "function": "extractVersionFromOAS",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 3,
+        "covered_conditions": 3,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:api.go:generateOASForCreate",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "api.go",
+      "function": "generateOASForCreate",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 1,
+        "covered_decisions": 1,
+        "decision_percent": 100,
+        "condition_count": 1,
+        "covered_conditions": 1,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 1,
+      "fully_covered": 1,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:api.go:loadOASFromFile",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "api.go",
+      "function": "loadOASFromFile",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 4,
+        "covered_decisions": 3,
+        "decision_percent": 75,
+        "condition_count": 4,
+        "covered_conditions": 3,
+        "condition_percent": 75,
+        "incomplete_decisions": 1,
+        "missing_condition_count": 1
+      },
+      "decision_count": 4,
+      "fully_covered": 3,
+      "partially_covered": 1,
+      "hotspots": [
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/cli",
+          "file": "api.go",
+          "function": "loadOASFromFile",
+          "line": 1305,
+          "kind": "if",
+          "expression": "err != nil",
+          "samples": 1,
+          "missing_conditions": [
+            "err != nil"
+          ],
+          "example_row": "err != nil=F =\u003e F"
+        }
+      ]
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:api.go:loadOASFromURL",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "api.go",
+      "function": "loadOASFromURL",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 5,
+        "covered_decisions": 4,
+        "decision_percent": 80,
+        "condition_count": 5,
+        "covered_conditions": 4,
+        "condition_percent": 80,
+        "incomplete_decisions": 1,
+        "missing_condition_count": 1
+      },
+      "decision_count": 5,
+      "fully_covered": 4,
+      "partially_covered": 1,
+      "hotspots": [
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/cli",
+          "file": "api.go",
+          "function": "loadOASFromURL",
+          "line": 1346,
+          "kind": "if",
+          "expression": "err != nil",
+          "samples": 1,
+          "missing_conditions": [
+            "err != nil"
+          ],
+          "example_row": "err != nil=F =\u003e F"
+        }
+      ]
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:api.go:outputAPIAsHuman",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "api.go",
+      "function": "outputAPIAsHuman",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 15,
+        "covered_decisions": 15,
+        "decision_percent": 100,
+        "condition_count": 16,
+        "covered_conditions": 16,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 15,
+      "fully_covered": 15,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:api.go:outputAPIAsJSON",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "api.go",
+      "function": "outputAPIAsJSON",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 3,
+        "covered_conditions": 3,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:api.go:outputCreatedAPIAsHuman",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "api.go",
+      "function": "outputCreatedAPIAsHuman",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 2,
+        "covered_conditions": 2,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:api.go:outputCreatedAPIAsJSON",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "api.go",
+      "function": "outputCreatedAPIAsJSON",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 2,
+        "covered_conditions": 2,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:api.go:outputDeletedAPIAsHuman",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "api.go",
+      "function": "outputDeletedAPIAsHuman",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 1,
+        "covered_decisions": 1,
+        "decision_percent": 100,
+        "condition_count": 1,
+        "covered_conditions": 1,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 1,
+      "fully_covered": 1,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:api.go:outputImportedAPIAsHuman",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "api.go",
+      "function": "outputImportedAPIAsHuman",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 2,
+        "covered_conditions": 2,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:api.go:outputUpdatedAPIAsHuman",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "api.go",
+      "function": "outputUpdatedAPIAsHuman",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 2,
+        "covered_conditions": 2,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:api.go:readKey",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "api.go",
+      "function": "readKey",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 3,
+        "covered_decisions": 0,
+        "decision_percent": 0,
+        "condition_count": 4,
+        "covered_conditions": 0,
+        "condition_percent": 0,
+        "incomplete_decisions": 3,
+        "missing_condition_count": 4
+      },
+      "decision_count": 3,
+      "fully_covered": 0,
+      "partially_covered": 3,
+      "hotspots": [
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/cli",
+          "file": "api.go",
+          "function": "readKey",
+          "line": 131,
+          "kind": "if",
+          "expression": "n == 2 \u0026\u0026 tail[0] == '['",
+          "samples": 0,
+          "missing_conditions": [
+            "n == 2",
+            "tail[0] == '['"
+          ]
+        },
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/cli",
+          "file": "api.go",
+          "function": "readKey",
+          "line": 125,
+          "kind": "if",
+          "expression": "b != 27",
+          "samples": 0,
+          "missing_conditions": [
+            "b != 27"
+          ]
+        },
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/cli",
+          "file": "api.go",
+          "function": "readKey",
+          "line": 121,
+          "kind": "if",
+          "expression": "err != nil",
+          "samples": 0,
+          "missing_conditions": [
+            "err != nil"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:api.go:runAPIApply",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "api.go",
+      "function": "runAPIApply",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 11,
+        "covered_decisions": 9,
+        "decision_percent": 81.81818181818181,
+        "condition_count": 11,
+        "covered_conditions": 9,
+        "condition_percent": 81.81818181818181,
+        "incomplete_decisions": 2,
+        "missing_condition_count": 2
+      },
+      "decision_count": 11,
+      "fully_covered": 9,
+      "partially_covered": 2,
+      "hotspots": [
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/cli",
+          "file": "api.go",
+          "function": "runAPIApply",
+          "line": 941,
+          "kind": "if",
+          "expression": "err != nil",
+          "samples": 1,
+          "missing_conditions": [
+            "err != nil"
+          ],
+          "example_row": "err != nil=F =\u003e F"
+        },
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/cli",
+          "file": "api.go",
+          "function": "runAPIApply",
+          "line": 954,
+          "kind": "if",
+          "expression": "err != nil",
+          "samples": 1,
+          "missing_conditions": [
+            "err != nil"
+          ],
+          "example_row": "err != nil=F =\u003e F"
+        }
+      ]
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:api.go:runAPICreate",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "api.go",
+      "function": "runAPICreate",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 7,
+        "covered_decisions": 7,
+        "decision_percent": 100,
+        "condition_count": 7,
+        "covered_conditions": 7,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 7,
+      "fully_covered": 7,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:api.go:runAPIDelete",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "api.go",
+      "function": "runAPIDelete",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 10,
+        "covered_decisions": 10,
+        "decision_percent": 100,
+        "condition_count": 13,
+        "covered_conditions": 13,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 10,
+      "fully_covered": 10,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:api.go:runAPIGet",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "api.go",
+      "function": "runAPIGet",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 5,
+        "covered_decisions": 5,
+        "decision_percent": 100,
+        "condition_count": 6,
+        "covered_conditions": 6,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 5,
+      "fully_covered": 5,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:api.go:runAPIImportOAS",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "api.go",
+      "function": "runAPIImportOAS",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 13,
+        "covered_decisions": 12,
+        "decision_percent": 92.3076923076923,
+        "condition_count": 15,
+        "covered_conditions": 14,
+        "condition_percent": 93.33333333333333,
+        "incomplete_decisions": 1,
+        "missing_condition_count": 1
+      },
+      "decision_count": 13,
+      "fully_covered": 12,
+      "partially_covered": 1,
+      "hotspots": [
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/cli",
+          "file": "api.go",
+          "function": "runAPIImportOAS",
+          "line": 815,
+          "kind": "if",
+          "expression": "err != nil",
+          "samples": 1,
+          "missing_conditions": [
+            "err != nil"
+          ],
+          "example_row": "err != nil=F =\u003e F"
+        }
+      ]
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:api.go:runAPIList",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "api.go",
+      "function": "runAPIList",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 8,
+        "covered_decisions": 7,
+        "decision_percent": 87.5,
+        "condition_count": 8,
+        "covered_conditions": 7,
+        "condition_percent": 87.5,
+        "incomplete_decisions": 1,
+        "missing_condition_count": 1
+      },
+      "decision_count": 8,
+      "fully_covered": 7,
+      "partially_covered": 1,
+      "hotspots": [
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/cli",
+          "file": "api.go",
+          "function": "runAPIList",
+          "line": 420,
+          "kind": "if",
+          "expression": "outputFormat == types.OutputJSON",
+          "samples": 1,
+          "missing_conditions": [
+            "outputFormat == types.OutputJSON"
+          ],
+          "example_row": "outputFormat == types.OutputJSON=T =\u003e T"
+        }
+      ]
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:api.go:runAPIUpdateOAS",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "api.go",
+      "function": "runAPIUpdateOAS",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 6,
+        "covered_decisions": 6,
+        "decision_percent": 100,
+        "condition_count": 8,
+        "covered_conditions": 8,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 6,
+      "fully_covered": 6,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:api.go:runInteractiveAPIList",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "api.go",
+      "function": "runInteractiveAPIList",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 6,
+        "covered_decisions": 0,
+        "decision_percent": 0,
+        "condition_count": 6,
+        "covered_conditions": 0,
+        "condition_percent": 0,
+        "incomplete_decisions": 6,
+        "missing_condition_count": 6
+      },
+      "decision_count": 6,
+      "fully_covered": 0,
+      "partially_covered": 6,
+      "hotspots": [
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/cli",
+          "file": "api.go",
+          "function": "runInteractiveAPIList",
+          "line": 544,
+          "kind": "if",
+          "expression": "!term.IsTerminal(int(os.Stdin.Fd()))",
+          "samples": 1,
+          "missing_conditions": [
+            "term.IsTerminal(int(os.Stdin.Fd()))"
+          ],
+          "example_row": "term.IsTerminal(int(os.Stdin.Fd()))=F =\u003e T"
+        },
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/cli",
+          "file": "api.go",
+          "function": "runInteractiveAPIList",
+          "line": 596,
+          "kind": "if",
+          "expression": "len(apis) \u003e 0",
+          "samples": 0,
+          "missing_conditions": [
+            "len(apis) \u003e 0"
+          ]
+        },
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/cli",
+          "file": "api.go",
+          "function": "runInteractiveAPIList",
+          "line": 591,
+          "kind": "if",
+          "expression": "currentPage \u003e 1",
+          "samples": 0,
+          "missing_conditions": [
+            "currentPage \u003e 1"
+          ]
+        },
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/cli",
+          "file": "api.go",
+          "function": "runInteractiveAPIList",
+          "line": 550,
+          "kind": "if",
+          "expression": "err != nil",
+          "samples": 0,
+          "missing_conditions": [
+            "err != nil"
+          ]
+        },
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/cli",
+          "file": "api.go",
+          "function": "runInteractiveAPIList",
+          "line": 570,
+          "kind": "if",
+          "expression": "err != nil",
+          "samples": 0,
+          "missing_conditions": [
+            "err != nil"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:api.go:stripExistingAPIID",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "api.go",
+      "function": "stripExistingAPIID",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 4,
+        "covered_decisions": 4,
+        "decision_percent": 100,
+        "condition_count": 4,
+        "covered_conditions": 4,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 4,
+      "fully_covered": 4,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:api.go:truncateWithEllipsis",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "api.go",
+      "function": "truncateWithEllipsis",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 3,
+        "covered_decisions": 3,
+        "decision_percent": 100,
+        "condition_count": 3,
+        "covered_conditions": 3,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 3,
+      "fully_covered": 3,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:api.go:updateExistingAPI",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "api.go",
+      "function": "updateExistingAPI",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 16,
+        "covered_decisions": 15,
+        "decision_percent": 93.75,
+        "condition_count": 17,
+        "covered_conditions": 16,
+        "condition_percent": 94.11764705882354,
+        "incomplete_decisions": 1,
+        "missing_condition_count": 1
+      },
+      "decision_count": 16,
+      "fully_covered": 15,
+      "partially_covered": 1,
+      "hotspots": [
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/cli",
+          "file": "api.go",
+          "function": "updateExistingAPI",
+          "line": 1035,
+          "kind": "if",
+          "expression": "isConflictError(cerr)",
+          "samples": 1,
+          "missing_conditions": [
+            "isConflictError(cerr)"
+          ],
+          "example_row": "isConflictError(cerr)=T =\u003e T"
+        }
+      ]
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:api.go:updateExistingAPIWithOAS",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "api.go",
+      "function": "updateExistingAPIWithOAS",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 5,
+        "covered_decisions": 4,
+        "decision_percent": 80,
+        "condition_count": 6,
+        "covered_conditions": 5,
+        "condition_percent": 83.33333333333333,
+        "incomplete_decisions": 1,
+        "missing_condition_count": 1
+      },
+      "decision_count": 5,
+      "fully_covered": 4,
+      "partially_covered": 1,
+      "hotspots": [
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/cli",
+          "file": "api.go",
+          "function": "updateExistingAPIWithOAS",
+          "line": 1542,
+          "kind": "if",
+          "expression": "strings.Contains(err.Error(), \"404\") || strings.Contains(err.Error(), \"not found\")",
+          "samples": 2,
+          "missing_conditions": [
+            "strings.Contains(err.Error(), \"404\")"
+          ],
+          "example_row": "strings.Contains(err.Error(), \"404\")=F, strings.Contains(err.Error(), \"not found\")=T =\u003e T"
+        }
+      ]
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:config.go:generateTOMLConfigUnified",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "config.go",
+      "function": "generateTOMLConfigUnified",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 3,
+        "covered_decisions": 3,
+        "decision_percent": 100,
+        "condition_count": 3,
+        "covered_conditions": 3,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 3,
+      "fully_covered": 3,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:config.go:getConfigDir",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "config.go",
+      "function": "getConfigDir",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 1,
+        "covered_decisions": 1,
+        "decision_percent": 100,
+        "condition_count": 1,
+        "covered_conditions": 1,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 1,
+      "fully_covered": 1,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:config.go:maskToken",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "config.go",
+      "function": "maskToken",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 2,
+        "covered_conditions": 2,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:config.go:runConfigAdd",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "config.go",
+      "function": "runConfigAdd",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 5,
+        "covered_decisions": 5,
+        "decision_percent": 100,
+        "condition_count": 6,
+        "covered_conditions": 6,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 5,
+      "fully_covered": 5,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:config.go:runConfigCurrent",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "config.go",
+      "function": "runConfigCurrent",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 3,
+        "covered_decisions": 3,
+        "decision_percent": 100,
+        "condition_count": 3,
+        "covered_conditions": 3,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 3,
+      "fully_covered": 3,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:config.go:runConfigList",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "config.go",
+      "function": "runConfigList",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 3,
+        "covered_decisions": 3,
+        "decision_percent": 100,
+        "condition_count": 3,
+        "covered_conditions": 3,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 3,
+      "fully_covered": 3,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:config.go:runConfigRemove",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "config.go",
+      "function": "runConfigRemove",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 5,
+        "covered_decisions": 4,
+        "decision_percent": 80,
+        "condition_count": 5,
+        "covered_conditions": 4,
+        "condition_percent": 80,
+        "incomplete_decisions": 1,
+        "missing_condition_count": 1
+      },
+      "decision_count": 5,
+      "fully_covered": 4,
+      "partially_covered": 1,
+      "hotspots": [
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/cli",
+          "file": "config.go",
+          "function": "runConfigRemove",
+          "line": 429,
+          "kind": "if",
+          "expression": "err != nil",
+          "samples": 1,
+          "missing_conditions": [
+            "err != nil"
+          ],
+          "example_row": "err != nil=F =\u003e F"
+        }
+      ]
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:config.go:runConfigSet",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "config.go",
+      "function": "runConfigSet",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 12,
+        "covered_decisions": 11,
+        "decision_percent": 91.66666666666667,
+        "condition_count": 14,
+        "covered_conditions": 13,
+        "condition_percent": 92.85714285714286,
+        "incomplete_decisions": 1,
+        "missing_condition_count": 1
+      },
+      "decision_count": 12,
+      "fully_covered": 11,
+      "partially_covered": 1,
+      "hotspots": [
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/cli",
+          "file": "config.go",
+          "function": "runConfigSet",
+          "line": 373,
+          "kind": "if",
+          "expression": "err != nil",
+          "samples": 1,
+          "missing_conditions": [
+            "err != nil"
+          ],
+          "example_row": "err != nil=F =\u003e F"
+        }
+      ]
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:config.go:runConfigUse",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "config.go",
+      "function": "runConfigUse",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 7,
+        "covered_decisions": 4,
+        "decision_percent": 57.142857142857146,
+        "condition_count": 7,
+        "covered_conditions": 4,
+        "condition_percent": 57.142857142857146,
+        "incomplete_decisions": 3,
+        "missing_condition_count": 3
+      },
+      "decision_count": 7,
+      "fully_covered": 4,
+      "partially_covered": 3,
+      "hotspots": [
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/cli",
+          "file": "config.go",
+          "function": "runConfigUse",
+          "line": 219,
+          "kind": "if",
+          "expression": "envName == \"\"",
+          "samples": 0,
+          "missing_conditions": [
+            "envName == \"\""
+          ]
+        },
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/cli",
+          "file": "config.go",
+          "function": "runConfigUse",
+          "line": 216,
+          "kind": "if",
+          "expression": "err != nil",
+          "samples": 1,
+          "missing_conditions": [
+            "err != nil"
+          ],
+          "example_row": "err != nil=T =\u003e T"
+        },
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/cli",
+          "file": "config.go",
+          "function": "runConfigUse",
+          "line": 235,
+          "kind": "if",
+          "expression": "err != nil",
+          "samples": 1,
+          "missing_conditions": [
+            "err != nil"
+          ],
+          "example_row": "err != nil=F =\u003e F"
+        }
+      ]
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:config.go:saveConfigToFile",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "config.go",
+      "function": "saveConfigToFile",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 3,
+        "covered_decisions": 2,
+        "decision_percent": 66.66666666666667,
+        "condition_count": 3,
+        "covered_conditions": 2,
+        "condition_percent": 66.66666666666667,
+        "incomplete_decisions": 1,
+        "missing_condition_count": 1
+      },
+      "decision_count": 3,
+      "fully_covered": 2,
+      "partially_covered": 1,
+      "hotspots": [
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/cli",
+          "file": "config.go",
+          "function": "saveConfigToFile",
+          "line": 441,
+          "kind": "if",
+          "expression": "err != nil",
+          "samples": 1,
+          "missing_conditions": [
+            "err != nil"
+          ],
+          "example_row": "err != nil=F =\u003e F"
+        }
+      ]
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:config.go:selectEnvironmentInteractively",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "config.go",
+      "function": "selectEnvironmentInteractively",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 1,
+        "decision_percent": 50,
+        "condition_count": 2,
+        "covered_conditions": 1,
+        "condition_percent": 50,
+        "incomplete_decisions": 1,
+        "missing_condition_count": 1
+      },
+      "decision_count": 2,
+      "fully_covered": 1,
+      "partially_covered": 1,
+      "hotspots": [
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/cli",
+          "file": "config.go",
+          "function": "selectEnvironmentInteractively",
+          "line": 547,
+          "kind": "if",
+          "expression": "err != nil",
+          "samples": 1,
+          "missing_conditions": [
+            "err != nil"
+          ],
+          "example_row": "err != nil=T =\u003e T"
+        }
+      ]
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:context.go:GetConfigFromContext",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "context.go",
+      "function": "GetConfigFromContext",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 1,
+        "covered_decisions": 1,
+        "decision_percent": 100,
+        "condition_count": 1,
+        "covered_conditions": 1,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 1,
+      "fully_covered": 1,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:context.go:GetOutputFormatFromContext",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "context.go",
+      "function": "GetOutputFormatFromContext",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 1,
+        "covered_decisions": 1,
+        "decision_percent": 100,
+        "condition_count": 1,
+        "covered_conditions": 1,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 1,
+      "fully_covered": 1,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:errors.go:classifyDashboardError",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "errors.go",
+      "function": "classifyDashboardError",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 5,
+        "covered_decisions": 5,
+        "decision_percent": 100,
+        "condition_count": 5,
+        "covered_conditions": 5,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 5,
+      "fully_covered": 5,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:errors.go:httpStatusFromError",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "errors.go",
+      "function": "httpStatusFromError",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 3,
+        "covered_conditions": 3,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:errors.go:isConflictError",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "errors.go",
+      "function": "isConflictError",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 2,
+        "covered_conditions": 2,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:init.go:askString",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "init.go",
+      "function": "askString",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 3,
+        "covered_conditions": 3,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:init.go:gatherEnvironmentInfo",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "init.go",
+      "function": "gatherEnvironmentInfo",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 6,
+        "covered_decisions": 6,
+        "decision_percent": 100,
+        "condition_count": 6,
+        "covered_conditions": 6,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 6,
+      "fully_covered": 6,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:init.go:runQuickSetup",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "init.go",
+      "function": "runQuickSetup",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 5,
+        "covered_decisions": 5,
+        "decision_percent": 100,
+        "condition_count": 5,
+        "covered_conditions": 5,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 5,
+      "fully_covered": 5,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:init.go:saveEnvironment",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "init.go",
+      "function": "saveEnvironment",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 5,
+        "covered_decisions": 5,
+        "decision_percent": 100,
+        "condition_count": 5,
+        "covered_conditions": 5,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 5,
+      "fully_covered": 5,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:init.go:testConnection",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "init.go",
+      "function": "testConnection",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 1,
+        "covered_decisions": 1,
+        "decision_percent": 100,
+        "condition_count": 1,
+        "covered_conditions": 1,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 1,
+      "fully_covered": 1,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:policy.go:buildResolveRequests",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "policy.go",
+      "function": "buildResolveRequests",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 4,
+        "covered_decisions": 4,
+        "decision_percent": 100,
+        "condition_count": 4,
+        "covered_conditions": 4,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 4,
+      "fully_covered": 4,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:policy.go:displayPolicyPage",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "policy.go",
+      "function": "displayPolicyPage",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 2,
+        "covered_conditions": 2,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:policy.go:isNotFoundError",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "policy.go",
+      "function": "isNotFoundError",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 1,
+        "covered_decisions": 1,
+        "decision_percent": 100,
+        "condition_count": 2,
+        "covered_conditions": 2,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 1,
+      "fully_covered": 1,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:policy.go:readPolicyFile",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "policy.go",
+      "function": "readPolicyFile",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 6,
+        "covered_decisions": 5,
+        "decision_percent": 83.33333333333333,
+        "condition_count": 6,
+        "covered_conditions": 5,
+        "condition_percent": 83.33333333333333,
+        "incomplete_decisions": 1,
+        "missing_condition_count": 1
+      },
+      "decision_count": 6,
+      "fully_covered": 5,
+      "partially_covered": 1,
+      "hotspots": [
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/cli",
+          "file": "policy.go",
+          "function": "readPolicyFile",
+          "line": 478,
+          "kind": "if",
+          "expression": "err != nil",
+          "samples": 1,
+          "missing_conditions": [
+            "err != nil"
+          ],
+          "example_row": "err != nil=F =\u003e F"
+        }
+      ]
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:policy.go:resolveFriendlyID",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "policy.go",
+      "function": "resolveFriendlyID",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 2,
+        "covered_conditions": 2,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:policy.go:runPolicyApply",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "policy.go",
+      "function": "runPolicyApply",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 14,
+        "covered_decisions": 14,
+        "decision_percent": 100,
+        "condition_count": 14,
+        "covered_conditions": 14,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 14,
+      "fully_covered": 14,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:policy.go:runPolicyDelete",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "policy.go",
+      "function": "runPolicyDelete",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 10,
+        "covered_decisions": 10,
+        "decision_percent": 100,
+        "condition_count": 11,
+        "covered_conditions": 11,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 10,
+      "fully_covered": 10,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:policy.go:runPolicyGet",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "policy.go",
+      "function": "runPolicyGet",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 8,
+        "covered_decisions": 8,
+        "decision_percent": 100,
+        "condition_count": 8,
+        "covered_conditions": 8,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 8,
+      "fully_covered": 8,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:policy.go:runPolicyInit",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "policy.go",
+      "function": "runPolicyInit",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 5,
+        "covered_decisions": 4,
+        "decision_percent": 80,
+        "condition_count": 5,
+        "covered_conditions": 4,
+        "condition_percent": 80,
+        "incomplete_decisions": 1,
+        "missing_condition_count": 1
+      },
+      "decision_count": 5,
+      "fully_covered": 4,
+      "partially_covered": 1,
+      "hotspots": [
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/cli",
+          "file": "policy.go",
+          "function": "runPolicyInit",
+          "line": 463,
+          "kind": "if",
+          "expression": "err != nil",
+          "samples": 1,
+          "missing_conditions": [
+            "err != nil"
+          ],
+          "example_row": "err != nil=F =\u003e F"
+        }
+      ]
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:policy.go:runPolicyList",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "policy.go",
+      "function": "runPolicyList",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 6,
+        "covered_decisions": 6,
+        "decision_percent": 100,
+        "condition_count": 6,
+        "covered_conditions": 6,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 6,
+      "fully_covered": 6,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:root.go:getOutputFormat",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "root.go",
+      "function": "getOutputFormat",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 1,
+        "covered_decisions": 1,
+        "decision_percent": 100,
+        "condition_count": 1,
+        "covered_conditions": 1,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 1,
+      "fully_covered": 1,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/cli:root.go:initConfig",
+      "package": "github.com/tyktech/tyk-cli/internal/cli",
+      "file": "root.go",
+      "function": "initConfig",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 2,
+        "covered_conditions": 2,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/client:client.go:*Client.CreateOASAPI",
+      "package": "github.com/tyktech/tyk-cli/internal/client",
+      "file": "client.go",
+      "function": "*Client.CreateOASAPI",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 3,
+        "covered_decisions": 3,
+        "decision_percent": 100,
+        "condition_count": 3,
+        "covered_conditions": 3,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 3,
+      "fully_covered": 3,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/client:client.go:*Client.DeleteOASAPI",
+      "package": "github.com/tyktech/tyk-cli/internal/client",
+      "file": "client.go",
+      "function": "*Client.DeleteOASAPI",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 1,
+        "covered_decisions": 1,
+        "decision_percent": 100,
+        "condition_count": 1,
+        "covered_conditions": 1,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 1,
+      "fully_covered": 1,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/client:client.go:*Client.GetOASAPI",
+      "package": "github.com/tyktech/tyk-cli/internal/client",
+      "file": "client.go",
+      "function": "*Client.GetOASAPI",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 7,
+        "covered_decisions": 7,
+        "decision_percent": 100,
+        "condition_count": 7,
+        "covered_conditions": 7,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 7,
+      "fully_covered": 7,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/client:client.go:*Client.Health",
+      "package": "github.com/tyktech/tyk-cli/internal/client",
+      "file": "client.go",
+      "function": "*Client.Health",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 2,
+        "covered_conditions": 2,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/client:client.go:*Client.ListAPIsDashboard",
+      "package": "github.com/tyktech/tyk-cli/internal/client",
+      "file": "client.go",
+      "function": "*Client.ListAPIsDashboard",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 14,
+        "covered_decisions": 14,
+        "decision_percent": 100,
+        "condition_count": 14,
+        "covered_conditions": 14,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 14,
+      "fully_covered": 14,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/client:client.go:*Client.ListOASAPIVersions",
+      "package": "github.com/tyktech/tyk-cli/internal/client",
+      "file": "client.go",
+      "function": "*Client.ListOASAPIVersions",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 2,
+        "covered_conditions": 2,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/client:client.go:*Client.ListOASAPIs",
+      "package": "github.com/tyktech/tyk-cli/internal/client",
+      "file": "client.go",
+      "function": "*Client.ListOASAPIs",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 3,
+        "covered_decisions": 3,
+        "decision_percent": 100,
+        "condition_count": 3,
+        "covered_conditions": 3,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 3,
+      "fully_covered": 3,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/client:client.go:*Client.SwitchDefaultVersion",
+      "package": "github.com/tyktech/tyk-cli/internal/client",
+      "file": "client.go",
+      "function": "*Client.SwitchDefaultVersion",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 1,
+        "covered_decisions": 1,
+        "decision_percent": 100,
+        "condition_count": 1,
+        "covered_conditions": 1,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 1,
+      "fully_covered": 1,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/client:client.go:*Client.UpdateOASAPI",
+      "package": "github.com/tyktech/tyk-cli/internal/client",
+      "file": "client.go",
+      "function": "*Client.UpdateOASAPI",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 2,
+        "covered_conditions": 2,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/client:client.go:*Client.doRequest",
+      "package": "github.com/tyktech/tyk-cli/internal/client",
+      "file": "client.go",
+      "function": "*Client.doRequest",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 6,
+        "covered_decisions": 6,
+        "decision_percent": 100,
+        "condition_count": 6,
+        "covered_conditions": 6,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 6,
+      "fully_covered": 6,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/client:client.go:*Client.handleResponse",
+      "package": "github.com/tyktech/tyk-cli/internal/client",
+      "file": "client.go",
+      "function": "*Client.handleResponse",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 6,
+        "covered_decisions": 6,
+        "decision_percent": 100,
+        "condition_count": 7,
+        "covered_conditions": 7,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 6,
+      "fully_covered": 6,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/client:client.go:*Client.parseOASDocumentToAPI",
+      "package": "github.com/tyktech/tyk-cli/internal/client",
+      "file": "client.go",
+      "function": "*Client.parseOASDocumentToAPI",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 9,
+        "covered_decisions": 9,
+        "decision_percent": 100,
+        "condition_count": 9,
+        "covered_conditions": 9,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 9,
+      "fully_covered": 9,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/client:client.go:NewClient",
+      "package": "github.com/tyktech/tyk-cli/internal/client",
+      "file": "client.go",
+      "function": "NewClient",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 2,
+        "covered_conditions": 2,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/client:client.go:getString",
+      "package": "github.com/tyktech/tyk-cli/internal/client",
+      "file": "client.go",
+      "function": "getString",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 1,
+        "covered_decisions": 1,
+        "decision_percent": 100,
+        "condition_count": 1,
+        "covered_conditions": 1,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 1,
+      "fully_covered": 1,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/client:policy.go:*Client.CreatePolicy",
+      "package": "github.com/tyktech/tyk-cli/internal/client",
+      "file": "policy.go",
+      "function": "*Client.CreatePolicy",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 1,
+        "covered_decisions": 1,
+        "decision_percent": 100,
+        "condition_count": 1,
+        "covered_conditions": 1,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 1,
+      "fully_covered": 1,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/client:policy.go:*Client.DeletePolicy",
+      "package": "github.com/tyktech/tyk-cli/internal/client",
+      "file": "policy.go",
+      "function": "*Client.DeletePolicy",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 1,
+        "covered_decisions": 1,
+        "decision_percent": 100,
+        "condition_count": 1,
+        "covered_conditions": 1,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 1,
+      "fully_covered": 1,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/client:policy.go:*Client.GetPolicy",
+      "package": "github.com/tyktech/tyk-cli/internal/client",
+      "file": "policy.go",
+      "function": "*Client.GetPolicy",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 2,
+        "covered_conditions": 2,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/client:policy.go:*Client.ListPolicies",
+      "package": "github.com/tyktech/tyk-cli/internal/client",
+      "file": "policy.go",
+      "function": "*Client.ListPolicies",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 3,
+        "covered_decisions": 3,
+        "decision_percent": 100,
+        "condition_count": 3,
+        "covered_conditions": 3,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 3,
+      "fully_covered": 3,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/client:policy.go:*Client.UpdatePolicy",
+      "package": "github.com/tyktech/tyk-cli/internal/client",
+      "file": "policy.go",
+      "function": "*Client.UpdatePolicy",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 1,
+        "covered_decisions": 1,
+        "decision_percent": 100,
+        "condition_count": 1,
+        "covered_conditions": 1,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 1,
+      "fully_covered": 1,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/config:config.go:*Manager.GetEnvironment",
+      "package": "github.com/tyktech/tyk-cli/internal/config",
+      "file": "config.go",
+      "function": "*Manager.GetEnvironment",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 2,
+        "covered_conditions": 2,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/config:config.go:*Manager.ListEnvironments",
+      "package": "github.com/tyktech/tyk-cli/internal/config",
+      "file": "config.go",
+      "function": "*Manager.ListEnvironments",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 1,
+        "covered_decisions": 1,
+        "decision_percent": 100,
+        "condition_count": 1,
+        "covered_conditions": 1,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 1,
+      "fully_covered": 1,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/config:config.go:*Manager.LoadConfig",
+      "package": "github.com/tyktech/tyk-cli/internal/config",
+      "file": "config.go",
+      "function": "*Manager.LoadConfig",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 6,
+        "covered_decisions": 6,
+        "decision_percent": 100,
+        "condition_count": 8,
+        "covered_conditions": 8,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 6,
+      "fully_covered": 6,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/config:config.go:*Manager.SaveEnvironment",
+      "package": "github.com/tyktech/tyk-cli/internal/config",
+      "file": "config.go",
+      "function": "*Manager.SaveEnvironment",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 3,
+        "covered_conditions": 3,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/config:config.go:*Manager.SetDefaultEnvironment",
+      "package": "github.com/tyktech/tyk-cli/internal/config",
+      "file": "config.go",
+      "function": "*Manager.SetDefaultEnvironment",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 1,
+        "covered_decisions": 1,
+        "decision_percent": 100,
+        "condition_count": 2,
+        "covered_conditions": 2,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 1,
+      "fully_covered": 1,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/config:config.go:*Manager.SetFromFlags",
+      "package": "github.com/tyktech/tyk-cli/internal/config",
+      "file": "config.go",
+      "function": "*Manager.SetFromFlags",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 5,
+        "covered_decisions": 5,
+        "decision_percent": 100,
+        "condition_count": 5,
+        "covered_conditions": 5,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 5,
+      "fully_covered": 5,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/filehandler:filehandler.go:GetOASInfo",
+      "package": "github.com/tyktech/tyk-cli/internal/filehandler",
+      "file": "filehandler.go",
+      "function": "GetOASInfo",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 1,
+        "covered_decisions": 1,
+        "decision_percent": 100,
+        "condition_count": 1,
+        "covered_conditions": 1,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 1,
+      "fully_covered": 1,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/filehandler:filehandler.go:GetOASInfoVersion",
+      "package": "github.com/tyktech/tyk-cli/internal/filehandler",
+      "file": "filehandler.go",
+      "function": "GetOASInfoVersion",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 2,
+        "covered_conditions": 2,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/filehandler:filehandler.go:GetOASTitle",
+      "package": "github.com/tyktech/tyk-cli/internal/filehandler",
+      "file": "filehandler.go",
+      "function": "GetOASTitle",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 2,
+        "covered_conditions": 2,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/filehandler:filehandler.go:GetOASVersion",
+      "package": "github.com/tyktech/tyk-cli/internal/filehandler",
+      "file": "filehandler.go",
+      "function": "GetOASVersion",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 2,
+        "covered_conditions": 2,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/filehandler:filehandler.go:LoadFile",
+      "package": "github.com/tyktech/tyk-cli/internal/filehandler",
+      "file": "filehandler.go",
+      "function": "LoadFile",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 5,
+        "covered_decisions": 5,
+        "decision_percent": 100,
+        "condition_count": 5,
+        "covered_conditions": 5,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 5,
+      "fully_covered": 5,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/filehandler:filehandler.go:LoadFileAsRawJSON",
+      "package": "github.com/tyktech/tyk-cli/internal/filehandler",
+      "file": "filehandler.go",
+      "function": "LoadFileAsRawJSON",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 2,
+        "covered_conditions": 2,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/filehandler:filehandler.go:SaveFile",
+      "package": "github.com/tyktech/tyk-cli/internal/filehandler",
+      "file": "filehandler.go",
+      "function": "SaveFile",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 6,
+        "covered_decisions": 4,
+        "decision_percent": 66.66666666666667,
+        "condition_count": 6,
+        "covered_conditions": 4,
+        "condition_percent": 66.66666666666667,
+        "incomplete_decisions": 2,
+        "missing_condition_count": 2
+      },
+      "decision_count": 6,
+      "fully_covered": 4,
+      "partially_covered": 2,
+      "hotspots": [
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/filehandler",
+          "file": "filehandler.go",
+          "function": "SaveFile",
+          "line": 115,
+          "kind": "if",
+          "expression": "dir != \"\"",
+          "samples": 6,
+          "missing_conditions": [
+            "dir != \"\""
+          ],
+          "example_row": "dir != \"\"=T =\u003e T"
+        },
+        {
+          "package": "github.com/tyktech/tyk-cli/internal/filehandler",
+          "file": "filehandler.go",
+          "function": "SaveFile",
+          "line": 107,
+          "kind": "if",
+          "expression": "err != nil",
+          "samples": 2,
+          "missing_conditions": [
+            "err != nil"
+          ],
+          "example_row": "err != nil=F =\u003e F"
+        }
+      ]
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/filehandler:filehandler.go:ValidateFilePath",
+      "package": "github.com/tyktech/tyk-cli/internal/filehandler",
+      "file": "filehandler.go",
+      "function": "ValidateFilePath",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 2,
+        "covered_conditions": 2,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/oas:transform.go:AddTykExtensions",
+      "package": "github.com/tyktech/tyk-cli/internal/oas",
+      "file": "transform.go",
+      "function": "AddTykExtensions",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 4,
+        "covered_decisions": 4,
+        "decision_percent": 100,
+        "condition_count": 5,
+        "covered_conditions": 5,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 4,
+      "fully_covered": 4,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/oas:transform.go:ExtractAPIIDFromTykExtensions",
+      "package": "github.com/tyktech/tyk-cli/internal/oas",
+      "file": "transform.go",
+      "function": "ExtractAPIIDFromTykExtensions",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 4,
+        "covered_decisions": 4,
+        "decision_percent": 100,
+        "condition_count": 5,
+        "covered_conditions": 5,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 4,
+      "fully_covered": 4,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/oas:transform.go:GenerateListenPath",
+      "package": "github.com/tyktech/tyk-cli/internal/oas",
+      "file": "transform.go",
+      "function": "GenerateListenPath",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 1,
+        "covered_decisions": 1,
+        "decision_percent": 100,
+        "condition_count": 1,
+        "covered_conditions": 1,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 1,
+      "fully_covered": 1,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/oas:transform.go:ValidateOASStructure",
+      "package": "github.com/tyktech/tyk-cli/internal/oas",
+      "file": "transform.go",
+      "function": "ValidateOASStructure",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 6,
+        "covered_decisions": 6,
+        "decision_percent": 100,
+        "condition_count": 9,
+        "covered_conditions": 9,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 6,
+      "fully_covered": 6,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/oas:transform.go:extractUpstreamURL",
+      "package": "github.com/tyktech/tyk-cli/internal/oas",
+      "file": "transform.go",
+      "function": "extractUpstreamURL",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 3,
+        "covered_decisions": 3,
+        "decision_percent": 100,
+        "condition_count": 4,
+        "covered_conditions": 4,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 3,
+      "fully_covered": 3,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/policy:convert.go:CLIToWire",
+      "package": "github.com/tyktech/tyk-cli/internal/policy",
+      "file": "convert.go",
+      "function": "CLIToWire",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 8,
+        "covered_decisions": 8,
+        "decision_percent": 100,
+        "condition_count": 8,
+        "covered_conditions": 8,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 8,
+      "fully_covered": 8,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/policy:convert.go:WireToCLI",
+      "package": "github.com/tyktech/tyk-cli/internal/policy",
+      "file": "convert.go",
+      "function": "WireToCLI",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 4,
+        "covered_decisions": 4,
+        "decision_percent": 100,
+        "condition_count": 6,
+        "covered_conditions": 6,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 4,
+      "fully_covered": 4,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/policy:duration.go:FormatDuration",
+      "package": "github.com/tyktech/tyk-cli/internal/policy",
+      "file": "duration.go",
+      "function": "FormatDuration",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 4,
+        "covered_decisions": 4,
+        "decision_percent": 100,
+        "condition_count": 4,
+        "covered_conditions": 4,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 4,
+      "fully_covered": 4,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/policy:duration.go:ParseDuration",
+      "package": "github.com/tyktech/tyk-cli/internal/policy",
+      "file": "duration.go",
+      "function": "ParseDuration",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 8,
+        "covered_decisions": 8,
+        "decision_percent": 100,
+        "condition_count": 8,
+        "covered_conditions": 8,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 8,
+      "fully_covered": 8,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/policy:selector.go:FuzzySuggestions",
+      "package": "github.com/tyktech/tyk-cli/internal/policy",
+      "file": "selector.go",
+      "function": "FuzzySuggestions",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 1,
+        "covered_decisions": 1,
+        "decision_percent": 100,
+        "condition_count": 1,
+        "covered_conditions": 1,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 1,
+      "fully_covered": 1,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/policy:selector.go:ResolveAccessEntries",
+      "package": "github.com/tyktech/tyk-cli/internal/policy",
+      "file": "selector.go",
+      "function": "ResolveAccessEntries",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 4,
+        "covered_decisions": 4,
+        "decision_percent": 100,
+        "condition_count": 4,
+        "covered_conditions": 4,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 4,
+      "fully_covered": 4,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/policy:selector.go:ResolveByID",
+      "package": "github.com/tyktech/tyk-cli/internal/policy",
+      "file": "selector.go",
+      "function": "ResolveByID",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 1,
+        "covered_decisions": 1,
+        "decision_percent": 100,
+        "condition_count": 1,
+        "covered_conditions": 1,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 1,
+      "fully_covered": 1,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/policy:selector.go:ResolveByListenPath",
+      "package": "github.com/tyktech/tyk-cli/internal/policy",
+      "file": "selector.go",
+      "function": "ResolveByListenPath",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 3,
+        "covered_decisions": 3,
+        "decision_percent": 100,
+        "condition_count": 3,
+        "covered_conditions": 3,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 3,
+      "fully_covered": 3,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/policy:selector.go:ResolveByName",
+      "package": "github.com/tyktech/tyk-cli/internal/policy",
+      "file": "selector.go",
+      "function": "ResolveByName",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 4,
+        "covered_decisions": 4,
+        "decision_percent": 100,
+        "condition_count": 4,
+        "covered_conditions": 4,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 4,
+      "fully_covered": 4,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/policy:selector.go:ResolveByTags",
+      "package": "github.com/tyktech/tyk-cli/internal/policy",
+      "file": "selector.go",
+      "function": "ResolveByTags",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 2,
+        "covered_conditions": 2,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/policy:selector.go:hasAllTags",
+      "package": "github.com/tyktech/tyk-cli/internal/policy",
+      "file": "selector.go",
+      "function": "hasAllTags",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 1,
+        "covered_decisions": 1,
+        "decision_percent": 100,
+        "condition_count": 1,
+        "covered_conditions": 1,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 1,
+      "fully_covered": 1,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/policy:selector.go:levenshtein",
+      "package": "github.com/tyktech/tyk-cli/internal/policy",
+      "file": "selector.go",
+      "function": "levenshtein",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 6,
+        "covered_decisions": 6,
+        "decision_percent": 100,
+        "condition_count": 6,
+        "covered_conditions": 6,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 6,
+      "fully_covered": 6,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/policy:validate.go:ValidatePolicy",
+      "package": "github.com/tyktech/tyk-cli/internal/policy",
+      "file": "validate.go",
+      "function": "ValidatePolicy",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 13,
+        "covered_decisions": 13,
+        "decision_percent": 100,
+        "condition_count": 13,
+        "covered_conditions": 13,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 13,
+      "fully_covered": 13,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/policy:validate.go:isObjectIDFormat",
+      "package": "github.com/tyktech/tyk-cli/internal/policy",
+      "file": "validate.go",
+      "function": "isObjectIDFormat",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 5,
+        "covered_conditions": 5,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/policy:validate.go:selectorCount",
+      "package": "github.com/tyktech/tyk-cli/internal/policy",
+      "file": "validate.go",
+      "function": "selectorCount",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 4,
+        "covered_decisions": 4,
+        "decision_percent": 100,
+        "condition_count": 4,
+        "covered_conditions": 4,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 4,
+      "fully_covered": 4,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/internal/policy:validate.go:validateFriendlyID",
+      "package": "github.com/tyktech/tyk-cli/internal/policy",
+      "file": "validate.go",
+      "function": "validateFriendlyID",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 3,
+        "covered_decisions": 3,
+        "decision_percent": 100,
+        "condition_count": 3,
+        "covered_conditions": 3,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 3,
+      "fully_covered": 3,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/pkg/types:config.go:*Config.GetActiveEnvironment",
+      "package": "github.com/tyktech/tyk-cli/pkg/types",
+      "file": "config.go",
+      "function": "*Config.GetActiveEnvironment",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 3,
+        "covered_conditions": 3,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/pkg/types:config.go:*Config.GetEffectiveConfig",
+      "package": "github.com/tyktech/tyk-cli/pkg/types",
+      "file": "config.go",
+      "function": "*Config.GetEffectiveConfig",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 1,
+        "covered_decisions": 1,
+        "decision_percent": 100,
+        "condition_count": 1,
+        "covered_conditions": 1,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 1,
+      "fully_covered": 1,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/pkg/types:config.go:*Config.Validate",
+      "package": "github.com/tyktech/tyk-cli/pkg/types",
+      "file": "config.go",
+      "function": "*Config.Validate",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 3,
+        "covered_decisions": 3,
+        "decision_percent": 100,
+        "condition_count": 3,
+        "covered_conditions": 3,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 3,
+      "fully_covered": 3,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/pkg/types:config.go:*Environment.Validate",
+      "package": "github.com/tyktech/tyk-cli/pkg/types",
+      "file": "config.go",
+      "function": "*Environment.Validate",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 5,
+        "covered_decisions": 5,
+        "decision_percent": 100,
+        "condition_count": 7,
+        "covered_conditions": 7,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 5,
+      "fully_covered": 5,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/pkg/types:policy.go:*AccessRight.MarshalJSON",
+      "package": "github.com/tyktech/tyk-cli/pkg/types",
+      "file": "policy.go",
+      "function": "*AccessRight.MarshalJSON",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 2,
+        "covered_conditions": 2,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    },
+    {
+      "id": "github.com/tyktech/tyk-cli/pkg/types:policy.go:ValidationErrors.Error",
+      "package": "github.com/tyktech/tyk-cli/pkg/types",
+      "file": "policy.go",
+      "function": "ValidationErrors.Error",
+      "layers": {
+        "eligible_decisions": 0,
+        "instrumented_decisions": 0,
+        "unsupported_decisions": 0,
+        "statement_percent": 0,
+        "decision_count": 2,
+        "covered_decisions": 2,
+        "decision_percent": 100,
+        "condition_count": 2,
+        "covered_conditions": 2,
+        "condition_percent": 100,
+        "incomplete_decisions": 0,
+        "missing_condition_count": 0
+      },
+      "decision_count": 2,
+      "fully_covered": 2,
+      "partially_covered": 0
+    }
+  ]
+}

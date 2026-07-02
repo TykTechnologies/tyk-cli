@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// reqproof:req REQ-API-040
+// Verifies: SYS-REQ-023
 // versionsPlaceholderCmds enumerates the three placeholder subcommands so the
 // tests can iterate over them with their expected output substring.
 var versionsPlaceholderCmds = []struct {
@@ -21,12 +21,12 @@ var versionsPlaceholderCmds = []struct {
 	{"switch-default", buildSwitchDefault, "API versions switch-default command will be implemented in phase 3"},
 }
 
-// reqproof:req REQ-API-040
+// Verifies: SYS-REQ-023
 type placeholderCmd struct {
 	execute func(out *bytes.Buffer)
 }
 
-// reqproof:req REQ-API-040
+// Verifies: SYS-REQ-023
 func buildList() *placeholderCmd {
 	cmd := NewAPIVersionsListCommand()
 	return &placeholderCmd{execute: func(out *bytes.Buffer) {
@@ -35,7 +35,7 @@ func buildList() *placeholderCmd {
 	}}
 }
 
-// reqproof:req REQ-API-040
+// Verifies: SYS-REQ-023
 func buildCreate() *placeholderCmd {
 	cmd := NewAPIVersionsCreateCommand()
 	return &placeholderCmd{execute: func(out *bytes.Buffer) {
@@ -44,7 +44,7 @@ func buildCreate() *placeholderCmd {
 	}}
 }
 
-// reqproof:req REQ-API-040
+// Verifies: SYS-REQ-023
 func buildSwitchDefault() *placeholderCmd {
 	cmd := NewAPIVersionsSwitchDefaultCommand()
 	return &placeholderCmd{execute: func(out *bytes.Buffer) {
@@ -53,7 +53,7 @@ func buildSwitchDefault() *placeholderCmd {
 	}}
 }
 
-// reqproof:req REQ-API-040
+// Verifies: SYS-REQ-023
 func TestAPIVersions_PlaceholderSubcommandsEmitMessage(t *testing.T) {
 	for _, tc := range versionsPlaceholderCmds {
 		t.Run(tc.name, func(t *testing.T) {
@@ -65,7 +65,7 @@ func TestAPIVersions_PlaceholderSubcommandsEmitMessage(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-API-040
+// Verifies: SYS-REQ-023
 // TestAPIVersions_PlaceholderSubcommandsMakeNoDashboardCall verifies the
 // placeholder commands return without any HTTP activity. They are constructed
 // without a config/context, so any attempt to reach the Dashboard would panic

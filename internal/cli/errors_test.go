@@ -13,14 +13,14 @@ import (
 // MC/DC coverage for errors.go helpers
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-API-020
+// Verifies: SYS-REQ-013
 // TestExitError_Error covers (*ExitError).Error.
 func TestExitError_Error(t *testing.T) {
 	e := &ExitError{Code: 2, Message: "boom"}
 	assert.Equal(t, "boom", e.Error())
 }
 
-// reqproof:req REQ-API-024
+// Verifies: SYS-REQ-017
 // TestHttpStatusFromError_AllBranches covers each branch of
 // httpStatusFromError:
 //   - err == nil  → 0
@@ -39,16 +39,16 @@ func TestHttpStatusFromError_AllBranches(t *testing.T) {
 // nil" branch of httpStatusFromError.
 type nilWrappedErrorResponse struct{}
 
-// reqproof:req REQ-API-020
+// Verifies: SYS-REQ-013
 func (e *nilWrappedErrorResponse) Error() string { return "wrapper" }
 
-// reqproof:req REQ-API-020
+// Verifies: SYS-REQ-013
 func (e *nilWrappedErrorResponse) Unwrap() error {
 	var er *types.ErrorResponse
 	return er
 }
 
-// reqproof:req REQ-API-024
+// Verifies: SYS-REQ-017
 // TestHttpStatusFromError_AsSucceedsButErIsNil covers the L33 right-hand
 // operand er!=nil=F (when errors.As reports a match but the value is nil).
 func TestHttpStatusFromError_AsSucceedsButErIsNil(t *testing.T) {
@@ -61,7 +61,7 @@ func TestHttpStatusFromError_AsSucceedsButErIsNil(t *testing.T) {
 	assert.Equal(t, 0, got, "wrapper whose Unwrap returns a typed nil must yield 0")
 }
 
-// reqproof:req REQ-API-023
+// Verifies: SYS-REQ-016
 // TestIsConflictError_AllBranches covers each branch of isConflictError.
 func TestIsConflictError_AllBranches(t *testing.T) {
 	assert.False(t, isConflictError(nil), "nil err must return false")
@@ -74,7 +74,7 @@ func TestIsConflictError_AllBranches(t *testing.T) {
 	assert.False(t, isConflictError(errors.New("some other error")))
 }
 
-// reqproof:req REQ-API-024
+// Verifies: SYS-REQ-017
 // TestIsAuthError covers branch true vs false.
 func TestIsAuthError(t *testing.T) {
 	assert.True(t, isAuthError(&types.ErrorResponse{Status: 401}))
@@ -82,19 +82,19 @@ func TestIsAuthError(t *testing.T) {
 	assert.False(t, isAuthError(nil))
 }
 
-// reqproof:req REQ-API-024
+// Verifies: SYS-REQ-017
 func TestIsForbiddenError(t *testing.T) {
 	assert.True(t, isForbiddenError(&types.ErrorResponse{Status: 403}))
 	assert.False(t, isForbiddenError(&types.ErrorResponse{Status: 401}))
 }
 
-// reqproof:req REQ-API-025
+// Verifies: SYS-REQ-018
 func TestIsRateLimitError(t *testing.T) {
 	assert.True(t, isRateLimitError(&types.ErrorResponse{Status: 429}))
 	assert.False(t, isRateLimitError(&types.ErrorResponse{Status: 500}))
 }
 
-// reqproof:req REQ-API-026
+// Verifies: SYS-REQ-019
 // TestIsServerError covers the 500..599 range vs outside.
 func TestIsServerError(t *testing.T) {
 	assert.True(t, isServerError(&types.ErrorResponse{Status: 500}))
@@ -104,7 +104,7 @@ func TestIsServerError(t *testing.T) {
 	assert.False(t, isServerError(&types.ErrorResponse{Status: 600}))
 }
 
-// reqproof:req REQ-API-024
+// Verifies: SYS-REQ-017
 // TestClassifyDashboardError_AllStatuses drives every classified branch and
 // the nil + unclassified fallback.
 func TestClassifyDashboardError_AllStatuses(t *testing.T) {

@@ -1,27 +1,27 @@
 id: SW-REQ-005
 version: 1
-status: review
+status: approved
 priority: shall
 category: functional
 req_type: guarantee
-fretish: when parse_duration_with_suffix the policy shall immediately satisfy (resolved_seconds_matches_suffix_table & duration_positive)
+fretish: when parse_duration_with_suffix the policy_data_model shall immediately satisfy (resolved_seconds_matches_suffix_table & duration_positive)
 description: 'ParseDuration converts a suffixed input using the canonical multiplier table: s=1, m=60, h=3600, d=86400; the resolved value is positive'
 formalization_strategy: fretish
 informal_verification:
     method: ""
     evidence: ""
     verified: false
-parent: REQ-POL-010
-component: policy
+parent: SYS-REQ-031
+component: policy_data_model
 rationale: ""
 tags: []
 variables: []
 traces:
     satisfies:
-        - REQ-POL-010
-    reviewed_at: "2026-06-01T13:00:40.558559Z"
+        - SYS-REQ-031
+    reviewed_at: "2026-07-01T15:07:14.85776Z"
     reviewed_by: human:tombuchaillot
-    reviewed_fingerprint: sha256:d8c6c70769ad8ff5285a28d849d0bc07fcd15aa1de9e58686ed0426a8058b3b6
+    reviewed_fingerprint: sha256:6d41a1dbe7cdc9125463ad0046b90e243ec33fe57ab5242b6283370f21cb98c6
 verification:
     assurance_level: E
     formalization_status: valid
@@ -35,21 +35,26 @@ verification:
           artifact: internal/policy/duration.go
           decision: no-authored-change
           reviewer: tombuchaillot
-          reason: 'Re-annotated existing production functions to declare implementation linkage for previously-unlinked requirements: FuzzySuggestions → SW-REQ-001/002/003; ParseDuration → SW-REQ-004/005/006; GenerateListenPath → SW-REQ-007/008/009; NewClient → REQ-CFG-007 (env timeout); classifyDashboardError → REQ-API-027/POL-022/POL-027; ExitCode enum → REQ-API-020/021, REQ-CFG-020/021, REQ-POL-020/021. No behavioural change — purely trace metadata.'
+          reason: 'Component rename to domain-oriented names (api → api_lifecycle/oas_transformer/api_versioning/dashboard_client, policy → policy_lifecycle/policy_data_model, config → environment_config; cli_exit_codes cross-cuts). FRETish sentences updated accordingly. Purely metadata; production behaviour unchanged.'
           base: origin/main
-          requirement_fingerprint: sha256:d8c6c70769ad8ff5285a28d849d0bc07fcd15aa1de9e58686ed0426a8058b3b6
-          approval_fingerprint: sha256:2889231b33e88e69ce2d681f94cb3411d485a75ff49bbee3448b1ed818b0803c
-          artifact_fingerprint: sha256:fd8bcbf1527e4d6655525f8d78249f7ccf483118f366209f0c721a71a9a15364
-          reviewed_at: "2026-06-02T13:56:27Z"
+          requirement_fingerprint: sha256:6d41a1dbe7cdc9125463ad0046b90e243ec33fe57ab5242b6283370f21cb98c6
+          approval_fingerprint: sha256:4f69f39f100293d8f1072ee3e397a6ee9d2c2963e55a6ff4884fbda58970cb00
+          artifact_fingerprint: sha256:53121ff991ed113131f6bb71989c0b878d073600ef99397ed930919d333ea3b0
+          reviewed_at: "2026-07-01T15:10:09Z"
 history:
     created_by: human:cli
     created_at: "2026-06-01T12:53:43Z"
     last_modified_by: human:cli
-    last_modified_at: "2026-06-01T13:00:11Z"
+    last_modified_at: "2026-07-01T13:38:23Z"
 lifecycle:
     change_history:
         - date: "2026-06-01T13:00:11Z"
           from: draft
           to: review
+          reason: ""
+          changed_by: human:cli
+        - date: "2026-07-01T13:38:23Z"
+          from: review
+          to: approved
           reason: ""
           changed_by: human:cli

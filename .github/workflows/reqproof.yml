@@ -12,11 +12,13 @@ on:
       - 'internal/**'
       - 'pkg/**'
       - 'specs/**'
+      - 'signal-rules/**'
       - 'proof.yaml'
       - 'proof.waivers.yaml'
       - '.proof/known-issues/**'
       - '.proof/risks/**'
-      - 'docs/superpowers/specs/**'
+      - '.proof/evidence/**'
+      - 'docs/**'
       - 'go.mod'
       - 'go.sum'
 
@@ -53,12 +55,33 @@ jobs:
           echo "${install_dir}" >> "${GITHUB_PATH}"
           "${install_dir}/proof" version
 
+      - name: Install OpenGrep CLI
+        shell: bash
+        env:
+          OPENGREP_VERSION: v1.22.0
+        run: |
+          set -euo pipefail
+          install_dir="${RUNNER_TEMP}/opengrep-bin"
+          mkdir -p "${install_dir}"
+          curl -fsSL "https://github.com/opengrep/opengrep/releases/download/${OPENGREP_VERSION}/opengrep_manylinux_x86" -o "${install_dir}/opengrep"
+          chmod +x "${install_dir}/opengrep"
+          echo "${install_dir}" >> "${GITHUB_PATH}"
+          "${install_dir}/opengrep" --version
+
       - name: Refresh ReqProof trace links
         shell: bash
         run: |
           rm -f .proof/index.db .proof/index.db-shm .proof/index.db-wal .proof/audit-cache.json
           proof trace autolink
           proof trace coverage
+
+      - name: Collect OpenGrep code signals
+        shell: bash
+        run: |
+          set -euo pipefail
+          proof signals collect --provider opengrep --format json
+          proof signals list
+          proof signals matrix --provider opengrep --all --format markdown >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Run ReqProof audit
         shell: bash

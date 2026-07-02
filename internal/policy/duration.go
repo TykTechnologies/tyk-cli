@@ -24,10 +24,7 @@ var suffixMultipliers = map[byte]int64{
 // ParseDuration parses a duration string into seconds.
 // Accepted formats: plain integer ("60"), or integer with suffix s/m/h/d ("30d", "1h").
 // Rejects negative values, fractional values, mixed units, and unsupported suffixes.
-// reqproof:req REQ-POL-010
-// reqproof:req SW-REQ-004
-// reqproof:req SW-REQ-005
-// reqproof:req SW-REQ-006
+// Implements: SYS-REQ-031, SW-REQ-004, SW-REQ-005, SW-REQ-006
 func ParseDuration(s string) (int64, error) {
 	if s == "" {
 		return 0, fmt.Errorf("invalid duration %q: empty string", s)
@@ -71,7 +68,7 @@ func ParseDuration(s string) (int64, error) {
 	return n, nil
 }
 
-// reqproof:req REQ-POL-010
+// Implements: SYS-REQ-031
 func FormatDuration(seconds int64) string {
 	if seconds == 0 {
 		return "0"

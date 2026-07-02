@@ -1,27 +1,27 @@
 id: SW-REQ-001
 version: 1
-status: review
+status: approved
 priority: shall
 category: functional
 req_type: guarantee
-fretish: when fuzzy_invoked the policy shall immediately satisfy fuzzy_result_count_bounded
+fretish: when fuzzy_invoked the policy_data_model shall immediately satisfy fuzzy_result_count_bounded
 description: FuzzySuggestions returns a slice no longer than the requested max (n argument)
 formalization_strategy: fretish
 informal_verification:
     method: ""
     evidence: ""
     verified: false
-parent: REQ-POL-011
-component: policy
+parent: SYS-REQ-032
+component: policy_data_model
 rationale: ""
 tags: []
 variables: []
 traces:
     satisfies:
-        - REQ-POL-011
-    reviewed_at: "2026-06-01T12:52:29.640076Z"
+        - SYS-REQ-032
+    reviewed_at: "2026-07-01T15:07:14.831416Z"
     reviewed_by: human:tombuchaillot
-    reviewed_fingerprint: sha256:89898071e2b8e0cb3797cffdf06f5c29fdbc10dc0b41aa7c50f611c3a3d12bd0
+    reviewed_fingerprint: sha256:a82bc56ed57558f99e6986517834ddf1692b3974977d6cca2e51fccb1540ee3e
 verification:
     assurance_level: E
     formalization_status: valid
@@ -35,21 +35,26 @@ verification:
           artifact: internal/policy/selector.go
           decision: no-authored-change
           reviewer: tombuchaillot
-          reason: 'Re-annotated existing production functions to declare implementation linkage for previously-unlinked requirements: FuzzySuggestions → SW-REQ-001/002/003; ParseDuration → SW-REQ-004/005/006; GenerateListenPath → SW-REQ-007/008/009; NewClient → REQ-CFG-007 (env timeout); classifyDashboardError → REQ-API-027/POL-022/POL-027; ExitCode enum → REQ-API-020/021, REQ-CFG-020/021, REQ-POL-020/021. No behavioural change — purely trace metadata.'
+          reason: 'Component rename to domain-oriented names (api → api_lifecycle/oas_transformer/api_versioning/dashboard_client, policy → policy_lifecycle/policy_data_model, config → environment_config; cli_exit_codes cross-cuts). FRETish sentences updated accordingly. Purely metadata; production behaviour unchanged.'
           base: origin/main
-          requirement_fingerprint: sha256:89898071e2b8e0cb3797cffdf06f5c29fdbc10dc0b41aa7c50f611c3a3d12bd0
-          approval_fingerprint: sha256:618a64b1a4ffc87aa17cfe4e0051fe484435e8f94e54f45dedac5aded60706a9
-          artifact_fingerprint: sha256:ea1495e9964fc046f46118eb828ec63d5a99ada901ce0d37ea1ec66050640af9
-          reviewed_at: "2026-06-02T13:56:27Z"
+          requirement_fingerprint: sha256:a82bc56ed57558f99e6986517834ddf1692b3974977d6cca2e51fccb1540ee3e
+          approval_fingerprint: sha256:cbe1b66f90884c7f35dd7e2ddbc6eac5d753e679501efc3542aff9759105137b
+          artifact_fingerprint: sha256:90bde213c6afc69dcc458ba0928e095c25f3e444572b5576b71bfd3d48ae2815
+          reviewed_at: "2026-07-01T15:10:09Z"
 history:
     created_by: human:cli
     created_at: "2026-06-01T12:52:06Z"
     last_modified_by: human:cli
-    last_modified_at: "2026-06-01T13:00:11Z"
+    last_modified_at: "2026-07-01T13:38:23Z"
 lifecycle:
     change_history:
         - date: "2026-06-01T13:00:11Z"
           from: draft
           to: review
+          reason: ""
+          changed_by: human:cli
+        - date: "2026-07-01T13:38:23Z"
+          from: review
+          to: approved
           reason: ""
           changed_by: human:cli

@@ -15,7 +15,7 @@ const (
 	PolicyPath   = "/api/portal/policies/%s" // {policyId}
 )
 
-// reqproof:req REQ-POL-001
+// Implements: SYS-REQ-024
 func (c *Client) ListPolicies(ctx context.Context, page int) (*types.DashboardPolicyListResponse, error) {
 	listPath := PoliciesPath
 	if page > 0 {
@@ -37,7 +37,7 @@ func (c *Client) ListPolicies(ctx context.Context, page int) (*types.DashboardPo
 	return &result, nil
 }
 
-// reqproof:req REQ-POL-002
+// Implements: SYS-REQ-025
 func (c *Client) GetPolicy(ctx context.Context, policyID string) (*types.DashboardPolicy, error) {
 	policyPath := fmt.Sprintf(PolicyPath, url.PathEscape(policyID))
 
@@ -54,7 +54,7 @@ func (c *Client) GetPolicy(ctx context.Context, policyID string) (*types.Dashboa
 	return &result, nil
 }
 
-// reqproof:req REQ-POL-003
+// Implements: SYS-REQ-026
 func (c *Client) CreatePolicy(ctx context.Context, policy *types.DashboardPolicy) error {
 	resp, err := c.doRequest(ctx, http.MethodPost, PoliciesPath, policy)
 	if err != nil {
@@ -64,7 +64,7 @@ func (c *Client) CreatePolicy(ctx context.Context, policy *types.DashboardPolicy
 	return c.handleResponse(resp, nil)
 }
 
-// reqproof:req REQ-POL-003
+// Implements: SYS-REQ-026
 func (c *Client) UpdatePolicy(ctx context.Context, policyID string, policy *types.DashboardPolicy) error {
 	policyPath := fmt.Sprintf(PolicyPath, url.PathEscape(policyID))
 
@@ -76,7 +76,7 @@ func (c *Client) UpdatePolicy(ctx context.Context, policyID string, policy *type
 	return c.handleResponse(resp, nil)
 }
 
-// reqproof:req REQ-POL-004
+// Implements: SYS-REQ-027
 func (c *Client) DeletePolicy(ctx context.Context, policyID string) error {
 	policyPath := fmt.Sprintf(PolicyPath, url.PathEscape(policyID))
 

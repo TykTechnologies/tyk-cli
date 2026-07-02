@@ -1,6 +1,6 @@
 id: STK-REQ-003
 version: 1
-status: review
+status: approved
 priority: shall
 category: functional
 req_type: guarantee
@@ -16,9 +16,9 @@ rationale: Operators work across multiple environments (dev, staging, prod). A f
 tags: []
 variables: []
 traces:
-    reviewed_at: "2026-06-01T08:22:55.886234Z"
+    reviewed_at: "2026-07-01T13:40:06.388403Z"
     reviewed_by: human:tombuchaillot
-    reviewed_fingerprint: sha256:a497c30c4871467ab6e8c41a818cd930dc6665abfcbcce8f9867df7591b6f2f3
+    reviewed_fingerprint: sha256:9862545ab9422c12e60114d61a915384a7c4121e6705956bdd59e10b564ab9a9
 verification:
     assurance_level: E
     formalization_status: none
@@ -31,7 +31,7 @@ history:
     created_by: human:cli
     created_at: "2026-05-29T00:00:00Z"
     last_modified_by: human:cli
-    last_modified_at: "2026-05-29T16:07:13Z"
+    last_modified_at: "2026-07-01T13:38:22Z"
 obligation_checklist:
     - boundary
 stakeholder:
@@ -42,19 +42,26 @@ stakeholder:
           text: tyk init wizard writes ~/.config/tyk/cli.toml
           testable: true
           derived_reqs:
-            - REQ-CFG-002
+            - SYS-REQ-042
         - id: AC-002
           text: tyk config use <env> switches the active environment
           testable: true
           derived_reqs:
-            - REQ-CFG-003
+            - SYS-REQ-043
         - id: AC-003
           text: flags override env vars which override the config file
           testable: true
           derived_reqs:
-            - REQ-CFG-001
+            - SYS-REQ-041
         - id: AC-004
           text: Validate() returns an error when dashboard URL or auth token is absent
           testable: true
           derived_reqs:
-            - REQ-CFG-010
+            - SYS-REQ-048
+lifecycle:
+    change_history:
+        - date: "2026-07-01T13:38:22Z"
+          from: review
+          to: approved
+          reason: ""
+          changed_by: human:cli

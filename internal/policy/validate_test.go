@@ -8,7 +8,7 @@ import (
 	"github.com/tyktech/tyk-cli/pkg/types"
 )
 
-// reqproof:req REQ-POL-006
+// Verifies: SYS-REQ-029
 func validPolicyFile() types.PolicyFile {
 	return types.PolicyFile{
 		ID:   "gold",
@@ -22,13 +22,13 @@ func validPolicyFile() types.PolicyFile {
 	}
 }
 
-// reqproof:req REQ-POL-006
+// Verifies: SYS-REQ-029
 func TestValidatePolicy_Valid(t *testing.T) {
 	errs := ValidatePolicy(validPolicyFile())
 	assert.Empty(t, errs)
 }
 
-// reqproof:req REQ-POL-006
+// Verifies: SYS-REQ-029
 func TestValidatePolicy_MissingRequiredFields(t *testing.T) {
 	tests := []struct {
 		name          string
@@ -73,7 +73,7 @@ func TestValidatePolicy_MissingRequiredFields(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-POL-006
+// Verifies: SYS-REQ-029
 func TestValidatePolicy_InvalidDurations(t *testing.T) {
 	tests := []struct {
 		name          string
@@ -117,7 +117,7 @@ func TestValidatePolicy_InvalidDurations(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-POL-006
+// Verifies: SYS-REQ-029
 func TestValidatePolicy_SelectorConstraints(t *testing.T) {
 	tests := []struct {
 		name   string
@@ -165,7 +165,7 @@ func TestValidatePolicy_SelectorConstraints(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-POL-006
+// Verifies: SYS-REQ-029
 func TestValidatePolicy_CollectsAllErrors(t *testing.T) {
 	pf := types.PolicyFile{
 		// Missing id, name
@@ -181,7 +181,7 @@ func TestValidatePolicy_CollectsAllErrors(t *testing.T) {
 		"expected at least 4 errors for multiply-broken policy, got %d: %v", len(errs), errs)
 }
 
-// reqproof:req REQ-POL-006
+// Verifies: SYS-REQ-029
 func TestValidatePolicy_FriendlyID_Valid(t *testing.T) {
 	validIDs := []string{"gold", "free-tier", "rate-limit-basic", "v2.0", "a", "abc_def"}
 
@@ -197,7 +197,7 @@ func TestValidatePolicy_FriendlyID_Valid(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-POL-006
+// Verifies: SYS-REQ-029
 func TestValidatePolicy_FriendlyID_Invalid(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -237,7 +237,7 @@ func TestValidatePolicy_FriendlyID_Invalid(t *testing.T) {
 // character-class condition independence.
 // ===========================================================================
 
-// reqproof:req REQ-POL-006
+// Verifies: SYS-REQ-029
 func TestValidatePolicy_DurationBranches_MCDC(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -329,7 +329,7 @@ func TestValidatePolicy_DurationBranches_MCDC(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-POL-006
+// Verifies: SYS-REQ-029
 // MC/DC: selectorCount's len(e.Tags) > 0 = T branch (validate.go:128).
 // A policy with Tags as the sole selector must validate without selector errors,
 // proving the count++ branch executes when Tags is non-empty.
@@ -345,7 +345,7 @@ func TestValidatePolicy_TagsAsSoleSelector(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-POL-006
+// Verifies: SYS-REQ-029
 // isObjectIDFormat checks: len == 24 AND every char in [0-9a-f].
 // MC/DC requires independent exercise of each character-class condition.
 func TestIsObjectIDFormat_MCDC(t *testing.T) {

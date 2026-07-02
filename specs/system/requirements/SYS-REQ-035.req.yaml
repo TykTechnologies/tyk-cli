@@ -1,0 +1,64 @@
+id: SYS-REQ-035
+version: 1
+status: approved
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when policy_target_not_found the cli_exit_codes shall immediately satisfy policy_exit_not_found
+description: policy get and policy delete exit 3 when the target policy ID is not found (HTTP 404)
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+component: cli_exit_codes
+rationale: ""
+tags: []
+variables:
+    - policy_target_not_found
+    - policy_exit_not_found
+traces:
+    satisfies:
+        - STK-REQ-002
+    reviewed_at: "2026-07-01T15:07:15.261559Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:be83ae0690383e0b14949c6823e96cbc1c676c81923c1339386918dbeb2ea1de
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: approved
+        reviewer: tomas@tyk.io
+        reviewed_at: "2026-07-01T13:38:54Z"
+        ai_generated: false
+    gaps_reviewed_at: "2026-07-01T13:40:30.377499Z"
+    gaps_reviewed_by: tombuchaillot
+    impact_reviews:
+        - requirement: SYS-REQ-035
+          artifact: internal/cli/errors.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Component rename to domain-oriented names (api → api_lifecycle/oas_transformer/api_versioning/dashboard_client, policy → policy_lifecycle/policy_data_model, config → environment_config; cli_exit_codes cross-cuts). FRETish sentences updated accordingly. Purely metadata; production behaviour unchanged.'
+          base: origin/main
+          requirement_fingerprint: sha256:be83ae0690383e0b14949c6823e96cbc1c676c81923c1339386918dbeb2ea1de
+          approval_fingerprint: sha256:396c224f682eccd6bebaaedc34bec6d03d8df8ccd25e9306bdc867dc3641ae18
+          artifact_fingerprint: sha256:8cfd8d8bf4496e4e548c0fef3ed990536e14d17d4dcaedff29360217aa34fefb
+          reviewed_at: "2026-07-01T15:10:09Z"
+history:
+    created_by: human:cli
+    created_at: "2026-05-29T15:42:37Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-07-01T13:38:40Z"
+obligation_class: boundary
+lifecycle:
+    change_history:
+        - date: "2026-07-01T13:38:40Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:cli
+        - date: "2026-07-01T13:38:40Z"
+          from: review
+          to: approved
+          reason: ""
+          changed_by: human:cli

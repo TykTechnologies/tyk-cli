@@ -13,7 +13,7 @@ import (
 	"github.com/tyktech/tyk-cli/internal/config"
 )
 
-// reqproof:req REQ-CFG-003
+// Verifies: SYS-REQ-043
 // captureColorOutput swaps color.Output for a buffer for the duration of the
 // test, returning the buffer. The fatih/color package writes through its own
 // writer (initialized at init time), so redirecting os.Stdout alone is not
@@ -27,7 +27,7 @@ func captureColorOutput(t *testing.T) *bytes.Buffer {
 	return buf
 }
 
-// reqproof:req REQ-CFG-003
+// Verifies: SYS-REQ-043
 // setupTempConfig redirects the user config dir to a temp directory for the
 // duration of the test and writes the supplied TOML to cli.toml. Returns the
 // config dir (the parent that contains cli.toml).
@@ -49,7 +49,7 @@ func setupTempConfig(t *testing.T, toml string) string {
 	return tykDir
 }
 
-// reqproof:req REQ-CFG-003
+// Verifies: SYS-REQ-043
 const twoEnvConfig = `default_environment = "dev"
 
 [environments.dev]
@@ -65,7 +65,7 @@ auth_token = "staging-token"
 org_id = "staging-org"
 `
 
-// reqproof:req REQ-CFG-003
+// Verifies: SYS-REQ-043
 func TestConfigUse_SwitchesActiveEnvironmentAndPersists(t *testing.T) {
 	tykDir := setupTempConfig(t, twoEnvConfig)
 
@@ -87,7 +87,7 @@ func TestConfigUse_SwitchesActiveEnvironmentAndPersists(t *testing.T) {
 	assert.Contains(t, string(contents), `default_environment = "staging"`)
 }
 
-// reqproof:req REQ-CFG-003
+// Verifies: SYS-REQ-043
 // TestConfigUse_NoArgsInteractive covers L210 len(args)>0=F branch. Without
 // args runConfigUse falls into selectEnvironmentInteractively which fails
 // without a TTY; the failure path proves the F branch was taken.
@@ -102,7 +102,7 @@ func TestConfigUse_NoArgsInteractive(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-CFG-003
+// Verifies: SYS-REQ-043
 func TestConfigUse_UnknownEnvironmentReturnsError(t *testing.T) {
 	setupTempConfig(t, twoEnvConfig)
 
@@ -115,7 +115,7 @@ func TestConfigUse_UnknownEnvironmentReturnsError(t *testing.T) {
 		"error should mention the unknown environment name")
 }
 
-// reqproof:req REQ-CFG-003
+// Verifies: SYS-REQ-043
 func TestConfigUse_NoEnvironmentsConfiguredReturnsError(t *testing.T) {
 	setupTempConfig(t, "# empty\n")
 
@@ -127,7 +127,7 @@ func TestConfigUse_NoEnvironmentsConfiguredReturnsError(t *testing.T) {
 	assert.Contains(t, err.Error(), "no environments configured")
 }
 
-// reqproof:req REQ-CFG-003
+// Verifies: SYS-REQ-043
 func TestConfigCurrent_ShowsActiveEnvironment(t *testing.T) {
 	setupTempConfig(t, twoEnvConfig)
 	buf := captureColorOutput(t)
@@ -145,7 +145,7 @@ func TestConfigCurrent_ShowsActiveEnvironment(t *testing.T) {
 }
 
 
-// reqproof:req REQ-CFG-003
+// Verifies: SYS-REQ-043
 func TestConfigCurrent_NoDefaultEnvironmentReportsCleanly(t *testing.T) {
 	setupTempConfig(t, `[environments.dev]
 name = "dev"

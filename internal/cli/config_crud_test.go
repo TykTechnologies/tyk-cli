@@ -14,9 +14,7 @@ import (
 	"github.com/tyktech/tyk-cli/pkg/types"
 )
 
-// reqproof:req REQ-CFG-004
-// reqproof:req REQ-CFG-005
-// reqproof:req REQ-CFG-006
+// Verifies: SYS-REQ-044, SYS-REQ-045, SYS-REQ-046
 // captureColorOutputBuf swaps color.Output for a buffer for the lifetime of
 // the test. The fatih/color package writes through its own writer initialised
 // at package import time, so redirecting os.Stdout alone is not enough.
@@ -30,10 +28,10 @@ func captureColorOutputBuf(t *testing.T) *bytes.Buffer {
 }
 
 // ---------------------------------------------------------------------------
-// REQ-CFG-004 — config list
+// SYS-REQ-044 — config list
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-CFG-004
+// Verifies: SYS-REQ-044
 func TestConfigList_RendersAllEnvironmentsWithActiveMarked(t *testing.T) {
 	setupTempConfig(t, twoEnvConfig)
 	buf := captureColorOutputBuf(t)
@@ -57,7 +55,7 @@ func TestConfigList_RendersAllEnvironmentsWithActiveMarked(t *testing.T) {
 	assert.NotEmpty(t, devLine, "expected a line marking 'dev' as active, got: %q", out)
 }
 
-// reqproof:req REQ-CFG-004
+// Verifies: SYS-REQ-044
 func TestConfigList_EmptyConfigPrintsHelpfulMessage(t *testing.T) {
 	setupTempConfig(t, "# empty\n")
 	buf := captureColorOutputBuf(t)
@@ -83,10 +81,10 @@ func TestConfigList_EmptyConfigPrintsHelpfulMessage(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// REQ-CFG-005 — config set
+// SYS-REQ-045 — config set
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-CFG-005
+// Verifies: SYS-REQ-045
 func TestConfigSet_NoFlagsReturnsBadArgs(t *testing.T) {
 	setupTempConfig(t, twoEnvConfig)
 
@@ -100,7 +98,7 @@ func TestConfigSet_NoFlagsReturnsBadArgs(t *testing.T) {
 		"error must cite the missing-flag contract")
 }
 
-// reqproof:req REQ-CFG-005
+// Verifies: SYS-REQ-045
 func TestConfigSet_UpdatesActiveEnvironmentAndPersists(t *testing.T) {
 	tykDir := setupTempConfig(t, twoEnvConfig)
 
@@ -135,7 +133,7 @@ func TestConfigSet_UpdatesActiveEnvironmentAndPersists(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-CFG-005
+// Verifies: SYS-REQ-045
 func TestConfigSet_NoActiveEnvironmentReturnsError(t *testing.T) {
 	setupTempConfig(t, `[environments.dev]
 name = "dev"
@@ -156,10 +154,10 @@ org_id = "dev-org"
 }
 
 // ---------------------------------------------------------------------------
-// REQ-CFG-006 — config remove
+// SYS-REQ-046 — config remove
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-CFG-006
+// Verifies: SYS-REQ-046
 func TestConfigRemove_UnknownEnvironmentReturnsError(t *testing.T) {
 	setupTempConfig(t, twoEnvConfig)
 
@@ -172,7 +170,7 @@ func TestConfigRemove_UnknownEnvironmentReturnsError(t *testing.T) {
 		"error must cite the missing environment name")
 }
 
-// reqproof:req REQ-CFG-006
+// Verifies: SYS-REQ-046
 func TestConfigRemove_RefusesToRemoveOnlyEnvironment(t *testing.T) {
 	setupTempConfig(t, `default_environment = "dev"
 
@@ -192,7 +190,7 @@ org_id = "dev-org"
 		"error must explain why the sole environment cannot be removed")
 }
 
-// reqproof:req REQ-CFG-006
+// Verifies: SYS-REQ-046
 func TestConfigRemove_RemovesEnvironmentAndPersists(t *testing.T) {
 	tykDir := setupTempConfig(t, twoEnvConfig)
 
@@ -210,11 +208,11 @@ func TestConfigRemove_RemovesEnvironmentAndPersists(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// REQ-CFG-005 — additional config set branches to exercise every flag combination
+// SYS-REQ-045 — additional config set branches to exercise every flag combination
 // (closes MC/DC gaps in runConfigSet)
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-CFG-005
+// Verifies: SYS-REQ-045
 func TestConfigSet_FlagCombinations(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -244,7 +242,7 @@ func TestConfigSet_FlagCombinations(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-CFG-005
+// Verifies: SYS-REQ-045
 func TestConfigSet_InvalidatesEnvironmentReturnsError(t *testing.T) {
 	// Start with a valid 2-env config, then try to set an empty dashboard_url
 	// (impossible via the runner because empty values are filtered, but a malformed
@@ -268,7 +266,7 @@ func TestConfigSet_InvalidatesEnvironmentReturnsError(t *testing.T) {
 // runConfigRemove / generateTOMLConfigUnified.
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-CFG-031
+// Verifies: SYS-REQ-052
 // TestConfigAdd_SuccessNonDefault covers L321 setDefault||matches=F branches
 // (set-default flag absent, env not default).
 func TestConfigAdd_SuccessNonDefault(t *testing.T) {
@@ -286,7 +284,7 @@ func TestConfigAdd_SuccessNonDefault(t *testing.T) {
 	require.NoError(t, cmd.RunE(cmd, []string{"newenv"}))
 }
 
-// reqproof:req REQ-CFG-031
+// Verifies: SYS-REQ-052
 // TestConfigAdd_SuccessAsDefault covers L321 setDefault=T branch.
 func TestConfigAdd_SuccessAsDefault(t *testing.T) {
 	setupTempConfig(t, twoEnvConfig)
@@ -304,7 +302,7 @@ func TestConfigAdd_SuccessAsDefault(t *testing.T) {
 	require.NoError(t, cmd.RunE(cmd, []string{"newenv"}))
 }
 
-// reqproof:req REQ-CFG-031
+// Verifies: SYS-REQ-052
 // TestConfigAdd_FirstEnvironmentBecomesDefault covers L321 setDefault=F &&
 // DefaultEnvironment==envName=T (the second OR-operand).
 func TestConfigAdd_FirstEnvironmentBecomesDefault(t *testing.T) {
@@ -323,7 +321,7 @@ func TestConfigAdd_FirstEnvironmentBecomesDefault(t *testing.T) {
 	require.NoError(t, cmd.RunE(cmd, []string{"firstenv"}))
 }
 
-// reqproof:req REQ-CFG-031
+// Verifies: SYS-REQ-052
 // TestConfigAdd_DuplicateReturnsError covers L305 err==nil=T branch.
 func TestConfigAdd_DuplicateReturnsError(t *testing.T) {
 	setupTempConfig(t, twoEnvConfig)
@@ -342,7 +340,7 @@ func TestConfigAdd_DuplicateReturnsError(t *testing.T) {
 	assert.Contains(t, err.Error(), "already exists")
 }
 
-// reqproof:req REQ-CFG-031
+// Verifies: SYS-REQ-052
 // TestConfigAdd_ValidationFailsReturnsError covers L294 err!=nil from
 // env.Validate().
 func TestConfigAdd_ValidationFailsReturnsError(t *testing.T) {
@@ -361,7 +359,7 @@ func TestConfigAdd_ValidationFailsReturnsError(t *testing.T) {
 	assert.Contains(t, err.Error(), "invalid dashboard URL")
 }
 
-// reqproof:req REQ-CFG-006
+// Verifies: SYS-REQ-046
 // TestConfigRemove_RemovesDefaultAndRotates covers L419 cfg.DefaultEnvironment==envName=T
 // (removing the current default rotates to another env).
 func TestConfigRemove_RemovesDefaultAndRotates(t *testing.T) {
@@ -379,7 +377,7 @@ func TestConfigRemove_RemovesDefaultAndRotates(t *testing.T) {
 	assert.Contains(t, out, `default_environment = "staging"`)
 }
 
-// reqproof:req REQ-CFG-001
+// Verifies: SYS-REQ-041
 // TestRunConfigCurrent_NoActiveEnvErrors covers L260 err!=nil branch (active
 // env lookup fails — set default to a non-existing env name).
 func TestRunConfigCurrent_NoActiveEnvErrors(t *testing.T) {
@@ -400,7 +398,7 @@ org_id = "org"
 	assert.Contains(t, err.Error(), "active environment")
 }
 
-// reqproof:req REQ-CFG-030
+// Verifies: SYS-REQ-051
 // TestGenerateTOMLConfigUnified_NoDefault covers L477 cfg.DefaultEnvironment!=""=F.
 func TestGenerateTOMLConfigUnified_NoDefault(t *testing.T) {
 	cfg := &types.Config{
@@ -413,7 +411,7 @@ func TestGenerateTOMLConfigUnified_NoDefault(t *testing.T) {
 	assert.NotContains(t, out, "default_environment")
 }
 
-// reqproof:req REQ-CFG-030
+// Verifies: SYS-REQ-051
 // TestGenerateTOMLConfigUnified_NoEnvironments covers L482 len(envs)>0=F.
 func TestGenerateTOMLConfigUnified_NoEnvironments(t *testing.T) {
 	cfg := &types.Config{DefaultEnvironment: "x", Environments: map[string]*types.Environment{}}
@@ -422,7 +420,7 @@ func TestGenerateTOMLConfigUnified_NoEnvironments(t *testing.T) {
 	assert.NotContains(t, out, "[environments.")
 }
 
-// reqproof:req REQ-CFG-030
+// Verifies: SYS-REQ-051
 // TestGenerateTOMLConfigUnified_WithTimeout covers L489 env.TimeoutSeconds>0=T.
 func TestGenerateTOMLConfigUnified_WithTimeout(t *testing.T) {
 	cfg := &types.Config{
@@ -435,7 +433,7 @@ func TestGenerateTOMLConfigUnified_WithTimeout(t *testing.T) {
 	assert.Contains(t, out, "timeout_seconds = 30")
 }
 
-// reqproof:req REQ-CFG-005
+// Verifies: SYS-REQ-045
 // TestRunConfigSet_DashboardURLOnly covers the dashboard-url-only flag branch
 // (the others stay empty, exercising the F branch for auth_token and org_id).
 func TestRunConfigSet_DashboardURLOnly(t *testing.T) {
@@ -450,7 +448,7 @@ func TestRunConfigSet_DashboardURLOnly(t *testing.T) {
 }
 
 
-// reqproof:req REQ-CFG-005
+// Verifies: SYS-REQ-045
 // TestRunConfigSet_LoadConfigFails covers L340 err!=nil from LoadConfig
 // (malformed TOML file).
 func TestRunConfigSet_LoadConfigFails(t *testing.T) {
@@ -472,7 +470,7 @@ func TestRunConfigSet_LoadConfigFails(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-CFG-005
+// Verifies: SYS-REQ-045
 // TestRunConfigSet_GetEnvironmentFails covers L352 err!=nil from
 // manager.GetEnvironment(cfg.DefaultEnvironment) where the named default env
 // is missing from environments.
@@ -495,7 +493,7 @@ org_id = "org"
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-CFG-006
+// Verifies: SYS-REQ-046
 // TestRunConfigRemove_LoadConfigFails covers L399 err!=nil from LoadConfig.
 func TestRunConfigRemove_LoadConfigFails(t *testing.T) {
 	tempHome := t.TempDir()
@@ -512,7 +510,7 @@ func TestRunConfigRemove_LoadConfigFails(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-CFG-031
+// Verifies: SYS-REQ-052
 // TestRunConfigAdd_LoadConfigFails covers L300 err!=nil from LoadConfig.
 func TestRunConfigAdd_LoadConfigFails(t *testing.T) {
 	tempHome := t.TempDir()
@@ -535,7 +533,7 @@ func TestRunConfigAdd_LoadConfigFails(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-CFG-003
+// Verifies: SYS-REQ-043
 // TestRunConfigUse_LoadConfigFails covers L196 err!=nil from LoadConfig.
 func TestRunConfigUse_LoadConfigFails(t *testing.T) {
 	tempHome := t.TempDir()
@@ -552,7 +550,7 @@ func TestRunConfigUse_LoadConfigFails(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-CFG-001
+// Verifies: SYS-REQ-041
 // TestRunConfigList_LoadConfigFails covers L147 err!=nil.
 func TestRunConfigList_LoadConfigFails(t *testing.T) {
 	tempHome := t.TempDir()
@@ -568,7 +566,7 @@ func TestRunConfigList_LoadConfigFails(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-CFG-001
+// Verifies: SYS-REQ-041
 // TestRunConfigCurrent_LoadConfigFails covers L247 err!=nil.
 func TestRunConfigCurrent_LoadConfigFails(t *testing.T) {
 	tempHome := t.TempDir()
@@ -584,7 +582,7 @@ func TestRunConfigCurrent_LoadConfigFails(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-CFG-030
+// Verifies: SYS-REQ-051
 // TestSaveConfigToFile_DirectFailure exercises saveConfigToFile directly by
 // constructing a manager and pointing HOME at a regular file so MkdirAll
 // inside saveConfigToFile fails.
@@ -604,7 +602,7 @@ func TestSaveConfigToFile_DirectFailure(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-CFG-030
+// Verifies: SYS-REQ-051
 // TestSaveConfigToFile_WriteFailDueToDirAsFile covers L454 err!=nil from
 // os.WriteFile by ensuring the cli.toml path itself is a directory.
 func TestSaveConfigToFile_WriteFailDueToDirAsFile(t *testing.T) {
@@ -624,7 +622,7 @@ func TestSaveConfigToFile_WriteFailDueToDirAsFile(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-CFG-030
+// Verifies: SYS-REQ-051
 // TestSaveConfigToFile_MkdirAllFails covers L450 err!=nil. We point HOME at a
 // path whose parent is a regular file so MkdirAll cannot create the tyk dir.
 func TestSaveConfigToFile_MkdirAllFails(t *testing.T) {
@@ -653,7 +651,7 @@ func TestSaveConfigToFile_MkdirAllFails(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-CFG-030
+// Verifies: SYS-REQ-051
 // TestGetConfigDir_NoHome covers L464 err!=nil from os.UserConfigDir.
 // On macOS UserConfigDir returns ($HOME)/Library/Application Support, but when
 // HOME is empty and XDG_CONFIG_HOME also empty, UserConfigDir errors.
@@ -671,7 +669,7 @@ func TestGetConfigDir_NoHome(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-CFG-005
+// Verifies: SYS-REQ-045
 // TestRunConfigSet_OrgIDOnly covers the org-id-only branch.
 func TestRunConfigSet_OrgIDOnly(t *testing.T) {
 	setupTempConfig(t, twoEnvConfig)

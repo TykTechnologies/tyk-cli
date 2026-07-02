@@ -15,7 +15,7 @@ import (
 	"github.com/tyktech/tyk-cli/pkg/types"
 )
 
-// reqproof:req REQ-API-001
+// Verifies: SYS-REQ-001
 func TestAPIListInteractiveFlag(t *testing.T) {
 	// Create a test server that returns mock APIs
 	mockAPIs := []*types.OASAPI{
@@ -53,7 +53,7 @@ func TestAPIListInteractiveFlag(t *testing.T) {
 // ./build/tyk api list --interactive --json
 // Error: interactive mode is not compatible with JSON output format
 
-// reqproof:req REQ-API-001
+// Verifies: SYS-REQ-001
 func TestDisplayAPIPage(t *testing.T) {
 	// Test the displayAPIPage function
 	apis := []*types.OASAPI{
@@ -103,7 +103,7 @@ func TestDisplayAPIPage(t *testing.T) {
 	assert.Contains(t, stderrOutput, "Use '--page 2' for next page")
 }
 
-// reqproof:req REQ-API-001
+// Verifies: SYS-REQ-001
 func TestDisplayAPIPageEmpty(t *testing.T) {
 	// Test empty API list
 	apis := []*types.OASAPI{}
@@ -125,7 +125,7 @@ func TestDisplayAPIPageEmpty(t *testing.T) {
 	assert.Contains(t, stderrOutput, "No APIs found on page 1")
 }
 
-// reqproof:req REQ-API-001
+// Verifies: SYS-REQ-001
 func TestAPIListCommandStructure(t *testing.T) {
 	cmd := NewAPIListCommand()
 	
@@ -148,7 +148,7 @@ func TestAPIListCommandStructure(t *testing.T) {
 	assert.Equal(t, interactiveFlag, shortFlag)
 }
 
-// reqproof:req REQ-API-001
+// Verifies: SYS-REQ-001
 func TestDisplayAPIPageInteractive(t *testing.T) {
 	// Test the interactive display mode
 	apis := []*types.OASAPI{
@@ -196,7 +196,7 @@ func TestDisplayAPIPageInteractive(t *testing.T) {
     assert.Contains(t, output, "/very/long/path/that/should/be/truncated")
 }
 
-// reqproof:req REQ-API-001
+// Verifies: SYS-REQ-001
 func TestDisplayAPIPageEmptyInteractive(t *testing.T) {
 	// Test empty API list in interactive mode
 	apis := []*types.OASAPI{}
@@ -225,7 +225,7 @@ func TestDisplayAPIPageEmptyInteractive(t *testing.T) {
 // MC/DC coverage for computeTableLayout / truncateWithEllipsis
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-API-001
+// Verifies: SYS-REQ-001
 // TestComputeTableLayout exercises every branch of computeTableLayout so the
 // decision points at L41 / L47 / L56 / L60 / L89 each see T and F.
 func TestComputeTableLayout(t *testing.T) {
@@ -256,7 +256,7 @@ func TestComputeTableLayout(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-API-001
+// Verifies: SYS-REQ-001
 // TestComputeTableLayout_ShrinkStillOverflows covers the L86 over>0 branch
 // where shrinking still leaves the layout too narrow, forcing stacked=true.
 // We use a termWidth where contentWidth is just above minTotal but well below
@@ -269,7 +269,7 @@ func TestComputeTableLayout_ShrinkStillOverflows(t *testing.T) {
 	assert.False(t, stacked, "termWidth=42 (== minTotal in content) must not stack")
 }
 
-// reqproof:req REQ-API-001
+// Verifies: SYS-REQ-001
 // TestTruncateWithEllipsis covers each branch:
 // - max<=0 (L26 T)
 // - len(s)<=max (L29 T)
@@ -298,7 +298,7 @@ func TestTruncateWithEllipsis(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-API-001
+// Verifies: SYS-REQ-001
 // TestDisplayAPIPage_StackedLayout covers L490 stacked=T branch of
 // displayAPIPage by setting a very small terminal width through interactive
 // mode. The test passes only if computeTableLayout reports stacked.
@@ -324,7 +324,7 @@ func TestDisplayAPIPage_StackedLayout(t *testing.T) {
 // MC/DC coverage for extractVersionFromOAS / stripExistingAPIID
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-API-004
+// Verifies: SYS-REQ-004
 // TestExtractVersionFromOAS_AllBranches drives each branch of the function:
 // - no info -> ok=F, returns ""
 // - info but no version -> ok=T, version!=""=F, returns ""
@@ -348,7 +348,7 @@ func TestExtractVersionFromOAS_AllBranches(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-API-010
+// Verifies: SYS-REQ-008
 // TestStripExistingAPIID_AllBranches drives each branch:
 // - no x-tyk-api-gateway → all "exists"/"ok" branches F
 // - tyk extension wrong type → outer ok=F
@@ -386,7 +386,7 @@ func TestStripExistingAPIID_AllBranches(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-API-001
+// Verifies: SYS-REQ-001
 // TestRunInteractiveAPIList_NoTTY covers L544 !term.IsTerminal=T branch.
 // In the test harness, os.Stdin is not a TTY so the function returns
 // immediately with an error.
@@ -405,7 +405,7 @@ func TestRunInteractiveAPIList_NoTTY(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-API-001
+// Verifies: SYS-REQ-001
 func TestInteractiveTerminalDetection(t *testing.T) {
 	// This test verifies the structure exists but can't test actual terminal detection
 	// since that requires a real TTY
@@ -419,7 +419,7 @@ func TestInteractiveTerminalDetection(t *testing.T) {
 	t.Log("Terminal detection tested through integration testing")
 }
 
-// reqproof:req REQ-API-001
+// Verifies: SYS-REQ-001
 func TestAPIListWithRealEndpoint(t *testing.T) {
 	// Test with the updated client parsing logic using dashboard response format
 	dashboardResponse := map[string]interface{}{

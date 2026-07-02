@@ -1,0 +1,81 @@
+id: SYS-REQ-051
+version: 1
+status: approved
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when toml_file_exists the environment_config shall immediately satisfy config_loaded_from_toml
+description: config manager loads environments from a TOML file in the XDG base directory, falls back to environment variables, and exposes an effective config resolving precedence
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+component: environment_config
+rationale: ""
+tags: []
+variables:
+    - toml_file_exists
+    - config_loaded_from_toml
+traces:
+    satisfies:
+        - STK-REQ-003
+    reviewed_at: "2026-07-01T15:07:15.454577Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:af5b4ce7f84c516e4bde58b7f71c3a66ee37f1d764d459ef494bb4ec2b0643b1
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: approved
+        reviewer: tomas@tyk.io
+        reviewed_at: "2026-07-01T13:38:54Z"
+        ai_generated: false
+    impact_reviews:
+        - requirement: SYS-REQ-051
+          artifact: internal/cli/config.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Component rename to domain-oriented names (api → api_lifecycle/oas_transformer/api_versioning/dashboard_client, policy → policy_lifecycle/policy_data_model, config → environment_config; cli_exit_codes cross-cuts). FRETish sentences updated accordingly. Purely metadata; production behaviour unchanged.'
+          base: origin/main
+          requirement_fingerprint: sha256:af5b4ce7f84c516e4bde58b7f71c3a66ee37f1d764d459ef494bb4ec2b0643b1
+          approval_fingerprint: sha256:0f1ba9d1759cb14fee4742456036ecde099a29cdee45523e679473ce9bac9df4
+          artifact_fingerprint: sha256:081612f8659e6f77b0d4653dec2ab586869910e3ba99f5fce79d445293e93be6
+          reviewed_at: "2026-07-01T15:10:09Z"
+        - requirement: SYS-REQ-051
+          artifact: internal/config/config.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Component rename to domain-oriented names (api → api_lifecycle/oas_transformer/api_versioning/dashboard_client, policy → policy_lifecycle/policy_data_model, config → environment_config; cli_exit_codes cross-cuts). FRETish sentences updated accordingly. Purely metadata; production behaviour unchanged.'
+          base: origin/main
+          requirement_fingerprint: sha256:af5b4ce7f84c516e4bde58b7f71c3a66ee37f1d764d459ef494bb4ec2b0643b1
+          approval_fingerprint: sha256:0f1ba9d1759cb14fee4742456036ecde099a29cdee45523e679473ce9bac9df4
+          artifact_fingerprint: sha256:f605f8cab17ca0ae0c9b548462c2ac1c3a7ec3a2b13ffa85bc03bde5f58364e8
+          reviewed_at: "2026-07-01T15:10:09Z"
+        - requirement: SYS-REQ-051
+          artifact: pkg/types/config.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Component rename to domain-oriented names (api → api_lifecycle/oas_transformer/api_versioning/dashboard_client, policy → policy_lifecycle/policy_data_model, config → environment_config; cli_exit_codes cross-cuts). FRETish sentences updated accordingly. Purely metadata; production behaviour unchanged.'
+          base: origin/main
+          requirement_fingerprint: sha256:af5b4ce7f84c516e4bde58b7f71c3a66ee37f1d764d459ef494bb4ec2b0643b1
+          approval_fingerprint: sha256:0f1ba9d1759cb14fee4742456036ecde099a29cdee45523e679473ce9bac9df4
+          artifact_fingerprint: sha256:96f0a220f75bf6ed558fc5c8c184ea4f78db4e75bb1405d9a298fca761b0f399
+          reviewed_at: "2026-07-01T15:10:09Z"
+history:
+    created_by: human:cli
+    created_at: "2026-05-29T16:11:40Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-07-01T13:38:41Z"
+lifecycle:
+    change_history:
+        - date: "2026-07-01T13:38:41Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:cli
+        - date: "2026-07-01T13:38:41Z"
+          from: review
+          to: approved
+          reason: ""
+          changed_by: human:cli

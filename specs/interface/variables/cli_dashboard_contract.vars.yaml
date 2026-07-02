@@ -1,0 +1,26 @@
+component: cli_dashboard_contract
+variables:
+    - name: dashboard_http_request_issued
+      type: bool
+      direction: input
+      description: A tyk-cli subcommand issued an HTTP request to the Tyk Dashboard REST API.
+    - name: authorization_and_org_headers_present
+      type: bool
+      direction: output
+      description: The request carries both the Authorization and x-org-id headers required by the Dashboard's HTTP contract.
+    - name: dashboard_returned_typed_error_response
+      type: bool
+      direction: input
+      description: The Dashboard responded with an application/json body decoded into *types.ErrorResponse (Status, Code, Message).
+    - name: exit_code_matches_status_class
+      type: bool
+      direction: output
+      description: The CLI terminated with the exit code declared in pkg/types/config.go for the response's status class (401→5, 403→6, 404→3, 409→4, 429→7, 5xx→8).
+    - name: oas_document_submitted_to_dashboard
+      type: bool
+      direction: input
+      description: A tyk-cli runner is about to submit an OAS document via the Dashboard /api/apis/oas endpoint.
+    - name: oas_passes_structural_validation
+      type: bool
+      direction: output
+      description: The document was validated locally with oas.ValidateOASStructure before any Dashboard round-trip.

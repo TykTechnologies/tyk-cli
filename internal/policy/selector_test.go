@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// reqproof:req REQ-POL-011
+// Verifies: SYS-REQ-032
 func testAPIList() []ResolverAPI {
 	return []ResolverAPI{
 		{ID: "a1b2c3d4e5f6", Name: "users-api", ListenPath: "/users/", Tags: []string{"public", "v1"}},
@@ -16,7 +16,7 @@ func testAPIList() []ResolverAPI {
 	}
 }
 
-// reqproof:req REQ-POL-011
+// Verifies: SYS-REQ-032
 func TestResolveByName(t *testing.T) {
 	apis := testAPIList()
 
@@ -44,7 +44,7 @@ func TestResolveByName(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-POL-011
+// Verifies: SYS-REQ-032
 func TestResolveByListenPath(t *testing.T) {
 	apis := testAPIList()
 
@@ -61,7 +61,7 @@ func TestResolveByListenPath(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-POL-011
+// Verifies: SYS-REQ-032
 func TestResolveByID(t *testing.T) {
 	apis := testAPIList()
 
@@ -78,7 +78,7 @@ func TestResolveByID(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-POL-011
+// Verifies: SYS-REQ-032
 func TestResolveByTags(t *testing.T) {
 	apis := testAPIList()
 
@@ -102,7 +102,7 @@ func TestResolveByTags(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-POL-011
+// Verifies: SYS-REQ-032
 func TestFuzzySuggestions(t *testing.T) {
 	apis := testAPIList()
 
@@ -116,7 +116,7 @@ func TestFuzzySuggestions(t *testing.T) {
 	assert.Greater(t, suggestions[0].Distance, 0)
 }
 
-// reqproof:req REQ-POL-011
+// Verifies: SYS-REQ-032
 func TestResolveAccessEntries(t *testing.T) {
 	apis := testAPIList()
 	entries := []ResolveRequest{
@@ -137,7 +137,7 @@ func TestResolveAccessEntries(t *testing.T) {
 	assert.Equal(t, "a1b2c3d4e5f6", resolved[3].APIID)
 }
 
-// reqproof:req REQ-POL-011
+// Verifies: SYS-REQ-032
 func TestResolveAccessEntries_CollectsErrors(t *testing.T) {
 	apis := testAPIList()
 	entries := []ResolveRequest{
@@ -153,7 +153,7 @@ func TestResolveAccessEntries_CollectsErrors(t *testing.T) {
 	assert.Len(t, errs, 2)
 }
 
-// reqproof:req REQ-POL-011
+// Verifies: SYS-REQ-032
 // MC/DC: exercise the err != nil = T branches for id and tags selectors in
 // ResolveAccessEntries (selector.go:211 and selector.go:241). The success
 // paths are already covered by TestResolveAccessEntries.
@@ -191,7 +191,7 @@ func TestResolveAccessEntries_IDAndTagsErrors(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-POL-011
+// Verifies: SYS-REQ-032
 // MC/DC: levenshtein decisions need both lenA == 0 = T (empty a) and
 // lenB == 0 = T (empty b) to be observed (selector.go:172, selector.go:175).
 func TestLevenshtein_EmptyInputs(t *testing.T) {
@@ -212,7 +212,7 @@ func TestLevenshtein_EmptyInputs(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-POL-011
+// Verifies: SYS-REQ-032
 // MC/DC: ResolveByListenPath len(matches) > 1 = T branch (selector.go:87)
 // — two APIs sharing a listenPath produce an ambiguous error.
 func TestResolveByListenPath_Ambiguous(t *testing.T) {
@@ -226,7 +226,7 @@ func TestResolveByListenPath_Ambiguous(t *testing.T) {
 	assert.Contains(t, err.Error(), "/shared/")
 }
 
-// reqproof:req REQ-POL-011
+// Verifies: SYS-REQ-032
 // MC/DC: ResolveByName len(suggestions) > 0 = F branch (selector.go:52)
 // — with an empty API list, no fuzzy suggestions can be produced, so the
 // error message must omit the "Did you mean" suffix.

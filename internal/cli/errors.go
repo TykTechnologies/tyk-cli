@@ -15,7 +15,7 @@ type ExitError struct {
 	Message string
 }
 
-// reqproof:req REQ-API-020
+// Implements: SYS-REQ-013
 func (e *ExitError) Error() string {
 	return e.Message
 }
@@ -23,8 +23,7 @@ func (e *ExitError) Error() string {
 // httpStatusFromError extracts the HTTP status code from a Dashboard error
 // response when one is available. Returns 0 for non-HTTP errors.
 //
-// reqproof:req REQ-API-024
-// reqproof:req REQ-POL-024
+// Implements: SYS-REQ-017, SYS-REQ-037
 func httpStatusFromError(err error) int {
 	if err == nil {
 		return 0
@@ -40,8 +39,7 @@ func httpStatusFromError(err error) int {
 // Dashboard. It checks the typed *types.ErrorResponse first (the canonical
 // signal) and falls back to a substring match for wrapped/string-only errors.
 //
-// reqproof:req REQ-API-023
-// reqproof:req REQ-POL-023
+// Implements: SYS-REQ-016, SYS-REQ-036
 func isConflictError(err error) bool {
 	if err == nil {
 		return false
@@ -55,32 +53,28 @@ func isConflictError(err error) bool {
 
 // isAuthError reports whether err is an HTTP 401 from the Dashboard.
 //
-// reqproof:req REQ-API-024
-// reqproof:req REQ-POL-024
+// Implements: SYS-REQ-017, SYS-REQ-037
 func isAuthError(err error) bool {
 	return httpStatusFromError(err) == http.StatusUnauthorized
 }
 
 // isForbiddenError reports whether err is an HTTP 403 from the Dashboard.
 //
-// reqproof:req REQ-API-024
-// reqproof:req REQ-POL-024
+// Implements: SYS-REQ-017, SYS-REQ-037
 func isForbiddenError(err error) bool {
 	return httpStatusFromError(err) == http.StatusForbidden
 }
 
 // isRateLimitError reports whether err is an HTTP 429 from the Dashboard.
 //
-// reqproof:req REQ-API-025
-// reqproof:req REQ-POL-025
+// Implements: SYS-REQ-018, SYS-REQ-038
 func isRateLimitError(err error) bool {
 	return httpStatusFromError(err) == http.StatusTooManyRequests
 }
 
 // isServerError reports whether err is a 5xx response from the Dashboard.
 //
-// reqproof:req REQ-API-026
-// reqproof:req REQ-POL-026
+// Implements: SYS-REQ-019, SYS-REQ-039
 func isServerError(err error) bool {
 	s := httpStatusFromError(err)
 	return s >= 500 && s <= 599
@@ -91,15 +85,7 @@ func isServerError(err error) bool {
 // when the error does not match any classified status (caller falls through
 // to its existing wrap/ExitError{Code: 1} path).
 //
-// reqproof:req REQ-API-024
-// reqproof:req REQ-API-025
-// reqproof:req REQ-API-026
-// reqproof:req REQ-API-027
-// reqproof:req REQ-POL-022
-// reqproof:req REQ-POL-024
-// reqproof:req REQ-POL-025
-// reqproof:req REQ-POL-026
-// reqproof:req REQ-POL-027
+// Implements: SYS-REQ-017, SYS-REQ-018, SYS-REQ-019, SYS-REQ-020, SYS-REQ-035, SYS-REQ-037, SYS-REQ-038, SYS-REQ-039, SYS-REQ-040, INT-REQ-002
 func classifyDashboardError(err error, op string) *ExitError {
 	if err == nil {
 		return nil

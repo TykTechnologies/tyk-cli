@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// reqproof:req REQ-API-013
+// Verifies: SYS-REQ-011
 func TestHasTykExtensions(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -42,7 +42,7 @@ func TestHasTykExtensions(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-API-013
+// Verifies: SYS-REQ-011
 func TestExtractAPIIDFromTykExtensions(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -89,7 +89,7 @@ func TestExtractAPIIDFromTykExtensions(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-API-011
+// Verifies: SYS-REQ-009
 func TestAddTykExtensions(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -202,7 +202,7 @@ func TestAddTykExtensions(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-API-012
+// Verifies: SYS-REQ-010
 func TestGenerateListenPath(t *testing.T) {
 	tests := []struct {
 		title    string
@@ -230,7 +230,7 @@ func TestGenerateListenPath(t *testing.T) {
 //   3. url, ok := firstServer["url"].(string); !ok
 // ===========================================================================
 
-// reqproof:req REQ-API-013
+// Verifies: SYS-REQ-011
 func TestExtractUpstreamURL_MCDC(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -312,7 +312,7 @@ func TestExtractUpstreamURL_MCDC(t *testing.T) {
 //   4. id cast fails OR id == ""
 // ===========================================================================
 
-// reqproof:req REQ-API-013
+// Verifies: SYS-REQ-011
 func TestExtractAPIIDFromTykExtensions_MCDC(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -420,7 +420,7 @@ func TestExtractAPIIDFromTykExtensions_MCDC(t *testing.T) {
 //   - title with leading digit ("3D Printer" -> "api-3d-printer")
 // ===========================================================================
 
-// reqproof:req REQ-API-012
+// Verifies: SYS-REQ-010
 func TestGenerateListenPath_MCDC(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -449,7 +449,7 @@ func TestGenerateListenPath_MCDC(t *testing.T) {
 //   - missing servers (upstream URL empty)
 // ===========================================================================
 
-// reqproof:req REQ-API-011
+// Verifies: SYS-REQ-009
 func TestAddTykExtensions_ErrorBranches_MCDC(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -495,7 +495,7 @@ func TestAddTykExtensions_ErrorBranches_MCDC(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-API-014
+// Verifies: SYS-REQ-012
 func TestValidateOASStructure(t *testing.T) {
 	tests := []struct {
 		name    string

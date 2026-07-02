@@ -23,7 +23,7 @@ import (
 // ---------------------------------------------------------------------------
 
 // mockDashboardPolicy returns a DashboardPolicy JSON-encodable map
-// reqproof:req REQ-POL-001
+// Verifies: SYS-REQ-024
 func mockDashboardPolicy(mid, wireID, name string, rate, per, quotaMax, quotaRenewalRate int64, tags []string, accessRights map[string]interface{}) map[string]interface{} {
 	return map[string]interface{}{
 		"_id":                  mid,
@@ -42,7 +42,7 @@ func mockDashboardPolicy(mid, wireID, name string, rate, per, quotaMax, quotaRen
 	}
 }
 
-// reqproof:req REQ-POL-001
+// Verifies: SYS-REQ-024
 func mockPolicyListResponse(policies []map[string]interface{}) map[string]interface{} {
 	return map[string]interface{}{
 		"Data":       policies,
@@ -51,7 +51,7 @@ func mockPolicyListResponse(policies []map[string]interface{}) map[string]interf
 	}
 }
 
-// reqproof:req REQ-API-001
+// Verifies: SYS-REQ-001
 func mockAPIListResponse() map[string]interface{} {
 	return map[string]interface{}{
 		"apis": []interface{}{
@@ -86,7 +86,7 @@ func mockAPIListResponse() map[string]interface{} {
 	}
 }
 
-// reqproof:req REQ-POL-007
+// Verifies: SYS-REQ-030
 func goldPolicyAccessRights() map[string]interface{} {
 	return map[string]interface{}{
 		"a1b2c3d4e5f6": map[string]interface{}{
@@ -113,7 +113,7 @@ func goldPolicyAccessRights() map[string]interface{} {
 	}
 }
 
-// reqproof:req REQ-CFG-001
+// Verifies: SYS-REQ-041
 func createPolicyConfig(serverURL string) *types.Config {
 	return &types.Config{
 		DefaultEnvironment: "test",
@@ -128,7 +128,7 @@ func createPolicyConfig(serverURL string) *types.Config {
 	}
 }
 
-// reqproof:req REQ-POL-005
+// Verifies: SYS-REQ-028
 func writeTempPolicyFile(t *testing.T, content string) string {
 	t.Helper()
 	tmpDir := t.TempDir()
@@ -158,7 +158,7 @@ access:
 // Walking Skeleton Tests (implement FIRST)
 // ===========================================================================
 
-// reqproof:req REQ-POL-001
+// Verifies: SYS-REQ-024
 func executePolicyListCmd(t *testing.T, serverURL string, outputFormat types.OutputFormat, extraArgs ...string) error {
 	t.Helper()
 	root := NewRootCommand("test", "commit", "time")
@@ -178,7 +178,7 @@ func executePolicyListCmd(t *testing.T, serverURL string, outputFormat types.Out
 	return listCmd.RunE(listCmd, []string{})
 }
 
-// reqproof:req REQ-POL-001
+// Verifies: SYS-REQ-024
 func TestPolicyList_Empty(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.Contains(r.URL.Path, "/api/portal/policies") {
@@ -204,7 +204,7 @@ func TestPolicyList_Empty(t *testing.T) {
 	assert.Contains(t, string(stderr), "No policies found")
 }
 
-// reqproof:req REQ-POL-001
+// Verifies: SYS-REQ-024
 func TestPolicyList_WithPolicies(t *testing.T) {
 	policies := []map[string]interface{}{
 		mockDashboardPolicy("507f1f77bcf86cd799439011", "gold", "Gold Plan", 1000, 60, 100000, 2592000,
@@ -247,7 +247,7 @@ func TestPolicyList_WithPolicies(t *testing.T) {
 	assert.Contains(t, output, "Silver Plan")
 }
 
-// reqproof:req REQ-POL-003
+// Verifies: SYS-REQ-026
 func executePolicyApplyCmd(t *testing.T, serverURL string, filePath string) error {
 	t.Helper()
 	applyCmd := NewPolicyApplyCommand()
@@ -263,7 +263,7 @@ func executePolicyApplyCmd(t *testing.T, serverURL string, filePath string) erro
 	return applyCmd.RunE(applyCmd, []string{})
 }
 
-// reqproof:req REQ-POL-003
+// Verifies: SYS-REQ-026
 func TestPolicyApply_Create_NameSelector(t *testing.T) {
 
 	var capturedCreateBody map[string]interface{}
@@ -319,7 +319,7 @@ func TestPolicyApply_Create_NameSelector(t *testing.T) {
 	assert.True(t, hasUsersAPI, "access_rights should contain resolved API ID a1b2c3d4e5f6")
 }
 
-// reqproof:req REQ-POL-003
+// Verifies: SYS-REQ-026
 func TestPolicyApply_Update_Idempotent(t *testing.T) {
 
 	var capturedUpdateBody map[string]interface{}
@@ -368,7 +368,7 @@ func TestPolicyApply_Update_Idempotent(t *testing.T) {
 // Milestone 1: List + Get (focused scenarios)
 // ===========================================================================
 
-// reqproof:req REQ-POL-001
+// Verifies: SYS-REQ-024
 func TestPolicyList_JSONOutput(t *testing.T) {
 	policies := []map[string]interface{}{
 		mockDashboardPolicy("507f1f77bcf86cd799439011", "gold", "Gold Plan", 1000, 60, 100000, 2592000,
@@ -402,7 +402,7 @@ func TestPolicyList_JSONOutput(t *testing.T) {
 	assert.Equal(t, float64(1), result["count"])
 }
 
-// reqproof:req REQ-POL-001
+// Verifies: SYS-REQ-024
 func TestPolicyList_Pagination_EmptyPage(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "2", r.URL.Query().Get("p"))
@@ -425,7 +425,7 @@ func TestPolicyList_Pagination_EmptyPage(t *testing.T) {
 	assert.Contains(t, string(stderr), "No policies found")
 }
 
-// reqproof:req REQ-POL-001
+// Verifies: SYS-REQ-024
 func TestPolicyList_NetworkError(t *testing.T) {
 	// Use a server that is immediately closed to trigger a network error
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
@@ -439,7 +439,7 @@ func TestPolicyList_NetworkError(t *testing.T) {
 	assert.Equal(t, 1, exitErr.Code)
 }
 
-// reqproof:req REQ-POL-001
+// Verifies: SYS-REQ-024
 func TestPolicyCommand_Registration(t *testing.T) {
 	root := NewRootCommand("test", "commit", "time")
 
@@ -462,7 +462,7 @@ func TestPolicyCommand_Registration(t *testing.T) {
 	assert.True(t, found, "'policy' should be a subcommand of root")
 }
 
-// reqproof:req REQ-POL-002
+// Verifies: SYS-REQ-025
 func executePolicyGetCmd(t *testing.T, serverURL string, outputFormat types.OutputFormat, policyID string) error {
 	t.Helper()
 	root := NewRootCommand("test", "commit", "time")
@@ -477,7 +477,7 @@ func executePolicyGetCmd(t *testing.T, serverURL string, outputFormat types.Outp
 	return getCmd.RunE(getCmd, []string{policyID})
 }
 
-// reqproof:req REQ-POL-002
+// Verifies: SYS-REQ-025
 func TestPolicyGet_Human(t *testing.T) {
 	goldPolicy := mockDashboardPolicy("507f1f77bcf86cd799439011", "gold", "Gold Plan", 1000, 60, 100000, 2592000,
 		[]string{"gold", "paid"}, goldPolicyAccessRights())
@@ -524,7 +524,7 @@ func TestPolicyGet_Human(t *testing.T) {
 	require.NoError(t, err, "stdout should be valid YAML")
 }
 
-// reqproof:req REQ-POL-002
+// Verifies: SYS-REQ-025
 func TestPolicyGet_JSON(t *testing.T) {
 	goldPolicy := mockDashboardPolicy("507f1f77bcf86cd799439011", "gold", "Gold Plan", 1000, 60, 100000, 2592000,
 		[]string{"gold", "paid"}, goldPolicyAccessRights())
@@ -561,7 +561,7 @@ func TestPolicyGet_JSON(t *testing.T) {
 	assert.Equal(t, "Gold Plan", result["name"])
 }
 
-// reqproof:req REQ-POL-022
+// Verifies: SYS-REQ-035
 func TestPolicyGet_NotFound(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
@@ -587,7 +587,7 @@ func TestPolicyGet_NotFound(t *testing.T) {
 // Milestone 2: Apply (focused scenarios)
 // ===========================================================================
 
-// reqproof:req REQ-POL-003
+// Verifies: SYS-REQ-026
 func TestPolicyApply_ListenPathSelector(t *testing.T) {
 
 	var capturedBody map[string]interface{}
@@ -634,7 +634,7 @@ access:
 	assert.True(t, hasOrdersAPI, "listenPath /orders/ should resolve to g7h8i9j0k1l2")
 }
 
-// reqproof:req REQ-POL-010
+// Verifies: SYS-REQ-031
 func TestPolicyApply_DurationConversion(t *testing.T) {
 
 	var capturedBody map[string]interface{}
@@ -679,7 +679,7 @@ access:
 	assert.EqualValues(t, 86400, capturedBody["key_expires_in"], "24h should convert to 86400 seconds")
 }
 
-// reqproof:req REQ-POL-011
+// Verifies: SYS-REQ-032
 func TestPolicyApply_NameNotFound(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -715,7 +715,7 @@ access:
 	assert.Contains(t, exitErr.Message, "no API found")
 }
 
-// reqproof:req REQ-POL-011
+// Verifies: SYS-REQ-032
 func TestPolicyApply_NameAmbiguous(t *testing.T) {
 
 	// Mock server with two APIs named "api-service"
@@ -769,7 +769,7 @@ access:
 	assert.Contains(t, exitErr.Message, "ambiguous")
 }
 
-// reqproof:req REQ-POL-021
+// Verifies: SYS-REQ-034
 func TestPolicyApply_MissingID(t *testing.T) {
 
 	policyYAML := `name: No ID Policy
@@ -795,7 +795,7 @@ access:
 	assert.Contains(t, exitErr.Message, "id")
 }
 
-// reqproof:req REQ-POL-021
+// Verifies: SYS-REQ-034
 func TestPolicyApply_InvalidDuration(t *testing.T) {
 
 	policyYAML := `id: bad-dur
@@ -822,7 +822,7 @@ access:
 	assert.Contains(t, exitErr.Message, "invalid duration")
 }
 
-// reqproof:req REQ-POL-021
+// Verifies: SYS-REQ-034
 func TestPolicyApply_FileNotFound(t *testing.T) {
 	err := executePolicyApplyCmd(t, "http://unused", "/nonexistent/policy.yaml")
 
@@ -833,7 +833,7 @@ func TestPolicyApply_FileNotFound(t *testing.T) {
 // Milestone 3: Delete + Init
 // ===========================================================================
 
-// reqproof:req REQ-POL-004
+// Verifies: SYS-REQ-027
 func executePolicyDeleteCmd(t *testing.T, serverURL string, outputFormat types.OutputFormat, policyID string, yes bool) error {
 	t.Helper()
 	deleteCmd := NewPolicyDeleteCommand()
@@ -853,7 +853,7 @@ func executePolicyDeleteCmd(t *testing.T, serverURL string, outputFormat types.O
 	return deleteCmd.RunE(deleteCmd, []string{policyID})
 }
 
-// reqproof:req REQ-POL-004
+// Verifies: SYS-REQ-027
 func TestPolicyDelete_WithYes(t *testing.T) {
 	deleteCalled := false
 
@@ -891,7 +891,7 @@ func TestPolicyDelete_WithYes(t *testing.T) {
 	assert.Contains(t, string(stderr), "deleted", "stderr should confirm deletion")
 }
 
-// reqproof:req REQ-POL-022
+// Verifies: SYS-REQ-035
 func TestPolicyDelete_NotFound(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
@@ -913,7 +913,7 @@ func TestPolicyDelete_NotFound(t *testing.T) {
 	assert.Contains(t, exitErr.Message, "not found")
 }
 
-// reqproof:req REQ-POL-004
+// Verifies: SYS-REQ-027
 func TestPolicyDelete_WithYes_JSON(t *testing.T) {
 	deleteCalled := false
 
@@ -955,7 +955,7 @@ func TestPolicyDelete_WithYes_JSON(t *testing.T) {
 	assert.Equal(t, true, result["success"])
 }
 
-// reqproof:req REQ-POL-005
+// Verifies: SYS-REQ-028
 func executePolicyInitCmd(t *testing.T, dir string, id string, name string) error {
 	t.Helper()
 	initCmd := NewPolicyInitCommand()
@@ -973,7 +973,7 @@ func executePolicyInitCmd(t *testing.T, dir string, id string, name string) erro
 	return initCmd.RunE(initCmd, []string{})
 }
 
-// reqproof:req REQ-POL-005
+// Verifies: SYS-REQ-028
 func TestPolicyInit_NewFile(t *testing.T) {
 	tmpDir := t.TempDir()
 
@@ -1007,7 +1007,7 @@ func TestPolicyInit_NewFile(t *testing.T) {
 	assert.Equal(t, []string{"Default"}, pf.Access[0].Versions)
 }
 
-// reqproof:req REQ-POL-005
+// Verifies: SYS-REQ-028
 func TestPolicyInit_FileExistsNoOverwrite(t *testing.T) {
 	tmpDir := t.TempDir()
 
@@ -1029,7 +1029,7 @@ func TestPolicyInit_FileExistsNoOverwrite(t *testing.T) {
 	assert.Equal(t, "original content", string(data))
 }
 
-// reqproof:req REQ-POL-005
+// Verifies: SYS-REQ-028
 func TestPolicyInit_Registration(t *testing.T) {
 	root := NewRootCommand("test", "commit", "time")
 
@@ -1057,7 +1057,7 @@ func TestPolicyInit_Registration(t *testing.T) {
 // resolveFriendlyID / isNotFoundError / displayPolicyPage.
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-POL-001
+// Verifies: SYS-REQ-024
 // brokenPolicyConfig returns a config whose default_environment does not exist
 // so client.NewClient fails.
 func brokenPolicyConfig() *types.Config {
@@ -1069,7 +1069,7 @@ func brokenPolicyConfig() *types.Config {
 	}
 }
 
-// reqproof:req REQ-POL-001
+// Verifies: SYS-REQ-024
 // TestRunPolicyList_NewClientFails covers L68 err!=nil from client.NewClient.
 func TestRunPolicyList_NewClientFails(t *testing.T) {
 	cmd := NewPolicyListCommand()
@@ -1079,7 +1079,7 @@ func TestRunPolicyList_NewClientFails(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-POL-002
+// Verifies: SYS-REQ-025
 // TestRunPolicyGet_ListAPIsFailureNonFatal covers L156 err!=nil branch from
 // the /api/apis call. The policy get function logs and continues even when
 // API list fetch fails.
@@ -1104,7 +1104,7 @@ func TestRunPolicyGet_ListAPIsFailureNonFatal(t *testing.T) {
 	require.NoError(t, err, "API list failure should be non-fatal in policy get")
 }
 
-// reqproof:req REQ-POL-002
+// Verifies: SYS-REQ-025
 // TestRunPolicyGet_NewClientFails covers L131 err!=nil from client.NewClient.
 func TestRunPolicyGet_NewClientFails(t *testing.T) {
 	cmd := NewPolicyGetCommand()
@@ -1114,7 +1114,7 @@ func TestRunPolicyGet_NewClientFails(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-POL-003
+// Verifies: SYS-REQ-026
 // TestRunPolicyApply_FetchAPIList_NonClassified covers L241 cls!=nil=F branch
 // (404 status from /api/apis is not in {401,403,429,5xx}).
 func TestRunPolicyApply_FetchAPIList_NonClassified(t *testing.T) {
@@ -1133,7 +1133,7 @@ func TestRunPolicyApply_FetchAPIList_NonClassified(t *testing.T) {
 	assert.Equal(t, 1, exitErr.Code, "non-classified errors map to exit 1")
 }
 
-// reqproof:req REQ-POL-003
+// Verifies: SYS-REQ-026
 // TestRunPolicyApply_UpdateNonClassified covers L276 cls!=nil=F branch.
 func TestRunPolicyApply_UpdateNonClassified(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -1162,7 +1162,7 @@ func TestRunPolicyApply_UpdateNonClassified(t *testing.T) {
 	assert.Equal(t, 1, exitErr.Code)
 }
 
-// reqproof:req REQ-POL-003
+// Verifies: SYS-REQ-026
 // TestRunPolicyApply_CreateNonClassified covers L289 cls!=nil=F branch.
 func TestRunPolicyApply_CreateNonClassified(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -1189,7 +1189,7 @@ func TestRunPolicyApply_CreateNonClassified(t *testing.T) {
 	assert.Equal(t, 1, exitErr.Code)
 }
 
-// reqproof:req REQ-POL-003
+// Verifies: SYS-REQ-026
 // TestRunPolicyApply_NewClientFails covers L231 err!=nil from client.NewClient.
 func TestRunPolicyApply_NewClientFails(t *testing.T) {
 	tmpFile := writeTempPolicyFile(t, validPlatinumPolicyYAML)
@@ -1201,7 +1201,7 @@ func TestRunPolicyApply_NewClientFails(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-POL-004
+// Verifies: SYS-REQ-027
 // TestRunPolicyDelete_NewClientFails covers L328 err!=nil from client.NewClient.
 func TestRunPolicyDelete_NewClientFails(t *testing.T) {
 	cmd := NewPolicyDeleteCommand()
@@ -1212,7 +1212,7 @@ func TestRunPolicyDelete_NewClientFails(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-POL-001
+// Verifies: SYS-REQ-024
 // TestRunPolicyList_ConfigNil covers L62 config==nil=T.
 func TestRunPolicyList_ConfigNil(t *testing.T) {
 	cmd := NewPolicyListCommand()
@@ -1223,7 +1223,7 @@ func TestRunPolicyList_ConfigNil(t *testing.T) {
 	assert.Contains(t, err.Error(), "configuration not found")
 }
 
-// reqproof:req REQ-POL-001
+// Verifies: SYS-REQ-024
 // TestRunPolicyList_PageZeroDefaults covers L56 page<=0=T branch.
 func TestRunPolicyList_PageZeroDefaults(t *testing.T) {
 	gotPage := ""
@@ -1243,7 +1243,7 @@ func TestRunPolicyList_PageZeroDefaults(t *testing.T) {
 	assert.Equal(t, "1", gotPage)
 }
 
-// reqproof:req REQ-POL-002
+// Verifies: SYS-REQ-025
 // TestRunPolicyGet_ConfigNil covers L125 config==nil=T.
 func TestRunPolicyGet_ConfigNil(t *testing.T) {
 	cmd := NewPolicyGetCommand()
@@ -1254,7 +1254,7 @@ func TestRunPolicyGet_ConfigNil(t *testing.T) {
 	assert.Contains(t, err.Error(), "configuration not found")
 }
 
-// reqproof:req REQ-POL-002
+// Verifies: SYS-REQ-025
 // TestRunPolicyGet_HumanWithTags covers L174 len(pf.Tags)>0=T branch.
 // Already covered by TestPolicyGet_Human, but include the targeted assertion.
 func TestRunPolicyGet_HumanWithTags(t *testing.T) {
@@ -1283,7 +1283,7 @@ func TestRunPolicyGet_HumanWithTags(t *testing.T) {
 	assert.Contains(t, string(stderr), "Tags:")
 }
 
-// reqproof:req REQ-POL-002
+// Verifies: SYS-REQ-025
 // TestRunPolicyGet_HumanNoTags covers L174 len(pf.Tags)>0=F branch.
 func TestRunPolicyGet_HumanNoTags(t *testing.T) {
 	pol := mockDashboardPolicy("507f1f77bcf86cd799439011", "no-tags", "No Tags", 100, 60, 1000, 86400,
@@ -1311,7 +1311,7 @@ func TestRunPolicyGet_HumanNoTags(t *testing.T) {
 	assert.NotContains(t, string(stderr), "Tags:")
 }
 
-// reqproof:req REQ-POL-002
+// Verifies: SYS-REQ-025
 // TestRunPolicyGet_NonClassifiedError covers L145 cls!=nil=F branch (a 400
 // from GetPolicy is not classified, so cls==nil and we fall through to wrap).
 func TestRunPolicyGet_NonClassifiedError(t *testing.T) {
@@ -1325,7 +1325,7 @@ func TestRunPolicyGet_NonClassifiedError(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-POL-002
+// Verifies: SYS-REQ-025
 // TestRunPolicyGet_DashboardError covers L145 classifyDashboardError cls!=nil path.
 func TestRunPolicyGet_DashboardError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -1341,7 +1341,7 @@ func TestRunPolicyGet_DashboardError(t *testing.T) {
 	assert.Equal(t, int(types.ExitAuthFailed), exitErr.Code)
 }
 
-// reqproof:req REQ-POL-003
+// Verifies: SYS-REQ-026
 // TestRunPolicyApply_ConfigNil covers L221 config==nil=T.
 func TestRunPolicyApply_ConfigNil(t *testing.T) {
 	tmpFile := writeTempPolicyFile(t, validPlatinumPolicyYAML)
@@ -1354,7 +1354,7 @@ func TestRunPolicyApply_ConfigNil(t *testing.T) {
 	assert.Contains(t, err.Error(), "configuration not found")
 }
 
-// reqproof:req REQ-POL-003
+// Verifies: SYS-REQ-026
 // TestRunPolicyApply_ResolveError covers L265 resolveErr!=nil=T path (the
 // policy GET call returns a non-404, non-success error).
 func TestRunPolicyApply_ResolveErrorBubble(t *testing.T) {
@@ -1376,7 +1376,7 @@ func TestRunPolicyApply_ResolveErrorBubble(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-POL-003
+// Verifies: SYS-REQ-026
 // TestRunPolicyApply_FetchAPIListAuthError covers L241 cls!=nil branch.
 func TestRunPolicyApply_FetchAPIListAuthError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -1393,7 +1393,7 @@ func TestRunPolicyApply_FetchAPIListAuthError(t *testing.T) {
 	assert.Equal(t, int(types.ExitAuthFailed), exitErr.Code)
 }
 
-// reqproof:req REQ-POL-003
+// Verifies: SYS-REQ-026
 // TestRunPolicyApply_UpdateServerError covers L276 classifyDashboardError path
 // on update with a 500.
 func TestRunPolicyApply_UpdateServerError(t *testing.T) {
@@ -1422,7 +1422,7 @@ func TestRunPolicyApply_UpdateServerError(t *testing.T) {
 	assert.Equal(t, int(types.ExitServerError), exitErr.Code)
 }
 
-// reqproof:req REQ-POL-003
+// Verifies: SYS-REQ-026
 // TestRunPolicyApply_CreateServerError covers the create-path classifyDashboardError.
 func TestRunPolicyApply_CreateServerError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -1449,7 +1449,7 @@ func TestRunPolicyApply_CreateServerError(t *testing.T) {
 	assert.Equal(t, int(types.ExitServerError), exitErr.Code)
 }
 
-// reqproof:req REQ-POL-004
+// Verifies: SYS-REQ-027
 // TestRunPolicyDelete_ConfigNil covers L322 config==nil=T.
 func TestRunPolicyDelete_ConfigNil(t *testing.T) {
 	cmd := NewPolicyDeleteCommand()
@@ -1461,7 +1461,7 @@ func TestRunPolicyDelete_ConfigNil(t *testing.T) {
 	assert.Contains(t, err.Error(), "configuration not found")
 }
 
-// reqproof:req REQ-POL-004
+// Verifies: SYS-REQ-027
 // TestRunPolicyDelete_PromptCancelled covers L353 strings.ToLower(response) !=
 // "y" && != "yes" decision with response="n".
 func TestRunPolicyDelete_PromptCancelled(t *testing.T) {
@@ -1483,7 +1483,7 @@ func TestRunPolicyDelete_PromptCancelled(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// reqproof:req REQ-POL-004
+// Verifies: SYS-REQ-027
 // TestRunPolicyDelete_PromptConfirmedY covers L353 response=="y" branch.
 func TestRunPolicyDelete_PromptConfirmedY(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -1507,7 +1507,7 @@ func TestRunPolicyDelete_PromptConfirmedY(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// reqproof:req REQ-POL-004
+// Verifies: SYS-REQ-027
 // TestRunPolicyDelete_PromptConfirmedYes covers L353 response=="yes" branch.
 func TestRunPolicyDelete_PromptConfirmedYes(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -1531,7 +1531,7 @@ func TestRunPolicyDelete_PromptConfirmedYes(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// reqproof:req REQ-POL-004
+// Verifies: SYS-REQ-027
 // TestRunPolicyDelete_ResolveNonClassifiedError covers L339 cls!=nil=F branch
 // (non-classified error during resolveFriendlyID).
 func TestRunPolicyDelete_ResolveNonClassifiedError(t *testing.T) {
@@ -1545,7 +1545,7 @@ func TestRunPolicyDelete_ResolveNonClassifiedError(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-POL-004
+// Verifies: SYS-REQ-027
 // TestRunPolicyDelete_DeleteNonClassifiedError covers L361 cls!=nil=F branch.
 func TestRunPolicyDelete_DeleteNonClassifiedError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -1567,7 +1567,7 @@ func TestRunPolicyDelete_DeleteNonClassifiedError(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-POL-004
+// Verifies: SYS-REQ-027
 // TestRunPolicyDelete_ResolveError covers L339 cls!=nil branch (auth failure
 // during resolveFriendlyID).
 func TestRunPolicyDelete_ResolveAuthError(t *testing.T) {
@@ -1584,7 +1584,7 @@ func TestRunPolicyDelete_ResolveAuthError(t *testing.T) {
 	assert.Equal(t, int(types.ExitAuthFailed), exitErr.Code)
 }
 
-// reqproof:req REQ-POL-004
+// Verifies: SYS-REQ-027
 // TestRunPolicyDelete_DeleteError covers L361 classifyDashboardError on delete.
 func TestRunPolicyDelete_DeleteServerError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -1609,7 +1609,7 @@ func TestRunPolicyDelete_DeleteServerError(t *testing.T) {
 	assert.Equal(t, int(types.ExitServerError), exitErr.Code)
 }
 
-// reqproof:req REQ-POL-005
+// Verifies: SYS-REQ-028
 // TestRunPolicyInit_WriteFails covers L463 err!=nil from os.WriteFile by
 // making the target path a directory.
 func TestRunPolicyInit_WriteFails(t *testing.T) {
@@ -1626,7 +1626,7 @@ func TestRunPolicyInit_WriteFails(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-POL-005
+// Verifies: SYS-REQ-028
 // TestRunPolicyInit_UnwritableDir covers L459 err!=nil from os.MkdirAll
 // (failure to create the policies subdir because its parent is a regular file
 // rather than a directory).
@@ -1643,7 +1643,7 @@ func TestRunPolicyInit_UnwritableDir(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-POL-005
+// Verifies: SYS-REQ-028
 // TestRunPolicyInit_MissingID covers L416 id==""=T.
 func TestRunPolicyInit_MissingID(t *testing.T) {
 	cmd := NewPolicyInitCommand()
@@ -1656,7 +1656,7 @@ func TestRunPolicyInit_MissingID(t *testing.T) {
 	assert.Equal(t, int(types.ExitBadArgs), exitErr.Code)
 }
 
-// reqproof:req REQ-POL-005
+// Verifies: SYS-REQ-028
 // TestRunPolicyInit_MissingName covers L419 name==""=T.
 func TestRunPolicyInit_MissingName(t *testing.T) {
 	cmd := NewPolicyInitCommand()
@@ -1669,7 +1669,7 @@ func TestRunPolicyInit_MissingName(t *testing.T) {
 	assert.Equal(t, int(types.ExitBadArgs), exitErr.Code)
 }
 
-// reqproof:req REQ-POL-006
+// Verifies: SYS-REQ-029
 // TestReadPolicyFile_StdinHappy covers L476 filePath=="-"=T branch.
 func TestReadPolicyFile_StdinHappy(t *testing.T) {
 	yamlBody := validPlatinumPolicyYAML
@@ -1680,7 +1680,7 @@ func TestReadPolicyFile_StdinHappy(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-POL-006
+// Verifies: SYS-REQ-029
 // TestReadPolicyFile_StdinEmpty covers L481 len(data)==0=T.
 func TestReadPolicyFile_StdinEmpty(t *testing.T) {
 	withStdin(t, "", func() {
@@ -1692,7 +1692,7 @@ func TestReadPolicyFile_StdinEmpty(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-POL-006
+// Verifies: SYS-REQ-029
 // TestReadPolicyFile_BadYAML covers L492 yaml.Unmarshal err!=nil branch.
 func TestReadPolicyFile_BadYAML(t *testing.T) {
 	tmpFile := writeTempPolicyFile(t, "::not valid yaml")
@@ -1700,7 +1700,7 @@ func TestReadPolicyFile_BadYAML(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-POL-011
+// Verifies: SYS-REQ-032
 // TestBuildResolveRequests_AllSelectorKinds drives every branch of the switch.
 func TestBuildResolveRequests_AllSelectorKinds(t *testing.T) {
 	entries := []types.AccessEntry{
@@ -1719,7 +1719,7 @@ func TestBuildResolveRequests_AllSelectorKinds(t *testing.T) {
 	assert.Equal(t, "", reqs[4].SelectorType)
 }
 
-// reqproof:req REQ-API-022
+// Verifies: SYS-REQ-015
 // TestIsNotFoundError_BothBranches covers L554 ok && er.Status==404 branch
 // and the substring fallback.
 func TestIsNotFoundError_BothBranches(t *testing.T) {
@@ -1741,7 +1741,7 @@ func TestIsNotFoundError_BothBranches(t *testing.T) {
 	assert.False(t, isNotFoundError(fmt.Errorf("something else")))
 }
 
-// reqproof:req REQ-POL-001
+// Verifies: SYS-REQ-024
 // TestDisplayPolicyPage_DisplayIDEmpty covers L586 displayID==""=T branch.
 func TestDisplayPolicyPage_DisplayIDEmpty(t *testing.T) {
 	policies := []types.DashboardPolicy{
@@ -1757,7 +1757,7 @@ func TestDisplayPolicyPage_DisplayIDEmpty(t *testing.T) {
 	assert.Contains(t, string(out), "mid-fallback")
 }
 
-// reqproof:req REQ-POL-001
+// Verifies: SYS-REQ-024
 func TestPolicyIntegration_FullLifecycle(t *testing.T) {
 	// This test exercises: list empty -> apply new -> list shows policy -> get returns CLI schema -> delete removes
 	// The mock Dashboard stores policies keyed by id (e.g., "platinum").

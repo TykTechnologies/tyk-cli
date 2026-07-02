@@ -16,7 +16,7 @@ import (
 	"github.com/tyktech/tyk-cli/pkg/types"
 )
 
-// reqproof:req REQ-API-030
+// Verifies: SYS-REQ-021
 func createTestConfig(dashboardURL, authToken, orgID string) *types.Config {
 	return &types.Config{
 		DefaultEnvironment: "test",
@@ -31,7 +31,7 @@ func createTestConfig(dashboardURL, authToken, orgID string) *types.Config {
 	}
 }
 
-// reqproof:req REQ-API-030
+// Verifies: SYS-REQ-021
 func TestNewClient(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -73,7 +73,7 @@ func TestNewClient(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-API-030
+// Verifies: SYS-REQ-021
 func TestClient_SetTimeout(t *testing.T) {
 	config := createTestConfig("http://localhost:3000", "test-token", "test-org")
 
@@ -85,7 +85,7 @@ func TestClient_SetTimeout(t *testing.T) {
 	assert.Equal(t, newTimeout, client.httpClient.Timeout)
 }
 
-// reqproof:req REQ-CFG-007
+// Verifies: SYS-REQ-047
 func TestClient_HonoursEnvironmentTimeout(t *testing.T) {
 	t.Run("environment timeout overrides default", func(t *testing.T) {
 		config := createTestConfig("http://localhost:3000", "test-token", "test-org")
@@ -94,7 +94,7 @@ func TestClient_HonoursEnvironmentTimeout(t *testing.T) {
 		client, err := NewClient(config)
 		require.NoError(t, err)
 		assert.Equal(t, 7*time.Second, client.httpClient.Timeout,
-			"REQ-CFG-007: env-level timeout_seconds must be applied to http.Client.Timeout")
+			"SYS-REQ-047: env-level timeout_seconds must be applied to http.Client.Timeout")
 	})
 
 	t.Run("zero environment timeout falls back to DefaultTimeout", func(t *testing.T) {
@@ -118,7 +118,7 @@ func TestClient_HonoursEnvironmentTimeout(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-API-030
+// Verifies: SYS-REQ-021, INT-REQ-001
 func TestClient_doRequest(t *testing.T) {
 	// Create test server
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -149,7 +149,7 @@ func TestClient_doRequest(t *testing.T) {
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 }
 
-// reqproof:req REQ-API-020
+// Verifies: SYS-REQ-013
 func TestClient_handleResponse(t *testing.T) {
 	config := createTestConfig("http://localhost:3000", "test-token", "test-org")
 
@@ -197,7 +197,7 @@ func TestClient_handleResponse(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 func TestClient_GetOASAPI(t *testing.T) {
 	// Create a mock OAS document with x-tyk-api-gateway extension
 	mockOASDoc := map[string]interface{}{
@@ -246,7 +246,7 @@ func TestClient_GetOASAPI(t *testing.T) {
 	assert.Equal(t, "http://example.com", api.UpstreamURL)
 }
 
-// reqproof:req REQ-API-003
+// Verifies: SYS-REQ-003
 func TestClient_CreateOASAPI(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost && r.URL.Path == "/api/apis/oas" {
@@ -300,7 +300,7 @@ func TestClient_CreateOASAPI(t *testing.T) {
 	assert.Equal(t, "New API", api.Name)
 }
 
-// reqproof:req REQ-API-001
+// Verifies: SYS-REQ-001
 func TestClient_ListOASAPIs(t *testing.T) {
 	// Prepare two mock APIs
 	mockAPIs := []*types.OASAPI{
@@ -333,7 +333,7 @@ func TestClient_ListOASAPIs(t *testing.T) {
 	assert.Equal(t, "API One", apis[0].Name)
 }
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 func TestClient_Health(t *testing.T) {
 	t.Run("healthy dashboard", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -377,7 +377,7 @@ func TestClient_Health(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 // newClientForTest constructs a Client pointed at the provided URL and returns it.
-// reqproof:req REQ-API-030
+// Verifies: SYS-REQ-021
 func newClientForTest(t *testing.T, dashboardURL string) *Client {
 	t.Helper()
 	config := createTestConfig(dashboardURL, "test-token", "test-org")
@@ -386,7 +386,7 @@ func newClientForTest(t *testing.T, dashboardURL string) *Client {
 	return client
 }
 
-// reqproof:req REQ-API-030
+// Verifies: SYS-REQ-021
 func TestClient_doRequest_ErrorPaths(t *testing.T) {
 	ctx := context.Background()
 
@@ -495,13 +495,13 @@ func TestClient_doRequest_ErrorPaths(t *testing.T) {
 // errReader fails on Read so io.ReadAll surfaces an error.
 type errReader struct{}
 
-// reqproof:req REQ-API-020
+// Verifies: SYS-REQ-013
 func (errReader) Read(_ []byte) (int, error) { return 0, fmt.Errorf("boom") }
 
-// reqproof:req REQ-API-020
+// Verifies: SYS-REQ-013
 func (errReader) Close() error { return nil }
 
-// reqproof:req REQ-API-020
+// Verifies: SYS-REQ-013
 func TestClient_handleResponse_ErrorPaths(t *testing.T) {
 	client := newClientForTest(t, "http://127.0.0.1:0")
 
@@ -596,7 +596,7 @@ func TestClient_handleResponse_ErrorPaths(t *testing.T) {
 // GetOASAPI / CreateOASAPI / UpdateOASAPI / DeleteOASAPI error-path coverage
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 func TestClient_GetOASAPI_VersionAndErrors(t *testing.T) {
 	ctx := context.Background()
 
@@ -707,7 +707,7 @@ func TestClient_GetOASAPI_VersionAndErrors(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-API-003
+// Verifies: SYS-REQ-003
 func TestClient_CreateOASAPI_ErrorPaths(t *testing.T) {
 	ctx := context.Background()
 
@@ -748,7 +748,7 @@ func TestClient_CreateOASAPI_ErrorPaths(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-API-006
+// Verifies: SYS-REQ-006
 func TestClient_UpdateOASAPI(t *testing.T) {
 	ctx := context.Background()
 
@@ -803,7 +803,7 @@ func TestClient_UpdateOASAPI(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-API-007
+// Verifies: SYS-REQ-007
 func TestClient_DeleteOASAPI(t *testing.T) {
 	ctx := context.Background()
 
@@ -836,7 +836,7 @@ func TestClient_DeleteOASAPI(t *testing.T) {
 // ListOASAPIs / ListAPIsDashboard / ListOASAPIVersions / SwitchDefaultVersion
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-API-001
+// Verifies: SYS-REQ-001
 func TestClient_ListOASAPIs_ZeroPage(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// page <= 0 must NOT append a `p=` query string.
@@ -854,7 +854,7 @@ func TestClient_ListOASAPIs_ZeroPage(t *testing.T) {
 	assert.Empty(t, apis)
 }
 
-// reqproof:req REQ-API-001
+// Verifies: SYS-REQ-001
 func TestClient_ListOASAPIs_ErrorPaths(t *testing.T) {
 	ctx := context.Background()
 
@@ -882,7 +882,7 @@ func TestClient_ListOASAPIs_ErrorPaths(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-API-001
+// Verifies: SYS-REQ-001
 func TestClient_ListAPIsDashboard(t *testing.T) {
 	ctx := context.Background()
 
@@ -1041,7 +1041,7 @@ func TestClient_ListAPIsDashboard(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 func TestClient_ListOASAPIVersions(t *testing.T) {
 	ctx := context.Background()
 
@@ -1087,7 +1087,7 @@ func TestClient_ListOASAPIVersions(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-API-002
+// Verifies: SYS-REQ-002
 func TestClient_SwitchDefaultVersion(t *testing.T) {
 	ctx := context.Background()
 
@@ -1119,7 +1119,7 @@ func TestClient_SwitchDefaultVersion(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 func TestClient_Health_NetworkFailure(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {}))
 	closedURL := server.URL
@@ -1135,7 +1135,7 @@ func TestClient_Health_NetworkFailure(t *testing.T) {
 // parseOASDocumentToAPI and getString coverage
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-API-013
+// Verifies: SYS-REQ-011
 func TestClient_parseOASDocumentToAPI(t *testing.T) {
 	client := newClientForTest(t, "http://127.0.0.1:0")
 
@@ -1218,7 +1218,7 @@ func TestClient_parseOASDocumentToAPI(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-API-013
+// Verifies: SYS-REQ-011
 func TestClient_getString(t *testing.T) {
 	t.Run("returns value when string", func(t *testing.T) {
 		assert.Equal(t, "v", getString(map[string]interface{}{"k": "v"}, "k"))
@@ -1231,7 +1231,7 @@ func TestClient_getString(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-API-030
+// Verifies: SYS-REQ-021
 func TestLiveEnvironmentClient(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test in short mode")

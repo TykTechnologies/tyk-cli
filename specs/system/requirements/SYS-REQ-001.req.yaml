@@ -1,0 +1,81 @@
+id: SYS-REQ-001
+version: 1
+status: approved
+priority: shall
+category: functional
+req_type: guarantee
+fretish: when page_flag_omitted the api_lifecycle shall immediately satisfy requested_page_equals_one
+description: api list returns paginated OAS APIs from the Dashboard; page defaults to 1, 10 per page; supports --json and --interactive flags
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+component: api_lifecycle
+rationale: ""
+tags: []
+variables:
+    - page_flag_omitted
+    - requested_page_equals_one
+traces:
+    satisfies:
+        - STK-REQ-001
+    reviewed_at: "2026-07-01T15:07:14.876059Z"
+    reviewed_by: human:tombuchaillot
+    reviewed_fingerprint: sha256:e1dd45ec78925ee195b967580e256bacc1ebd69ffd7482326694b363975a95fa
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: approved
+        reviewer: tomas@tyk.io
+        reviewed_at: "2026-07-01T13:38:54Z"
+        ai_generated: false
+    impact_reviews:
+        - requirement: SYS-REQ-001
+          artifact: internal/cli/api.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Component rename to domain-oriented names (api → api_lifecycle/oas_transformer/api_versioning/dashboard_client, policy → policy_lifecycle/policy_data_model, config → environment_config; cli_exit_codes cross-cuts). FRETish sentences updated accordingly. Purely metadata; production behaviour unchanged.'
+          base: origin/main
+          requirement_fingerprint: sha256:e1dd45ec78925ee195b967580e256bacc1ebd69ffd7482326694b363975a95fa
+          approval_fingerprint: sha256:b80cba4f3df212dfe120d61f6d4032bec0bdf781b2511c33e3944d48c16fb328
+          artifact_fingerprint: sha256:8e14508da84755a400ca711796cdd51e7be01723b558846ac6bb4f6806ba6cd4
+          reviewed_at: "2026-07-01T15:10:09Z"
+        - requirement: SYS-REQ-001
+          artifact: internal/cli/root.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Component rename to domain-oriented names (api → api_lifecycle/oas_transformer/api_versioning/dashboard_client, policy → policy_lifecycle/policy_data_model, config → environment_config; cli_exit_codes cross-cuts). FRETish sentences updated accordingly. Purely metadata; production behaviour unchanged.'
+          base: origin/main
+          requirement_fingerprint: sha256:e1dd45ec78925ee195b967580e256bacc1ebd69ffd7482326694b363975a95fa
+          approval_fingerprint: sha256:b80cba4f3df212dfe120d61f6d4032bec0bdf781b2511c33e3944d48c16fb328
+          artifact_fingerprint: sha256:994d6b836dcaaa30c319413a71db7a5278839b6a417d1f74a0098ac43380eadf
+          reviewed_at: "2026-07-01T15:10:09Z"
+        - requirement: SYS-REQ-001
+          artifact: internal/client/client.go
+          decision: no-authored-change
+          reviewer: tombuchaillot
+          reason: 'Component rename to domain-oriented names (api → api_lifecycle/oas_transformer/api_versioning/dashboard_client, policy → policy_lifecycle/policy_data_model, config → environment_config; cli_exit_codes cross-cuts). FRETish sentences updated accordingly. Purely metadata; production behaviour unchanged.'
+          base: origin/main
+          requirement_fingerprint: sha256:e1dd45ec78925ee195b967580e256bacc1ebd69ffd7482326694b363975a95fa
+          approval_fingerprint: sha256:b80cba4f3df212dfe120d61f6d4032bec0bdf781b2511c33e3944d48c16fb328
+          artifact_fingerprint: sha256:9927022e3be6fe6c2809caa5c2be93ca188c72f29147972de9bbbd60d5c0cf38
+          reviewed_at: "2026-07-01T15:10:09Z"
+history:
+    created_by: human:cli
+    created_at: "2026-05-29T15:38:16Z"
+    last_modified_by: human:cli
+    last_modified_at: "2026-07-01T13:38:38Z"
+lifecycle:
+    change_history:
+        - date: "2026-07-01T13:38:38Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:cli
+        - date: "2026-07-01T13:38:38Z"
+          from: review
+          to: approved
+          reason: ""
+          changed_by: human:cli

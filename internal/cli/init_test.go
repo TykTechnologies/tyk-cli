@@ -19,13 +19,13 @@ import (
 // saveEnvironment / testConnection / runQuickSetup).
 // ---------------------------------------------------------------------------
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 // scannerFor returns a bufio.Scanner reading from the supplied string.
 func scannerFor(s string) *bufio.Scanner {
 	return bufio.NewScanner(strings.NewReader(s))
 }
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 // TestAskString_PromptOnlyNoDefault drives L220 defaultValue!=""=F branch and
 // L229 input==""=F branch (returns input).
 func TestAskString_PromptOnlyNoDefault(t *testing.T) {
@@ -33,7 +33,7 @@ func TestAskString_PromptOnlyNoDefault(t *testing.T) {
 	assert.Equal(t, "hello", got)
 }
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 // TestAskString_DefaultUsed drives L220 defaultValue!=""=T branch and L229
 // input==""=T && defaultValue!=""=T branch (returns default).
 func TestAskString_DefaultUsed(t *testing.T) {
@@ -41,7 +41,7 @@ func TestAskString_DefaultUsed(t *testing.T) {
 	assert.Equal(t, "fallback", got)
 }
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 // TestAskString_InputOverridesDefault drives L229 input==""=F branch with a
 // default present (so input wins).
 func TestAskString_InputOverridesDefault(t *testing.T) {
@@ -49,21 +49,21 @@ func TestAskString_InputOverridesDefault(t *testing.T) {
 	assert.Equal(t, "override", got)
 }
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 // TestAskYesNo_Yes covers the y/yes input path.
 func TestAskYesNo_Yes(t *testing.T) {
 	assert.True(t, askYesNo(scannerFor("y\n"), "Continue?"))
 	assert.True(t, askYesNo(scannerFor("yes\n"), "Continue?"))
 }
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 // TestAskYesNo_No covers the non-yes input path.
 func TestAskYesNo_No(t *testing.T) {
 	assert.False(t, askYesNo(scannerFor("n\n"), "Continue?"))
 	assert.False(t, askYesNo(scannerFor("\n"), "Continue?"))
 }
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 // TestGatherEnvironmentInfo_AllFieldsSet covers L102/L117 isFirst=T branches,
 // and L112/L124/L136 empty-check branches all =F (happy path).
 func TestGatherEnvironmentInfo_AllFieldsSet(t *testing.T) {
@@ -75,7 +75,7 @@ func TestGatherEnvironmentInfo_AllFieldsSet(t *testing.T) {
 	assert.Equal(t, "org-456", env.OrgID)
 }
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 // TestGatherEnvironmentInfo_MissingDashboardURL covers L112 env.DashboardURL=="" =T.
 func TestGatherEnvironmentInfo_MissingDashboardURL(t *testing.T) {
 	input := "\n" // empty dashboard URL line
@@ -84,7 +84,7 @@ func TestGatherEnvironmentInfo_MissingDashboardURL(t *testing.T) {
 	assert.Contains(t, err.Error(), "dashboard URL is required")
 }
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 // TestGatherEnvironmentInfo_MissingAuthToken covers L124 env.AuthToken=="" =T.
 func TestGatherEnvironmentInfo_MissingAuthToken(t *testing.T) {
 	input := "http://dash.local:3000\n\n"
@@ -93,7 +93,7 @@ func TestGatherEnvironmentInfo_MissingAuthToken(t *testing.T) {
 	assert.Contains(t, err.Error(), "auth token is required")
 }
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 // TestGatherEnvironmentInfo_MissingOrgID covers L136 env.OrgID=="" =T.
 func TestGatherEnvironmentInfo_MissingOrgID(t *testing.T) {
 	input := "http://dash.local:3000\ntok\n\n"
@@ -102,7 +102,7 @@ func TestGatherEnvironmentInfo_MissingOrgID(t *testing.T) {
 	assert.Contains(t, err.Error(), "organization ID is required")
 }
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 // TestGatherEnvironmentInfo_NotFirst covers L102/L117 isFirst=F branch
 // (no example output, but the helper still fills the env).
 func TestGatherEnvironmentInfo_NotFirst(t *testing.T) {
@@ -112,7 +112,7 @@ func TestGatherEnvironmentInfo_NotFirst(t *testing.T) {
 	assert.Equal(t, "http://dash.local:3000", env.DashboardURL)
 }
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 // withHomeDir redirects HOME / XDG_CONFIG_HOME / USERPROFILE so config dir
 // lookups land in a per-test temp directory.
 func withHomeDir(t *testing.T) string {
@@ -123,7 +123,7 @@ func withHomeDir(t *testing.T) string {
 	return tempHome
 }
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 // TestSaveEnvironment_NewFile covers the happy path: no existing config,
 // successful Save + write to file. Drives L175 err==nil=F branch (file does
 // not exist).
@@ -143,7 +143,7 @@ func TestSaveEnvironment_NewFile(t *testing.T) {
 	assert.Contains(t, string(data), "dashboard_url = \"http://dash:3000\"")
 }
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 // TestSaveEnvironment_ExistingFile covers L175 err==nil=T branch (file exists,
 // LoadConfig is called).
 func TestSaveEnvironment_ExistingFile(t *testing.T) {
@@ -177,7 +177,7 @@ org_id = "org"
 	assert.Contains(t, out, "[environments.new]")
 }
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 // TestSaveEnvironment_WriteFailDueToDirAsFile covers L194 err!=nil from
 // os.WriteFile by ensuring the cli.toml path itself is a directory.
 func TestSaveEnvironment_WriteFailDueToDirAsFile(t *testing.T) {
@@ -195,7 +195,7 @@ func TestSaveEnvironment_WriteFailDueToDirAsFile(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 // TestSaveEnvironment_GetConfigDirFails covers L167 err!=nil branch by
 // unsetting HOME so UserConfigDir errors.
 func TestSaveEnvironment_GetConfigDirFails(t *testing.T) {
@@ -219,7 +219,7 @@ func TestSaveEnvironment_GetConfigDirFails(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 // TestSaveEnvironment_MkdirAllFails covers L190 err!=nil from os.MkdirAll by
 // forcing the config dir to traverse a regular file.
 func TestSaveEnvironment_MkdirAllFails(t *testing.T) {
@@ -236,7 +236,7 @@ func TestSaveEnvironment_MkdirAllFails(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 // TestSaveEnvironment_ExistingMalformedConfigFails covers the L176 err!=nil branch
 // from LoadConfig (existing file but malformed).
 func TestSaveEnvironment_ExistingMalformedConfigFails(t *testing.T) {
@@ -255,7 +255,7 @@ func TestSaveEnvironment_ExistingMalformedConfigFails(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 // TestTestConnection_Reachable covers L153 err!=nil=F branch (success).
 func TestTestConnection_Reachable(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -269,7 +269,7 @@ func TestTestConnection_Reachable(t *testing.T) {
 	require.NoError(t, testConnection(env))
 }
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 // TestTestConnection_NewClientFails covers L153 err!=nil=T branch where
 // client.NewClient itself fails (invalid env causes Validate to return error).
 func TestTestConnection_NewClientFails(t *testing.T) {
@@ -279,7 +279,7 @@ func TestTestConnection_NewClientFails(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 // TestTestConnection_Unreachable covers L153 err!=nil=T branch (failure).
 func TestTestConnection_Unreachable(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -293,7 +293,7 @@ func TestTestConnection_Unreachable(t *testing.T) {
 	require.Error(t, testConnection(env))
 }
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 // TestRunQuickSetup_SkipTest covers L75 !skipTest=F branch (skipTest=T).
 func TestRunQuickSetup_SkipTest(t *testing.T) {
 	_ = withHomeDir(t)
@@ -302,7 +302,7 @@ func TestRunQuickSetup_SkipTest(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 // TestRunQuickSetup_TestSucceeds covers L75 !skipTest=T && testConnection
 // returns nil (the success branch which logs ✅).
 func TestRunQuickSetup_TestSucceeds(t *testing.T) {
@@ -317,7 +317,7 @@ func TestRunQuickSetup_TestSucceeds(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 // TestRunQuickSetup_TestFails_Continue covers the failure-but-continue branch
 // (testConnection fails, user answers "y").
 func TestRunQuickSetup_TestFails_Continue(t *testing.T) {
@@ -331,7 +331,7 @@ func TestRunQuickSetup_TestFails_Continue(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 // TestRunQuickSetup_SaveEnvFails covers L86 err!=nil branch by setting HOME to
 // a path whose parent is a regular file (MkdirAll fails inside saveEnvironment).
 func TestRunQuickSetup_SaveEnvFails(t *testing.T) {
@@ -346,7 +346,7 @@ func TestRunQuickSetup_SaveEnvFails(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 // TestRunQuickSetup_TestFails_Cancel covers the failure-and-cancel branch.
 func TestRunQuickSetup_TestFails_Cancel(t *testing.T) {
 	_ = withHomeDir(t)
@@ -359,7 +359,7 @@ func TestRunQuickSetup_TestFails_Cancel(t *testing.T) {
 	assert.Contains(t, err.Error(), "setup cancelled")
 }
 
-// reqproof:req REQ-CFG-002
+// Verifies: SYS-REQ-042
 // TestRunQuickSetup_GatherFails covers L71 err!=nil=T branch (gather fails).
 func TestRunQuickSetup_GatherFails(t *testing.T) {
 	input := "\n" // empty dashboard URL line triggers gatherEnvironmentInfo error

@@ -9,7 +9,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// reqproof:req REQ-POL-007
+// Verifies: SYS-REQ-030
 func TestPolicyFile_YAMLRoundTrip(t *testing.T) {
 	original := PolicyFile{
 		ID:   "gold",
@@ -51,7 +51,7 @@ func TestPolicyFile_YAMLRoundTrip(t *testing.T) {
 	assert.Empty(t, restored.Access[3].Versions, "omitted versions should remain nil/empty")
 }
 
-// reqproof:req REQ-POL-007
+// Verifies: SYS-REQ-030
 func TestDashboardPolicy_JSONRoundTrip(t *testing.T) {
 	wireJSON := `{
 		"_id": "gold",
@@ -129,7 +129,7 @@ func TestDashboardPolicy_JSONRoundTrip(t *testing.T) {
 	assert.Equal(t, policy.AccessRights, roundTripped.AccessRights)
 }
 
-// reqproof:req REQ-POL-010
+// Verifies: SYS-REQ-031
 func TestDuration_UnmarshalYAML(t *testing.T) {
 	t.Run("string durations", func(t *testing.T) {
 		tests := []struct {
@@ -172,7 +172,7 @@ func TestDuration_UnmarshalYAML(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-POL-011
+// Verifies: SYS-REQ-032
 func TestAccessEntry_SelectorFields(t *testing.T) {
 	// Verify that each selector field is independently settable and
 	// survives YAML round-trip in isolation.
@@ -233,7 +233,7 @@ func TestAccessEntry_SelectorFields(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-POL-007
+// Verifies: SYS-REQ-030
 func TestAccessRight_MarshalJSON_NilHandling(t *testing.T) {
 	t.Run("nil AllowedURLs serializes as empty array", func(t *testing.T) {
 		ar := AccessRight{APIID: "a1", APIName: "test", AllowedURLs: nil, Limit: nil}
@@ -258,7 +258,7 @@ func TestAccessRight_MarshalJSON_NilHandling(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-POL-006
+// Verifies: SYS-REQ-029
 func TestValidationError_Error(t *testing.T) {
 	t.Run("formats field, message, and kind", func(t *testing.T) {
 		e := &ValidationError{Field: "rateLimit.requests", Message: "must be positive", Kind: "schema"}
@@ -271,7 +271,7 @@ func TestValidationError_Error(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-POL-006
+// Verifies: SYS-REQ-029
 func TestValidationErrors_Error(t *testing.T) {
 	t.Run("empty slice returns sentinel message", func(t *testing.T) {
 		// Covers the len(ve) == 0 == T branch.
@@ -301,7 +301,7 @@ func TestValidationErrors_Error(t *testing.T) {
 	})
 }
 
-// reqproof:req REQ-POL-001
+// Verifies: SYS-REQ-024
 func TestDashboardPolicyListResponse_JSONUnmarshal(t *testing.T) {
 	listJSON := `{
 		"Data": [

@@ -10,7 +10,7 @@ import (
 	"github.com/tyktech/tyk-cli/pkg/types"
 )
 
-// reqproof:req REQ-CFG-001
+// Verifies: SYS-REQ-041
 func TestNewRootCommand(t *testing.T) {
 	rootCmd := NewRootCommand("1.0.0", "abc123", "2023-01-01T00:00:00Z")
 	
@@ -32,7 +32,7 @@ func TestNewRootCommand(t *testing.T) {
 	assert.Equal(t, "init", initCmd.Use)
 }
 
-// reqproof:req REQ-CFG-001
+// Verifies: SYS-REQ-041
 func TestGlobalFlags(t *testing.T) {
 	rootCmd := NewRootCommand("1.0.0", "abc123", "2023-01-01T00:00:00Z")
 	
@@ -52,7 +52,7 @@ func TestGlobalFlags(t *testing.T) {
 	assert.Equal(t, "bool", jsonFlag.Value.Type())
 }
 
-// reqproof:req REQ-CFG-001
+// Verifies: SYS-REQ-041
 func TestGetOutputFormat(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -71,7 +71,7 @@ func TestGetOutputFormat(t *testing.T) {
 	}
 }
 
-// reqproof:req REQ-CFG-001
+// Verifies: SYS-REQ-041
 func TestInitConfigWithEnvironment(t *testing.T) {
 	// This test verifies that configuration can be loaded from flags
 	// (since existing config files may override environment variables in real environments)
@@ -106,7 +106,7 @@ func TestInitConfigWithEnvironment(t *testing.T) {
 	assert.Equal(t, "test-org", activeEnv.OrgID)
 }
 
-// reqproof:req REQ-CFG-001
+// Verifies: SYS-REQ-041
 func TestInitConfigWithFlags(t *testing.T) {
 	// Clean environment
 	os.Unsetenv("TYK_DASH_URL")
@@ -148,7 +148,7 @@ func TestInitConfigWithFlags(t *testing.T) {
 	assert.Equal(t, types.OutputJSON, format)
 }
 
-// reqproof:req REQ-CFG-001
+// Verifies: SYS-REQ-041
 func TestCommandSkipping(t *testing.T) {
 	// Test that init and config commands don't require configuration
 	rootCmd := NewRootCommand("1.0.0", "abc123", "2023-01-01T00:00:00Z")
@@ -164,7 +164,7 @@ func TestCommandSkipping(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-// reqproof:req REQ-CFG-001
+// Verifies: SYS-REQ-041
 func TestVersionCommand(t *testing.T) {
 	rootCmd := NewRootCommand("1.2.3", "def456", "2023-12-25T10:30:00Z")
 	
@@ -174,7 +174,7 @@ func TestVersionCommand(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-// reqproof:req REQ-CFG-001
+// Verifies: SYS-REQ-041
 // TestInitConfig_LoadConfigFails covers L79 err!=nil from LoadConfig
 // (malformed cli.toml).
 func TestInitConfig_LoadConfigFails(t *testing.T) {
@@ -196,7 +196,7 @@ func TestInitConfig_LoadConfigFails(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-CFG-001
+// Verifies: SYS-REQ-041
 // TestInitConfig_ValidateFails covers L88 err!=nil from config.Validate (no
 // environments configured).
 func TestInitConfig_ValidateFails(t *testing.T) {
@@ -216,7 +216,7 @@ func TestInitConfig_ValidateFails(t *testing.T) {
 	require.Error(t, err)
 }
 
-// reqproof:req REQ-CFG-001
+// Verifies: SYS-REQ-041
 func TestHelpCommand(t *testing.T) {
 	rootCmd := NewRootCommand("1.0.0", "abc123", "2023-01-01T00:00:00Z")
 	

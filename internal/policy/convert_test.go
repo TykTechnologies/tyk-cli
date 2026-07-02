@@ -8,7 +8,7 @@ import (
 	"github.com/tyktech/tyk-cli/pkg/types"
 )
 
-// reqproof:req REQ-POL-007
+// Verifies: SYS-REQ-030
 func TestCLIToWire(t *testing.T) {
 	resolved := []ResolvedAccess{
 		{APIID: "a1b2c3d4e5f6", APIName: "users-api", Versions: []string{"v1"}},
@@ -56,7 +56,7 @@ func TestCLIToWire(t *testing.T) {
 	assert.Equal(t, []string{"v1", "v2"}, ordersAR.Versions)
 }
 
-// reqproof:req REQ-POL-007
+// Verifies: SYS-REQ-030
 func TestWireToCLI(t *testing.T) {
 	dp := types.DashboardPolicy{
 		MID:              "507f1f77bcf86cd799439011",
@@ -118,7 +118,7 @@ func TestWireToCLI(t *testing.T) {
 	assert.Equal(t, []string{"v1", "v2"}, ordersEntry.Versions)
 }
 
-// reqproof:req REQ-POL-007
+// Verifies: SYS-REQ-030
 func TestWireToCLI_FallbackToMID(t *testing.T) {
 	dp := types.DashboardPolicy{
 		MID:  "507f1f77bcf86cd799439011",
@@ -143,7 +143,7 @@ func TestWireToCLI_FallbackToMID(t *testing.T) {
 	assert.Equal(t, "Legacy Policy", pf.Name)
 }
 
-// reqproof:req REQ-POL-007
+// Verifies: SYS-REQ-030
 func TestRoundTrip_CLIToWireToCLI(t *testing.T) {
 	// Original CLI policy
 	original := types.PolicyFile{
@@ -192,7 +192,7 @@ func TestRoundTrip_CLIToWireToCLI(t *testing.T) {
 // MC/DC coverage of CLIToWire branches (RateLimit/Quota/KeyTTL nil-or-set).
 // ===========================================================================
 
-// reqproof:req REQ-POL-007
+// Verifies: SYS-REQ-030
 func TestCLIToWire_BranchesMCDC(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -309,7 +309,7 @@ func TestCLIToWire_BranchesMCDC(t *testing.T) {
 // MC/DC coverage of WireToCLI branches.
 // ===========================================================================
 
-// reqproof:req REQ-POL-007
+// Verifies: SYS-REQ-030
 func TestWireToCLI_BranchesMCDC(t *testing.T) {
 	apis := []ResolverAPI{
 		{ID: "a1b2c3d4e5f6", Name: "users-api"},
